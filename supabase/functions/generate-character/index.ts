@@ -16,7 +16,7 @@ const MAX_B64 = 6_000_000; // ~4.5 MB per image
 
 // very small per-isolate rate limit (use Upstash/DB for real limits)
 const hits = new Map<string, number[]>();
-function limited(ip: string, max = 20, windowMs = 10 * 60_000) {
+function limited(ip: string, max = 60, windowMs = 10 * 60_000) {
   const now = Date.now();
   const list = (hits.get(ip) || []).filter((t) => now - t < windowMs);
   list.push(now);
@@ -70,14 +70,19 @@ Scene: ${scene}
 Leave calm space in the sky or background; never add any text.`;
 }
 
-async function callGemini(parts: unknown[]) {
+const RENDER_RULES = `Children's picture-book illustration. Absolutely no text, letters, numbers, captions, logos or watermarks anywhere in the image.
+${LIKENESS}`;
+
+async function callGemini(parts: unknown[], aspect?: string) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": KEY },
     body: JSON.stringify({
       contents: [{ role: "user", parts }],
-      generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
+      generationConfig: aspect
+        ? { responseModalities: ["IMAGE", "TEXT"], imageConfig: { aspectRatio: aspect } }
+        : { responseModalities: ["IMAGE", "TEXT"] },
     }),
   });
   const data = await res.json().catch(() => ({}));
@@ -110,7 +115,23 @@ Deno.serve(async (req) => {
   const variant = Number(body.variant || 0) | 0;
 
   let parts: unknown[];
-  if (body.mode === "page") {
+  let aspect: string | undefined;
+  if (body.mode === "render") {
+    // generic book render: image 1 = child photo/avatar, optional image 2 = approved character reference sheet
+    const sheet = String(body.sheet || "");
+    if (sheet.length > MAX_B64) return json({ error: "Sheet too large" }, 400, h);
+    const prompt = String(body.prompt || "").slice(0, 3000);
+    if (!prompt) return json({ error: "Missing prompt" }, 400, h);
+    aspect = ["4:5", "16:9", "3:2", "1:1"].includes(String(body.aspect)) ? String(body.aspect) : "4:5";
+    const intro = sheet
+      ? "Image 1 is the photo (or chosen avatar) of the real child, the hero. Image 2 is the approved character reference sheet for this book: keep every character, outfit, prop, colour and proportion exactly as in image 2, and the hero's face exactly as in image 1."
+      : "Image 1 is the photo (or chosen avatar) of the real child, the hero.";
+    parts = [
+      { inline_data: { mime_type: "image/jpeg", data: photo } },
+      ...(sheet ? [{ inline_data: { mime_type: /^image\/(png|jpeg|webp)$/.test(String(body.sheetMime)) ? String(body.sheetMime) : "image/png", data: sheet } }] : []),
+      { text: `${intro}\n${RENDER_RULES}\n${prompt}` },
+    ];
+  } else if (body.mode === "page") {
     const sheet = String(body.sheet || "");
     if (!sheet || sheet.length > MAX_B64) return json({ error: "Missing approved character" }, 400, h);
     const scene = String(body.scene || "a sunny garden").slice(0, 600);
@@ -126,6 +147,9 @@ Deno.serve(async (req) => {
     ];
   }
   // Photos are not stored by this function. Turn off request logging in the Google project for children's data.
-  const out = await callGemini(parts);
+  let out = await callGemini(parts, aspect);
+  if ("error" in out && aspect && out.code === "provider_error" && /aspect|imageConfig|Unknown name/i.test(String(out.error))) {
+    out = await callGemini(parts); // model without imageConfig support: aspect is also stated in the prompt
+  }
   return json(out, "error" in out ? 502 : 200, h);
 });
