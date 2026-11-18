@@ -683,6 +683,7 @@ footer.site{background:var(--canvas)}
 .pb-avs{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}.pb-av{border:3px solid transparent;border-radius:16px;padding:0;background:var(--canvas);cursor:pointer;overflow:hidden;aspect-ratio:1}.pb-av svg{width:100%;height:100%;display:block}.pb-av[aria-pressed=true]{border-color:var(--primary)}
 .pb-head{display:flex;flex-direction:column;gap:10px}.pb-head h1{font-size:clamp(26px,3.4vw,38px)}
 .pb-steps{display:flex;gap:8px;flex-wrap:wrap;list-style:none;padding:0;margin:0;counter-reset:s}.pb-steps li{counter-increment:s;padding:6px 12px;border-radius:999px;background:var(--canvas);color:var(--muted);font-size:14px;font-weight:600;border:1px solid var(--line)}.pb-steps li::before{content:counter(s) ". "}.pb-steps li.cur{background:var(--primary-soft);color:var(--primary);border-color:var(--primary)}.pb-steps li.done{background:var(--ok-soft);color:var(--ok)}
+.pb-hero-img{aspect-ratio:4/5;max-width:380px;width:100%;margin-inline:auto;border-radius:16px;background:#f7f1e6;overflow:hidden;display:grid;place-items:center}.pb-hero-img img{width:100%;height:100%;object-fit:cover}
 .pb-sheet-img{aspect-ratio:16/9;border-radius:16px;background:#f7f1e6;overflow:hidden;display:grid;place-items:center}.pb-sheet-img img{width:100%;height:100%;object-fit:contain}
 .pb-wait{display:flex;flex-direction:column;align-items:center;gap:10px;color:#6b6480;text-align:center;padding:16px}
 .pb-fail{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:16px;color:#7a2e2e;font-size:14px}
@@ -1732,8 +1733,14 @@ function pbSheetPrompt(b){const others=b.characters.filter(c=>c.id!=="hero");
   b.recurringProps&&b.recurringProps.length?"אביזרים קבועים לצייר בתחתית הדף: "+b.recurringProps.join(", "):"",
   "התוצאה תשמש כבסיס לכל איורי הספר, לכן לקבוע במדויק פנים, שיער, בגדים, צבעים ופרופורציות."].filter(Boolean).join(" | ")}
 const pbSlotPrompt=(b,slot)=>slot==="cover"?pbImgText(b.coverPromptTemplate,b):pbImgText(b.pages[+slot.slice(1)-1].illustrationPromptTemplate,b);
+function pbHeroPrompt(b,n){return ["דמות אחת בלבד: "+pbHero(b)+" של הספר, מצויר/ת לפי התמונה של הילד. גוף מלא, מבט קדמי, עומד/ת ומחייך/ת, על רקע שמנת בהיר ונקי. בלי דמויות נוספות, בלי חיות, בלי אביזרים ובלי רקע מצויר. ללא שום טקסט.",
+  b.illustrationStyle,"מראה ותלבושת קבועים: "+pbImgText(b.heroAppearanceRule,b),
+  "הדמות תשמש כבסיס לכל הספר, לכן לשמור במדויק על הפנים, צבע העור, העיניים, השיער (צבע, אורך, מרקם ותסרוקת) והפרופורציות של הילד מהתמונה."+(n?" גרסה "+(n+1)+", עם הבעה מעט שונה.":"")].join(" | ")}
+async function pbRenderHero(m,n){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
+ return aiCall({mode:"render",photo:b64(photo),prompt:pbHeroPrompt(b,n),aspect:"4:5",gender:pbG(b)})}
 async function pbRender(m){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
- return aiCall({mode:"render",photo:b64(photo),prompt:pbSheetPrompt(b),aspect:"16:9",gender:pbG(b)})}
+ const hero=await pbImg(m.id,"hero");
+ return aiCall({mode:"render",photo:b64(photo),...(hero?{sheet:b64(hero),sheetMime:pbMime(hero)}:{}),prompt:(hero?"תמונה 2 היא הדמות המאוירת של "+pbHero(b)+" שההורה אישר. לצייר את "+pbHero(b)+" בדף בדיוק כמו בתמונה 2, ולהוסיף לידו/ה את שאר הדמויות. | ":"")+pbSheetPrompt(b),aspect:"16:9",gender:pbG(b)})}
 async function pbRenderPage(m,slot,sheet){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  return aiCall({mode:"render",photo:b64(photo),sheet:b64(sheet),sheetMime:pbMime(sheet),prompt:pbSlotPrompt(b,slot),aspect:"4:5",gender:pbG(b)})}
 const PB_ERR={blocked:"מסנן הבטיחות של שירות האיור חסם את הבקשה. אפשר לנסות שוב או להחליף תמונה.",rate_limited:"יותר מדי בקשות בזמן קצר. נסו שוב בעוד כמה דקות.",no_photo:"התמונה נמחקה. כדי לצייר שוב צריך להעלות אותה מחדש.",not_configured:"שירות האיור עוד לא מוגדר.",error:"תקלה זמנית בשירות האיור. אפשר לנסות שוב."};
@@ -1753,7 +1760,7 @@ function pbCover(b,name,style){return `<div class="cover pb-cov" ${style?`style=
 function pbCardHTML(b){return `<a class="pb-card" href="#personal?book=${b.id}">${pbCoverArt(b)}<div class="stack" style="gap:4px"><b>${esc(pbTitle(b,"השם שלכם"))}</b><span class="small muted">${esc(b.genre)} · גילאי ${esc(b.ageRange)} · ${b.pageCount} עמודים</span><span class="small">${b.audience==="בנות"?"לגיבורה":"לגיבור"}</span></div><span class="btn btn-primary btn-sm">ליצור את הספר</span></a>`}
 function pbCoverArt(b,name){const [a,c]=PB_PAL[b.id]||["#4B3FD1","#FFCC75"];return `<div class="pb-cover-art" style="--a:${a};--c:${c}"><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="pb-cover-t">${esc(pbTitle(b,name))}</span></div>`}
 async function pbHomeView(root){const mine=await pbList().catch(()=>[]);
- root.innerHTML=`<section class="pb-hero"><span class="pill">חדש</span><h1>ספר שלם עם איורים אמיתיים של הילד שלכם</h1><p class="muted">בוחרים ספר, כותבים את השם ומעלים תמונה או בוחרים אווטאר. קודם מציירים דף דמויות קבוע ואתם מאשרים אותו, ואז נוצרים כריכה ו-12 עמודים עם אותן פנים, שיער, תלבושת וצבעים בכל העמודים.</p>
+ root.innerHTML=`<section class="pb-hero"><span class="pill">חדש</span><h1>ספר שלם עם איורים אמיתיים של הילד שלכם</h1><p class="muted">בוחרים ספר, כותבים את השם ומעלים תמונה או בוחרים אווטאר. קודם מציירים רק את הילד ואתם מאשרים, אחר כך דף דמויות קבוע של הספר, ואז נוצרים כריכה ו-12 עמודים עם אותן פנים, שיער, תלבושת וצבעים בכל העמודים.</p>
  ${AI_ON()?"":`<div class="note info">יצירת האיורים פועלת באתר המלא בלבד. כאן אפשר לראות את הספרים ואת התהליך.</div>`}</section>
  <div class="pb-grid">${PB.map(b=>pbCardHTML(b)).join("")}</div>
  ${mine.length?`<section class="box stack pb-mine"><h2 style="font-size:22px">הספרים שיצרתם במכשיר הזה</h2><p class="small muted">התמונות והאיורים שמורים רק בדפדפן הזה, ונמחקים אוטומטית ${PB_KEEP_DAYS} ימים אחרי היצירה.</p>${mine.map(m=>{const b=pbBy(m.book);return b?`<div class="pb-mine-row"><b>${esc(pbTitle(b,m.name))}</b><span class="small muted">${m.approved?"אושר":"בתהליך"} · יימחק ב-${new Date(m.createdAt+PB_KEEP_DAYS*864e5).toLocaleDateString("he-IL")}</span><span class="row"><a class="btn btn-soft btn-sm" href="#personal?p=${m.id}">לפתוח</a><button class="btn btn-ghost btn-sm" data-del="${m.id}">מחיקת התמונות והספר</button></span></div>`:""}).join("")}</section>`:""}`;
@@ -1771,7 +1778,7 @@ function pbFormView(root,b){const g=pbG(b);let photo=null,avatar=-1;
   <label class="chk"><input type="checkbox" id="pbC1"> אני ההורה או האפוטרופוס של ${g==="f"?"הילדה":"הילד"}, ואני מאשר/ת להשתמש בתמונה רק כדי ליצור את איורי הספר.</label>
   <label class="chk"><input type="checkbox" id="pbC2"> ידוע לי שהתמונה נשלחת לשירות האיור (Google Gemini) רק לצורך יצירת האיורים ואינה נשמרת אצלנו בשרת, נשמרת רק במכשיר הזה, ונמחקת אוטומטית אחרי ${PB_KEEP_DAYS} ימים או מתי שאבחר.</label></div>
  <span class="small bad" id="pbErr" aria-live="polite"></span>
- <button class="btn btn-primary" type="submit">ליצור את דף הדמויות</button></form></div>`;
+ <button class="btn btn-primary" type="submit">ליצור את הדמות</button></form></div>`;
  const f=$("#pbF",root),err=$("#pbErr",root);
  $$("input[name=pbsrc]",root).forEach(r=>r.onchange=()=>{const av=r.value==="avatar"&&r.checked;$("#pbAvBox",root).hidden=!av;$("#pbPhotoBox",root).hidden=av;$(".pb-consent",root).hidden=av});
  $("#pbFile",root).onchange=async e=>{const file=e.target.files[0];if(!file)return;if(!/^image\//.test(file.type)){err.textContent="צריך לבחור קובץ תמונה";return}if(file.size>15e6){err.textContent="התמונה גדולה מדי (עד 15MB)";return}
@@ -1790,16 +1797,29 @@ function pbFormView(root,b){const g=pbG(b);let photo=null,avatar=-1;
 async function pbProjectView(root,id){const m=await pbMeta(id);
  if(!m){root.innerHTML=`<div class="empty" style="padding-block:64px"><h1 style="font-size:28px">הספר לא נמצא במכשיר הזה</h1><p class="muted">ייתכן שנמחק, או שעברו ${PB_KEEP_DAYS} ימים מאז שנוצר.</p><a class="btn btn-primary" href="#personal">ליצור ספר חדש</a></div>`;return}
  const b=pbBy(m.book);if(!b){root.innerHTML="";return}
- const photo=await pbImg(id,"photo"),sheet=await pbImg(id,"sheet");
+ const photo=await pbImg(id,"photo"),sheet=await pbImg(id,"sheet");if(!m.heroOk&&sheet)m.heroOk=true; // books started before the hero step
  const head=`<div class="pb-head"><a class="small" href="#personal">→ כל הספרים</a><h1>${esc(pbTitle(b,m.name))}</h1>
-  <ol class="pb-steps"><li class="${sheet?"done":"cur"}">דף דמויות</li><li class="${m.sheetOk?(m.approved?"done":"cur"):""}">כריכה ו-12 עמודים</li><li class="${m.approved?"done":""}">אישור הספר</li></ol></div>`;
+  <ol class="pb-steps"><li class="${m.heroOk?"done":"cur"}">הדמות של ${esc(m.name)}</li><li class="${m.sheetOk?"done":m.heroOk?"cur":""}">דף דמויות</li><li class="${m.sheetOk?(m.approved?"done":"cur"):""}">כריכה ו-12 עמודים</li><li class="${m.approved?"done":""}">אישור הספר</li></ol></div>`;
  const foot=`<div class="pb-privacy small muted">${photo?`התמונה שמורה רק במכשיר הזה ותימחק אוטומטית ב-${new Date(m.createdAt+PB_KEEP_DAYS*864e5).toLocaleDateString("he-IL")}.`:"התמונה כבר נמחקה מהמכשיר."} <button class="linkbtn" id="pbDelPhoto" ${photo?"":"hidden"}>למחוק את התמונה עכשיו</button> · <button class="linkbtn" id="pbDelAll">למחוק את כל הספר והאיורים</button></div>`;
+ if(!m.heroOk){const hero=await pbImg(id,"hero");let n=m.heroN||0;
+  root.innerHTML=head+`<section class="box stack pb-sheet"><h2>הדמות של ${esc(m.name)}</h2><p class="muted">קודם מציירים רק את ${esc(m.name)}, בלי שאר הדמויות. בודקים שהפנים, השיער, הצבעים והפרופורציות דומים, ואם צריך מציירים שוב. רק אחרי האישור ממשיכים לדף הדמויות של הספר.</p>
+   <div class="pb-hero-img" id="pbHeroBox">${hero?`<img src="${hero}" alt="הדמות של ${esc(m.name)}">`:`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים את ${esc(m.name)}. זה לוקח בערך חצי דקה.</span></div>`}</div>
+   <span class="small bad" id="pbMsg" aria-live="polite"></span>
+   <div class="row"><button class="btn btn-primary" id="pbOkHero" ${hero?"":"disabled"}>זה ${pbG(b)==="f"?"היא":"הוא"}, אפשר להמשיך</button><button class="btn btn-ghost" id="pbReHero" ${hero?"":"hidden"}>לצייר שוב</button><a class="btn btn-ghost" href="#personal?book=${b.id}">להתחיל מחדש עם תמונה אחרת</a></div></section>`+foot;
+  pbBindFoot(root,m);
+  const drawH=async()=>{const box=$("#pbHeroBox",root),msg=$("#pbMsg",root);msg.textContent="";box.innerHTML=`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים את ${esc(m.name)}. זה לוקח בערך חצי דקה.</span></div>`;$("#pbOkHero",root).disabled=true;$("#pbReHero",root).hidden=true;
+   try{const u=await pbRenderHero(m,n);await pbSetImg(id,"hero",u);m.heroN=n;await pbSaveMeta(m);if(!root.isConnected)return;box.innerHTML=`<img src="${u}" alt="הדמות של ${esc(m.name)}">`;$("#pbOkHero",root).disabled=false}catch(e){if(!root.isConnected)return;msg.textContent=pbErr(e);box.innerHTML=""}$("#pbReHero",root).hidden=false};
+  $("#pbReHero",root).onclick=()=>{n++;drawH()};
+  $("#pbOkHero",root).onclick=async()=>{m.heroOk=true;await PBDB.del("i:"+id+":sheet");m.sheetOk=false;await pbSaveMeta(m);pbProjectView(root,id)};
+  if(!hero&&AI_ON())drawH();else if(!hero){$("#pbMsg",root).textContent="יצירת האיורים פועלת באתר המלא בלבד"}
+  return}
  if(!m.sheetOk){
   root.innerHTML=head+`<section class="box stack pb-sheet"><h2>דף הדמויות של הספר</h2><p class="muted">זה הבסיס הקבוע לכל האיורים: הפנים, השיער, התלבושת, הצבעים והפרופורציות של ${esc(m.name)} ושל שאר הדמויות. מאשרים אותו פעם אחת, ואז כל העמודים מצוירים לפיו.</p>
    <div class="pb-sheet-img" id="pbSheet">${sheet?`<img src="${sheet}" alt="דף הדמויות">`:`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים את דף הדמויות. זה לוקח בערך חצי דקה.</span></div>`}</div>
    <span class="small bad" id="pbMsg" aria-live="polite"></span>
-   <div class="row"><button class="btn btn-primary" id="pbOkSheet" ${sheet?"":"disabled"}>הדמויות נראות מעולה, לצייר את הספר</button><button class="btn btn-ghost" id="pbReSheet" ${sheet?"":"hidden"}>לצייר דף דמויות חדש</button><a class="btn btn-ghost" href="#personal?book=${b.id}">להתחיל מחדש עם תמונה אחרת</a></div></section>`+foot;
+   <div class="row"><button class="btn btn-primary" id="pbOkSheet" ${sheet?"":"disabled"}>הדמויות נראות מעולה, לצייר את הספר</button><button class="btn btn-ghost" id="pbReSheet" ${sheet?"":"hidden"}>לצייר דף דמויות חדש</button><button class="btn btn-ghost" id="pbBackHero">לחזור לדמות של ${esc(m.name)}</button></div></section>`+foot;
   pbBindFoot(root,m);
+  $("#pbBackHero",root).onclick=async()=>{m.heroOk=false;await pbSaveMeta(m);pbProjectView(root,id)};
   const draw=async()=>{const box=$("#pbSheet",root),msg=$("#pbMsg",root);msg.textContent="";box.innerHTML=`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים את דף הדמויות. זה לוקח בערך חצי דקה.</span></div>`;$("#pbOkSheet",root).disabled=true;$("#pbReSheet",root).hidden=true;
    try{const u=await pbRender(m);await pbSetImg(id,"sheet",u);if(!root.isConnected)return;box.innerHTML=`<img src="${u}" alt="דף הדמויות">`;$("#pbOkSheet",root).disabled=false}catch(e){if(!root.isConnected)return;msg.textContent=pbErr(e);box.innerHTML=""}$("#pbReSheet",root).hidden=false};
   $("#pbReSheet",root).onclick=draw;
