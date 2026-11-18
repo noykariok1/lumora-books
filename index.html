@@ -686,6 +686,7 @@ footer.site{background:var(--canvas)}
 .pb-hero-img{aspect-ratio:4/5;max-width:380px;width:100%;margin-inline:auto;border-radius:16px;background:#f7f1e6;overflow:hidden;display:grid;place-items:center}.pb-hero-img img{width:100%;height:100%;object-fit:cover}
 .pb-sheet-img{aspect-ratio:16/9;border-radius:16px;background:#f7f1e6;overflow:hidden;display:grid;place-items:center}.pb-sheet-img img{width:100%;height:100%;object-fit:contain}
 .pb-wait{display:flex;flex-direction:column;align-items:center;gap:10px;color:#6b6480;text-align:center;padding:16px}
+.pb-badge{position:absolute;inset:auto 12px 12px 12px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;background:rgba(255,255,255,.92);color:#2a2540;border-radius:14px;padding:10px 12px;font-size:14px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.18)}.pb-badge.bad{color:#7a2e2e}.pb-th{position:relative}
 .pb-fail{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:16px;color:#7a2e2e;font-size:14px}
 .pb-book{display:flex;flex-direction:column;gap:12px;align-items:center}
 .pb-spread{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:100%;max-width:min(980px,calc((100vh - 220px)*1.6));background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-lg);touch-action:pan-y;user-select:none}
@@ -748,7 +749,8 @@ const AI_ON=()=>!!AI.endpoint;
 /* Orders and forms on the public site: Supabase REST insert into table "inbox" (insert-only RLS for anon). Empty = forms report failure honestly. */
 const INBOX={url:"https://lxcpmmiahrllakahhrch.supabase.co/rest/v1/inbox",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4Y3BtbWlhaHJsbGFrYWhocmNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ5NDkxOTcsImV4cCI6MjExMDUyNTE5N30.W_Pv79q2T8CdfYOjv3tgm7xDlrtNNvGROgqD9eIBKzk"};
 const MEM={ai:{}}; // in-memory cache for page art (too large for browser storage)
-async function aiCall(body){const r=await fetch(AI.endpoint,{method:"POST",signal:AbortSignal.timeout(100000),headers:{"Content-Type":"application/json",...(AI.anonKey?{apikey:AI.anonKey,Authorization:"Bearer "+AI.anonKey}:{})},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok||!d.image)throw Object.assign(new Error(d.error||"AI error"),{code:d.code||"error"});return "data:"+(d.mime||"image/png")+";base64,"+d.image}
+async function aiCall(body,tries=6){for(let i=0;;i++){try{return await aiCall1(body)}catch(e){if(e.code!=="rate_limited"||i>=tries-1)throw e;await new Promise(r=>setTimeout(r,4000+i*4000+Math.random()*3000))}}} // the image model allows a fixed number of requests per minute: wait and retry
+async function aiCall1(body){const r=await fetch(AI.endpoint,{method:"POST",signal:AbortSignal.timeout(100000),headers:{"Content-Type":"application/json",...(AI.anonKey?{apikey:AI.anonKey,Authorization:"Bearer "+AI.anonKey}:{})},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok||!d.image)throw Object.assign(new Error(d.error||"AI error"),{code:d.code||"error"});return "data:"+(d.mime||"image/png")+";base64,"+d.image}
 const b64=u=>String(u||"").split(",")[1]||"";
 const SCENE_EN={night:"a starry night sky over soft hills with a crescent moon",birthday:"a cosy birthday party with a cake, candles, balloons and bunting",space:"outer space next to a ringed planet and a little rocket on the moon",sea:"a sunny beach with gentle waves, a sailboat and a friendly fish",forest:"a friendly green forest path with mushrooms and fireflies",castle:"a lavender fairy-tale castle with flags on a grassy hill",garden:"a blooming garden with flowers, a big sprout and the sun",home:"a warm living room with a sofa and a big window",school:"a cheerful kindergarten room with a chalkboard and drawings",mountain:"snowy mountains with a little red flag on the peak",rainbow:"a big rainbow over green hills and clouds",monster:"a dim cosy bedroom at night with a friendly purple fluffy monster and a night light"};
 const BRAND={name:"לומורה",demoPricing:true,currency:"ILS",vat:0.18,shipping:{home:{label:"משלוח עד הבית",price:29,days:"7–10 ימי עסקים"},pickup:{label:"איסוף מנקודת חלוקה",price:15,days:"7–12 ימי עסקים"},digital:{label:"ספר דיגיטלי, ללא משלוח",price:0,days:"מיד לאחר אישור"}}};
@@ -1741,6 +1743,12 @@ async function pbRenderHero(m,n){const b=pbBy(m.book);const photo=await pbImg(m.
 async function pbRender(m){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  const hero=await pbImg(m.id,"hero");
  return aiCall({mode:"render",photo:b64(photo),...(hero?{sheet:b64(hero),sheetMime:pbMime(hero)}:{}),prompt:(hero?"תמונה 2 היא הדמות המאוירת של "+pbHero(b)+" שההורה אישר. לצייר את "+pbHero(b)+" בדף בדיוק כמו בתמונה 2, ולהוסיף לידו/ה את שאר הדמויות. | ":"")+pbSheetPrompt(b),aspect:"16:9",gender:pbG(b)})}
+const PB_BASE_URL=(book,slot)=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+book+"/"+slot+".jpg";
+const PB_BASE_CACHE={};
+function pbBaseData(book,slot){const k=book+"/"+slot;return PB_BASE_CACHE[k]=PB_BASE_CACHE[k]||fetch(PB_BASE_URL(book,slot)).then(r=>{if(!r.ok)throw new Error("no base");return r.blob()}).then(bl=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(bl)})).catch(e=>{delete PB_BASE_CACHE[k];throw e})}
+async function pbSwapPage(m,slot,hero){const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
+ let base;try{base=await pbBaseData(m.book,slot)}catch(e){return pbRenderPage(m,slot,hero)} // no pre-made page: draw it fully
+ return aiCall({mode:"swap",photo:b64(photo),hero:b64(hero),heroMime:pbMime(hero),base:b64(base),baseMime:pbMime(base),aspect:"4:5",gender:pbG(pbBy(m.book))})}
 async function pbRenderPage(m,slot,sheet){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  return aiCall({mode:"render",photo:b64(photo),sheet:b64(sheet),sheetMime:pbMime(sheet),prompt:pbSlotPrompt(b,slot),aspect:"4:5",gender:pbG(b)})}
 const PB_ERR={blocked:"מסנן הבטיחות של שירות האיור חסם את הבקשה. אפשר לנסות שוב או להחליף תמונה.",rate_limited:"יותר מדי בקשות בזמן קצר. נסו שוב בעוד כמה דקות.",no_photo:"התמונה נמחקה. כדי לצייר שוב צריך להעלות אותה מחדש.",not_configured:"שירות האיור עוד לא מוגדר.",error:"תקלה זמנית בשירות האיור. אפשר לנסות שוב."};
@@ -1755,12 +1763,12 @@ routes.personal={title:()=>"ספרים מאוירים מהתמונה",
   if(q.p)return pbProjectView(root,q.p);
   if(q.book&&pbBy(q.book))return pbFormView(root,pbBy(q.book));
   return pbHomeView(root)}};
-const PB_COVER_URL=id=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/"+id+".jpg";
+const PB_COVER_URL=id=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+id+"/cover.jpg"; // the same pre-made cover the child is placed into
 function pbCover(b,name,style){return `<div class="cover pb-cov" ${style?`style="${style}"`:""}><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="spine"></span><div class="ttl">${esc(pbTitle(b,name))}</div></div>`}
 function pbCardHTML(b){return `<a class="pb-card" href="#personal?book=${b.id}">${pbCoverArt(b)}<div class="stack" style="gap:4px"><b>${esc(pbTitle(b,"השם שלכם"))}</b><span class="small muted">${esc(b.genre)} · גילאי ${esc(b.ageRange)} · ${b.pageCount} עמודים</span><span class="small">${b.audience==="בנות"?"לגיבורה":"לגיבור"}</span></div><span class="btn btn-primary btn-sm">ליצור את הספר</span></a>`}
 function pbCoverArt(b,name){const [a,c]=PB_PAL[b.id]||["#4B3FD1","#FFCC75"];return `<div class="pb-cover-art" style="--a:${a};--c:${c}"><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="pb-cover-t">${esc(pbTitle(b,name))}</span></div>`}
 async function pbHomeView(root){const mine=await pbList().catch(()=>[]);
- root.innerHTML=`<section class="pb-hero"><span class="pill">חדש</span><h1>ספר שלם עם איורים אמיתיים של הילד שלכם</h1><p class="muted">בוחרים ספר, כותבים את השם ומעלים תמונה או בוחרים אווטאר. קודם מציירים רק את הילד ואתם מאשרים, אחר כך דף דמויות קבוע של הספר, ואז נוצרים כריכה ו-12 עמודים עם אותן פנים, שיער, תלבושת וצבעים בכל העמודים.</p>
+ root.innerHTML=`<section class="pb-hero"><span class="pill">חדש</span><h1>ספר שלם עם איורים אמיתיים של הילד שלכם</h1><p class="muted">בוחרים ספר, כותבים את השם ומעלים תמונה או בוחרים אווטאר. קודם מציירים רק את הילד ואתם מאשרים, ומיד נפתח הספר המלא, כתוב ומאויר, ובכריכה ובכל 12 העמודים מופיע הילד שלכם, עם אותן פנים, שיער וצבעים.</p>
  ${AI_ON()?"":`<div class="note info">יצירת האיורים פועלת באתר המלא בלבד. כאן אפשר לראות את הספרים ואת התהליך.</div>`}</section>
  <div class="pb-grid">${PB.map(b=>pbCardHTML(b)).join("")}</div>
  ${mine.length?`<section class="box stack pb-mine"><h2 style="font-size:22px">הספרים שיצרתם במכשיר הזה</h2><p class="small muted">התמונות והאיורים שמורים רק בדפדפן הזה, ונמחקים אוטומטית ${PB_KEEP_DAYS} ימים אחרי היצירה.</p>${mine.map(m=>{const b=pbBy(m.book);return b?`<div class="pb-mine-row"><b>${esc(pbTitle(b,m.name))}</b><span class="small muted">${m.approved?"אושר":"בתהליך"} · יימחק ב-${new Date(m.createdAt+PB_KEEP_DAYS*864e5).toLocaleDateString("he-IL")}</span><span class="row"><a class="btn btn-soft btn-sm" href="#personal?p=${m.id}">לפתוח</a><button class="btn btn-ghost btn-sm" data-del="${m.id}">מחיקת התמונות והספר</button></span></div>`:""}).join("")}</section>`:""}`;
@@ -1799,10 +1807,10 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
  const b=pbBy(m.book);if(!b){root.innerHTML="";return}
  const photo=await pbImg(id,"photo"),sheet=await pbImg(id,"sheet");if(!m.heroOk&&sheet)m.heroOk=true; // books started before the hero step
  const head=`<div class="pb-head"><a class="small" href="#personal">→ כל הספרים</a><h1>${esc(pbTitle(b,m.name))}</h1>
-  <ol class="pb-steps"><li class="${m.heroOk?"done":"cur"}">הדמות של ${esc(m.name)}</li><li class="${m.sheetOk?"done":m.heroOk?"cur":""}">דף דמויות</li><li class="${m.sheetOk?(m.approved?"done":"cur"):""}">כריכה ו-12 עמודים</li><li class="${m.approved?"done":""}">אישור הספר</li></ol></div>`;
+  <ol class="pb-steps"><li class="${m.heroOk?"done":"cur"}">הדמות של ${esc(m.name)}</li><li class="${m.sheetOk?(m.approved?"done":"cur"):""}">כריכה ו-12 עמודים</li><li class="${m.approved?"done":""}">אישור הספר</li></ol></div>`;
  const foot=`<div class="pb-privacy small muted">${photo?`התמונה שמורה רק במכשיר הזה ותימחק אוטומטית ב-${new Date(m.createdAt+PB_KEEP_DAYS*864e5).toLocaleDateString("he-IL")}.`:"התמונה כבר נמחקה מהמכשיר."} <button class="linkbtn" id="pbDelPhoto" ${photo?"":"hidden"}>למחוק את התמונה עכשיו</button> · <button class="linkbtn" id="pbDelAll">למחוק את כל הספר והאיורים</button></div>`;
  if(!m.heroOk){const hero=await pbImg(id,"hero");let n=m.heroN||0;
-  root.innerHTML=head+`<section class="box stack pb-sheet"><h2>הדמות של ${esc(m.name)}</h2><p class="muted">קודם מציירים רק את ${esc(m.name)}, בלי שאר הדמויות. בודקים שהפנים, השיער, הצבעים והפרופורציות דומים, ואם צריך מציירים שוב. רק אחרי האישור ממשיכים לדף הדמויות של הספר.</p>
+  root.innerHTML=head+`<section class="box stack pb-sheet"><h2>הדמות של ${esc(m.name)}</h2><p class="muted">קודם מציירים רק את ${esc(m.name)}, בלי שאר הדמויות. בודקים שהפנים, השיער, הצבעים והפרופורציות דומים, ואם צריך מציירים שוב. אחרי האישור נפתח הספר המלא, ו${esc(m.name)} מוכנס לכל העמודים.</p>
    <div class="pb-hero-img" id="pbHeroBox">${hero?`<img src="${hero}" alt="הדמות של ${esc(m.name)}">`:`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים את ${esc(m.name)}. זה לוקח בערך חצי דקה.</span></div>`}</div>
    <span class="small bad" id="pbMsg" aria-live="polite"></span>
    <div class="row"><button class="btn btn-primary" id="pbOkHero" ${hero?"":"disabled"}>זה ${pbG(b)==="f"?"היא":"הוא"}, אפשר להמשיך</button><button class="btn btn-ghost" id="pbReHero" ${hero?"":"hidden"}>לצייר שוב</button><a class="btn btn-ghost" href="#personal?book=${b.id}">להתחיל מחדש עם תמונה אחרת</a></div></section>`+foot;
@@ -1810,7 +1818,7 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
   const drawH=async()=>{const box=$("#pbHeroBox",root),msg=$("#pbMsg",root);msg.textContent="";box.innerHTML=`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים את ${esc(m.name)}. זה לוקח בערך חצי דקה.</span></div>`;$("#pbOkHero",root).disabled=true;$("#pbReHero",root).hidden=true;
    try{const u=await pbRenderHero(m,n);await pbSetImg(id,"hero",u);m.heroN=n;await pbSaveMeta(m);if(!root.isConnected)return;box.innerHTML=`<img src="${u}" alt="הדמות של ${esc(m.name)}">`;$("#pbOkHero",root).disabled=false}catch(e){if(!root.isConnected)return;msg.textContent=pbErr(e);box.innerHTML=""}$("#pbReHero",root).hidden=false};
   $("#pbReHero",root).onclick=()=>{n++;drawH()};
-  $("#pbOkHero",root).onclick=async()=>{m.heroOk=true;await PBDB.del("i:"+id+":sheet");m.sheetOk=false;await pbSaveMeta(m);pbProjectView(root,id)};
+  $("#pbOkHero",root).onclick=async()=>{m.heroOk=true;m.sheetOk=true;for(const s of pbSlots())await PBDB.del("i:"+id+":"+s);await pbSaveMeta(m);pbProjectView(root,id)};
   if(!hero&&AI_ON())drawH();else if(!hero){$("#pbMsg",root).textContent="יצירת האיורים פועלת באתר המלא בלבד"}
   return}
  if(!m.sheetOk){
@@ -1835,12 +1843,13 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
  pbBindFoot(root,m);
  let cur=0;const pages=[{slot:"cover"},...b.pages.map((p,i)=>({slot:"p"+(i+1),text:pbFill(p.textTemplate,m.name),n:p.pageNumber}))];
  const failed={};
- const tile=s=>imgs[s]?`<img src="${imgs[s]}" alt="">`:failed[s]?`<div class="pb-fail"><span>${esc(failed[s])}</span><button class="btn btn-soft btn-sm" data-retry="${s}">לנסות שוב</button></div>`:`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים...</span></div>`;
+ const baseImg=s=>`<img src="${PB_BASE_URL(b.id,s)}" alt="" onerror="this.remove()">`;
+ const tile=s=>imgs[s]?`<img src="${imgs[s]}" alt="">`:failed[s]?`${baseImg(s)}<div class="pb-badge bad"><span>${esc(failed[s])}</span><button class="btn btn-soft btn-sm" data-retry="${s}">לנסות שוב</button></div>`:`${baseImg(s)}<div class="pb-badge"><span class="spin" aria-hidden="true"></span><span>מכניסים את ${esc(m.name)} לעמוד...</span></div>`;
  const drawBook=()=>{const pg=pages[cur];const box=$("#pbBook",root);if(!box)return;
   box.innerHTML=`<div class="pb-spread ${pg.slot==="cover"?"is-cover":""}"><div class="pb-art">${tile(pg.slot)}${pg.slot==="cover"?`<div class="pb-title">${esc(pbTitle(b,m.name))}</div>`:""}</div>${pg.slot==="cover"?"":`<div class="pb-text" dir="rtl"><p>${esc(pg.text)}</p><span class="pb-num">${pg.n}</span></div>`}</div>
    <div class="pb-nav"><button class="icon-btn" id="pbPrev" aria-label="העמוד הקודם" ${cur===0?"disabled":""}>›</button><span class="small">${cur===0?"כריכה":"עמוד "+pg.n+" מתוך 12"}</span><button class="icon-btn" id="pbNext" aria-label="העמוד הבא" ${cur===pages.length-1?"disabled":""}>‹</button></div>`;
   $("#pbPrev",root).onclick=()=>go(-1);$("#pbNext",root).onclick=()=>go(1);bindRetry(box);
-  $("#pbThumbs",root).innerHTML=pages.map((p,i)=>`<button class="pb-th ${i===cur?"on":""}" data-go="${i}" aria-label="${i?"עמוד "+p.n:"כריכה"}">${imgs[p.slot]?`<img src="${imgs[p.slot]}" alt="">`:`<span>${i?p.n:"כ"}</span>`}</button>`).join("");
+  $("#pbThumbs",root).innerHTML=pages.map((p,i)=>`<button class="pb-th ${i===cur?"on":""}" data-go="${i}" aria-label="${i?"עמוד "+p.n:"כריכה"}">${imgs[p.slot]?`<img src="${imgs[p.slot]}" alt="">`:`<img src="${PB_BASE_URL(b.id,p.slot)}" alt="" style="opacity:.45" onerror="this.remove()"><span style="position:absolute">${i?p.n:"כ"}</span>`}</button>`).join("");
   $$("[data-go]",root).forEach(t=>t.onclick=()=>{cur=+t.dataset.go;drawBook()})};
  const go=d=>{cur=Math.max(0,Math.min(pages.length-1,cur+d));drawBook()};
  const key=e=>{if(!root.isConnected){document.removeEventListener("keydown",key);return}if(e.target.closest&&e.target.closest("input,textarea,select"))return;if(e.key==="ArrowLeft")go(1);if(e.key==="ArrowRight")go(-1)};document.addEventListener("keydown",key);cleanup.push(()=>document.removeEventListener("keydown",key));
@@ -1848,7 +1857,7 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
  const bindRetry=scope=>$$("[data-retry]",scope).forEach(bt=>bt.onclick=()=>{delete failed[bt.dataset.retry];run([bt.dataset.retry])});
  const prog=()=>{const done=pages.filter(p=>imgs[p.slot]).length,bad=Object.keys(failed).length,el2=$("#pbProg",root);if(!el2)return;
   el2.className="note "+(done===pages.length?"ok":bad?"demo":"info");
-  el2.textContent=done===pages.length?"כל 13 האיורים מוכנים. דפדפו, ואם הכול נראה טוב אשרו את הספר למטה.":bad?`${done} מתוך 13 איורים מוכנים. ${bad===1?"איור אחד לא צויר, ואפשר לנסות אותו שוב.":bad+" איורים לא צוירו, ואפשר לנסות אותם שוב."}`:`מציירים את הכריכה ו-12 העמודים: ${done} מתוך 13 מוכנים. זה לוקח כמה דקות, ואפשר כבר לדפדף.`;
+  el2.textContent=done===pages.length?"כל 13 האיורים מוכנים. דפדפו, ואם הכול נראה טוב אשרו את הספר למטה.":bad?`${done} מתוך 13 איורים מוכנים. ${bad===1?"איור אחד לא צויר, ואפשר לנסות אותו שוב.":bad+" איורים לא צוירו, ואפשר לנסות אותם שוב."}`:`הספר מוכן לדפדוף. מכניסים את ${m.name} לכל העמודים במקביל: ${done} מתוך 13 מוכנים. זה לוקח פחות מדקה.`;
   drawApprove()};
  const drawApprove=()=>{const ap=$("#pbApprove",root);if(!ap)return;const all=pages.every(p=>imgs[p.slot]);
   if(m.approved){ap.innerHTML=`<h2>הספר אושר</h2><p class="muted">${S.cart.some(i=>i.pb===id)?"הספר נמצא בעגלה.":"אפשר להוסיף אותו לעגלה."}</p><div class="row"><a class="btn btn-primary" href="#cart">לעגלה</a>${S.cart.some(i=>i.pb===id)?"":'<button class="btn btn-soft" id="pbAdd">הוספה לעגלה</button>'}<button class="btn btn-ghost" id="pbUnapprove">לחזור ולשנות</button></div>`;}
@@ -1862,10 +1871,10 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
   const redo=$("#pbRedo",ap);if(redo)redo.onclick=()=>{const s=pages[cur].slot;if(PB_RUN[id]&&PB_RUN[id].has(s))return;imgs[s]=null;PBDB.del("i:"+id+":"+s);delete failed[s];drawBook();run([s])}};
  const toCart=async()=>{const thumb=await pbThumb(imgs.cover);const item={id:uid(),pb:id,project:"pb-"+id,book:"pb:"+b.id,fmt:m.fmt||"hard",qty:1,child:{name:m.name,gender:pbG(b),age:"",dedication:""},char:{thumb},art:thumb};S.cart=S.cart.filter(i=>i.pb!==id);S.cart.push(item);if(!save("cart")){item.art=null;item.char={};save("cart")}updateCartBadge()};
  const approve=async()=>{m.approved=true;m.approvedAt=Date.now();await pbSaveMeta(m);await toCart();toast("הספר אושר ונוסף לעגלה");drawApprove()};
- const run=async list=>{const sheetU=await pbImg(id,"sheet");if(!sheetU){m.sheetOk=false;await pbSaveMeta(m);return pbProjectView(root,id)}
+ const run=async list=>{const heroU=await pbImg(id,"hero"),sheetU=heroU?null:await pbImg(id,"sheet");if(!heroU&&!sheetU){m.heroOk=false;m.sheetOk=false;await pbSaveMeta(m);return pbProjectView(root,id)}
   const busy=PB_RUN[id]=PB_RUN[id]||new Set();const q=list.filter(s=>!busy.has(s));q.forEach(s=>busy.add(s));prog();drawBook();
-  const worker=async()=>{while(q.length){const s=q.shift();try{const u=await pbRenderPage(m,s,sheetU);await pbSetImg(id,s,u);imgs[s]=u}catch(e){failed[s]=pbErr(e)}busy.delete(s);if(root.isConnected){prog();if(pages[cur].slot===s||!imgs[pages[cur].slot])drawBook();else $("#pbThumbs",root)&&drawBook()}}};
-  await Promise.all([worker(),worker(),worker()])};
+  const worker=async()=>{while(q.length){const s=q.shift();try{const u=heroU?await pbSwapPage(m,s,heroU):await pbRenderPage(m,s,sheetU);await pbSetImg(id,s,u);imgs[s]=u}catch(e){failed[s]=pbErr(e)}busy.delete(s);if(root.isConnected){prog();if(pages[cur].slot===s||!imgs[pages[cur].slot])drawBook();else $("#pbThumbs",root)&&drawBook()}}};
+  await Promise.all(Array.from({length:heroU?7:3},worker))};
  drawBook();prog();
  const missing=pages.map(p=>p.slot).filter(s=>!imgs[s]);
  if(missing.length){if(!AI_ON()){$("#pbProg",root).textContent="יצירת האיורים פועלת באתר המלא בלבד"}else if(!photo){$("#pbProg",root).className="note demo";$("#pbProg",root).textContent=PB_ERR.no_photo}else run(missing)}}

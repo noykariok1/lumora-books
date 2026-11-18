@@ -4,6 +4,7 @@
 //   GEMINI_IMAGE_MODEL  optional, default "gemini-3-pro-image" (Nano Banana Pro, best identity consistency; cheaper: gemini-nano-banana-2.1)
 //   ALLOWED_ORIGINS     optional, comma separated, e.g. "https://lumora.onrender.com,http://localhost:8080"
 // Request (POST JSON):
+//   { mode: "swap", photo, hero: "<base64 approved hero>", base: "<base64 finished page>", heroMime?, baseMime?, aspect?, prompt? }
 //   { mode: "character", photo: "<base64 jpeg>", gender: "m"|"f", traits?: {...}, notes?: string, variant?: 0..3 }
 //   { mode: "page", photo: "<base64>", sheet: "<base64 approved character>", scene: "text", gender, variant?: number }
 // Response: { image: "<base64 png/jpeg>", mime: "image/png" } or { error, code }
@@ -16,7 +17,7 @@ const MAX_B64 = 6_000_000; // ~4.5 MB per image
 
 // very small per-isolate rate limit (use Upstash/DB for real limits)
 const hits = new Map<string, number[]>();
-function limited(ip: string, max = 60, windowMs = 10 * 60_000) {
+function limited(ip: string, max = 90, windowMs = 10 * 60_000) {
   const now = Date.now();
   const list = (hits.get(ip) || []).filter((t) => now - t < windowMs);
   list.push(now);
@@ -130,6 +131,23 @@ Deno.serve(async (req) => {
       { inline_data: { mime_type: "image/jpeg", data: photo } },
       ...(sheet ? [{ inline_data: { mime_type: /^image\/(png|jpeg|webp)$/.test(String(body.sheetMime)) ? String(body.sheetMime) : "image/png", data: sheet } }] : []),
       { text: `${intro}\n${RENDER_RULES}\n${prompt}` },
+    ];
+  } else if (body.mode === "swap") {
+    // pre-illustrated book page: image 1 = child photo/avatar, image 2 = approved hero character, image 3 = finished page with a placeholder hero
+    const hero = String(body.hero || ""), base = String(body.base || "");
+    if (!hero || !base || hero.length > MAX_B64 || base.length > MAX_B64) return json({ error: "Missing hero or base page" }, 400, h);
+    const extra = String(body.prompt || "").slice(0, 800);
+    aspect = ["4:5", "16:9", "3:2", "1:1"].includes(String(body.aspect)) ? String(body.aspect) : "4:5";
+    const mt = (m: unknown) => /^image\/(png|jpeg|webp)$/.test(String(m)) ? String(m) : "image/jpeg";
+    parts = [
+      { inline_data: { mime_type: "image/jpeg", data: photo } },
+      { inline_data: { mime_type: mt(body.heroMime), data: hero } },
+      { inline_data: { mime_type: mt(body.baseMime), data: base } },
+      { text: `Image 1 is a photo (or avatar) of the real child. Image 2 is this child's approved illustrated character. Image 3 is a finished children's-book illustration.
+Redraw image 3 EXACTLY: same composition, camera, background, lighting, colours, style, other characters, props and the hero's pose, position, size and outfit.
+Change ONLY the main hero child's face, skin tone, hair and body proportions so that the hero becomes the child of image 2 (with the face of image 1).
+${RENDER_RULES}
+${extra}` },
     ];
   } else if (body.mode === "page") {
     const sheet = String(body.sheet || "");
