@@ -4,6 +4,7 @@
 //   GEMINI_IMAGE_MODEL  optional, default "gemini-3-pro-image" (Nano Banana Pro, best identity consistency; cheaper: gemini-nano-banana-2.1)
 //   ALLOWED_ORIGINS     optional, comma separated, e.g. "https://lumora.onrender.com,http://localhost:8080"
 // Request (POST JSON):
+//   size?: "1K"|"2K" on any mode with an aspect (2K is used for printed pages)
 //   { mode: "swap", photo, hero: "<base64 approved hero>", base: "<base64 finished page>", heroMime?, baseMime?, aspect?, prompt? }
 //   { mode: "character", photo: "<base64 jpeg>", gender: "m"|"f", traits?: {...}, notes?: string, variant?: 0..3 }
 //   { mode: "page", photo: "<base64>", sheet: "<base64 approved character>", scene: "text", gender, variant?: number }
@@ -74,7 +75,7 @@ Leave calm space in the sky or background; never add any text.`;
 const RENDER_RULES = `Children's picture-book illustration. Absolutely no text, letters, numbers, captions, logos or watermarks anywhere in the image.
 ${LIKENESS}`;
 
-async function callGemini(parts: unknown[], aspect?: string) {
+async function callGemini(parts: unknown[], aspect?: string, size?: string) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
   const res = await fetch(url, {
     method: "POST",
@@ -82,7 +83,7 @@ async function callGemini(parts: unknown[], aspect?: string) {
     body: JSON.stringify({
       contents: [{ role: "user", parts }],
       generationConfig: aspect
-        ? { responseModalities: ["IMAGE", "TEXT"], imageConfig: { aspectRatio: aspect } }
+        ? { responseModalities: ["IMAGE", "TEXT"], imageConfig: size ? { aspectRatio: aspect, imageSize: size } : { aspectRatio: aspect } }
         : { responseModalities: ["IMAGE", "TEXT"] },
     }),
   });
@@ -165,7 +166,9 @@ ${extra}` },
     ];
   }
   // Photos are not stored by this function. Turn off request logging in the Google project for children's data.
-  let out = await callGemini(parts, aspect);
+  const size = ["1K", "2K"].includes(String(body.size)) ? String(body.size) : undefined; // 2K for print pages
+  let out = await callGemini(parts, aspect, size);
+  if ("error" in out && size && out.code === "provider_error" && /imageSize|size/i.test(String(out.error))) out = await callGemini(parts, aspect);
   if ("error" in out && aspect && out.code === "provider_error" && /aspect|imageConfig|Unknown name/i.test(String(out.error))) {
     out = await callGemini(parts); // model without imageConfig support: aspect is also stated in the prompt
   }
