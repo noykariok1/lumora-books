@@ -1516,8 +1516,10 @@ routes.checkout={title:()=>"תשלום",html(){
     gift:gift?{code:S.gift.code,amount:gift}:null,subtotal:sub,total:sub-gift+ship(),demoPricing:BRAND.demoPricing};
    const pbItems=S.cart.filter(i=>i.pb);if(pbItems.length){btn.textContent="שומרים את הספר להדפסה...";const up=await pbUploadOrder(order.id,pbItems,(d,t)=>{btn.textContent=`שומרים את הספר להדפסה... ${d}/${t}`});
     if(!up.ok){btn.disabled=false;btn.textContent="שליחת ההזמנה (ללא חיוב)";err.textContent=up.msg;err.hidden=false;err.scrollIntoView({block:"center"});return}
-    order.items.forEach((it,i)=>{const c=S.cart[i];if(c&&c.pb)it.files=up.files[c.pb]});btn.textContent="שולחים...";}
-   const r=await sendInbox("order",{order:{...order,items:order.items.map(i=>({...i}))}});order.sent=r.ok;
+    order.items.forEach((it,i)=>{const c=S.cart[i];if(c&&c.pb)it.files=up.files[c.pb]});
+    try{await pbUploadPrint(order.id,pbItems.filter(i=>i.fmt!=="digital"),(d,t)=>{btn.textContent=`מכינים קבצי דפוס... ${d}/${t}`})}catch(e){console.warn(e);btn.disabled=false;btn.textContent="שליחת ההזמנה (ללא חיוב)";err.textContent="לא הצלחנו להכין את קבצי ההדפסה. נסו שוב בעוד רגע.";err.hidden=false;return}
+    btn.textContent="שולחים...";}
+   const r=await sendInbox("order",{order:{...order,items:order.items.map(i=>({...i}))}});order.sent=r.ok;if(r.ok&&pbItems.length)pbBuildPrint(order.id).then(x=>console.log("print build",x));
    if(!r.ok){btn.disabled=false;btn.textContent="שליחת ההזמנה (ללא חיוב)";err.textContent="לא הצלחנו לשלוח את ההזמנה, והיא לא הגיעה אלינו. העגלה והפרטים נשמרו. נסו שוב בעוד כמה דקות.";err.hidden=false;err.focus&&err.scrollIntoView({block:"center"});return}
    S.orders.unshift({...order,arts:S.cart.map(i=>i.art)});save("orders");
    if(S.gift&&gift){if(S.gift.code&&S.gift.cloud)markGiftUsed(S.gift.code,order.id);S.gift=null;save("gift")}
@@ -1751,9 +1753,9 @@ const PB_BASE_CACHE={};
 function pbBaseData(book,slot){const k=book+"/"+slot;return PB_BASE_CACHE[k]=PB_BASE_CACHE[k]||fetch(PB_BASE_URL(book,slot)).then(r=>{if(!r.ok)throw new Error("no base");return r.blob()}).then(bl=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(bl)})).catch(e=>{delete PB_BASE_CACHE[k];throw e})}
 async function pbSwapPage(m,slot,hero){const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  let base;try{base=await pbBaseData(m.book,slot)}catch(e){return pbRenderPage(m,slot,hero)} // no pre-made page: draw it fully
- return aiCall({mode:"swap",photo:b64(photo),hero:b64(hero),heroMime:pbMime(hero),base:b64(base),baseMime:pbMime(base),aspect:"4:5",gender:pbG(pbBy(m.book))})}
+ return aiCall({mode:"swap",photo:b64(photo),hero:b64(hero),heroMime:pbMime(hero),base:b64(base),baseMime:pbMime(base),aspect:"4:5",size:"2K",gender:pbG(pbBy(m.book))})}
 async function pbRenderPage(m,slot,sheet){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
- return aiCall({mode:"render",photo:b64(photo),sheet:b64(sheet),sheetMime:pbMime(sheet),prompt:pbSlotPrompt(b,slot),aspect:"4:5",gender:pbG(b)})}
+ return aiCall({mode:"render",photo:b64(photo),sheet:b64(sheet),sheetMime:pbMime(sheet),prompt:pbSlotPrompt(b,slot),aspect:"4:5",size:"2K",gender:pbG(b)})}
 const PB_ERR={blocked:"מסנן הבטיחות של שירות האיור חסם את הבקשה. אפשר לנסות שוב או להחליף תמונה.",rate_limited:"יותר מדי בקשות בזמן קצר. נסו שוב בעוד כמה דקות.",no_photo:"התמונה נמחקה. כדי לצייר שוב צריך להעלות אותה מחדש.",not_configured:"שירות האיור עוד לא מוגדר.",error:"תקלה זמנית בשירות האיור. אפשר לנסות שוב."};
 const pbErr=e=>PB_ERR[e&&e.code]||PB_ERR.error;
 /* ---- order: send the approved illustrations (never the photo) to the private print bucket ---- */
@@ -1768,6 +1770,27 @@ async function pbUploadOrder(orderId,items,onProg){if(!INBOX.url)return {ok:fals
  await Promise.all([w(),w(),w(),w()]);
  if(fail.length)return {ok:false,msg:fail.some(s=>!s.startsWith("p")&&s!=="cover")?"לא הצלחנו לשמור את הספר להדפסה. נסו שוב בעוד רגע.":"חלק מאיורי הספר חסרים או לא נשמרו. פתחו את הספר מהעגלה, ודאו שכל העמודים מוכנים, ונסו שוב."};
  return {ok:true,files}}
+/* ---- print files: cover with title + 12 text pages, drawn here because the browser lays out Hebrew perfectly ---- */
+const PRINT={trimW:210,trimH:250,bleed:3,dpi:300}; // change to the printer's spec
+const pxMM=mm=>Math.round(mm/25.4*PRINT.dpi);
+function pbWrap(x,text,maxW){const words=String(text).split(/\s+/);const lines=[];let cur="";for(const w of words){const t=cur?cur+" "+w:w;if(x.measureText(t).width>maxW&&cur){lines.push(cur);cur=w}else cur=t}if(cur)lines.push(cur);return lines}
+async function pbPrintPages(pid,m){const b=pbBy(m.book);const W=pxMM(PRINT.trimW+2*PRINT.bleed),H=pxMM(PRINT.trimH+2*PRINT.bleed),safe=pxMM(PRINT.bleed+14);
+ try{await document.fonts.load('700 120px "Assistant"');await document.fonts.load('500 80px "Assistant"')}catch(e){}
+ const out=[];const mk=()=>{const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.direction="rtl";return [c,x]};
+ // 00 cover: art + title
+ {const [c,x]=mk();const im=await loadImg(await pbImg(pid,"cover"));const sc=Math.max(W/im.width,H/im.height);x.drawImage(im,(W-im.width*sc)/2,(H-im.height*sc)/2,im.width*sc,im.height*sc);
+  const g=x.createLinearGradient(0,H*.62,0,H);g.addColorStop(0,"rgba(10,8,30,0)");g.addColorStop(1,"rgba(10,8,30,.72)");x.fillStyle=g;x.fillRect(0,H*.62,W,H*.38);
+  x.font='700 190px "Assistant", sans-serif';x.textAlign="center";x.fillStyle="#fff";x.shadowColor="rgba(0,0,0,.45)";x.shadowBlur=24;
+  const lines=pbWrap(x,pbTitle(b,m.name),W-2*safe);let y=H-safe-(lines.length-1)*220;lines.forEach(l=>{x.fillText(l,W/2,y);y+=220});out.push(c)}
+ // 01..12 text pages
+ for(let i=0;i<12;i++){const [c,x]=mk();x.fillStyle="#FFFBF3";x.fillRect(0,0,W,H);x.fillStyle="#2A2540";x.textAlign="right";x.font='500 96px "Assistant", sans-serif';
+  const lines=pbWrap(x,pbFill(b.pages[i].textTemplate,m.name),W-2*safe);const lh=160;let y=(H-lines.length*lh)/2+lh*.7;lines.forEach(l=>{x.fillText(l,W-safe,y);y+=lh});
+  x.font='500 54px "Assistant", sans-serif';x.fillStyle="#8a8399";x.textAlign="center";x.fillText(String(b.pages[i].pageNumber||i+1),W/2,H-safe+20);out.push(c)}
+ return Promise.all(out.map(c=>new Promise(r=>c.toBlob(r,"image/jpeg",.9))))}
+async function pbUploadPrint(orderId,items,onProg){const base=INBOX.url.replace("/rest/v1/inbox","/storage/v1/object/orders/");
+ for(const it of items){const m=await pbMeta(it.pb);if(!m)throw new Error("book missing");const blobs=await pbPrintPages(it.pb,m);
+  for(let i=0;i<blobs.length;i++){const path=`${orderId}/${it.pb}/print/${String(i).padStart(2,"0")}.jpg`;const r=await fetch(base+path,{method:"POST",signal:AbortSignal.timeout(90000),headers:{apikey:INBOX.key,Authorization:"Bearer "+INBOX.key,"Content-Type":"image/jpeg"},body:blobs[i]});if(!r.ok&&r.status!==409)throw new Error("http "+r.status);onProg&&onProg(i+1,blobs.length)}}}
+function pbBuildPrint(orderId){if(!AI.endpoint)return Promise.resolve();return fetch(AI.endpoint.replace("generate-character","print-order"),{method:"POST",signal:AbortSignal.timeout(120000),headers:{"Content-Type":"application/json",apikey:AI.anonKey,Authorization:"Bearer "+AI.anonKey},body:JSON.stringify({action:"build",orderId})}).then(r=>r.json()).catch(e=>({error:String(e)}))}
 /* ---- cart integration ---- */
 function pbShim(slug){if(!String(slug).startsWith("pb:"))return null;const b=pbBy(slug.slice(3));if(!b)return null;return {slug,personal:true,title:b.titleTemplate.split("{{childName}}").join("{name}"),pages:b.pageCount||12,cover:"garden",story:[],extras:[]}}
 /* ---- routes ---- */
