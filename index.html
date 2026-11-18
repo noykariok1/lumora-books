@@ -1852,6 +1852,7 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
 function pbBindFoot(root,m){const d1=$("#pbDelPhoto",root);if(d1)d1.onclick=async()=>{if(!confirmInline(d1,"ללחוץ שוב כדי למחוק"))return;await PBDB.del("i:"+m.id+":photo");toast("התמונה נמחקה מהמכשיר. האיורים שכבר נוצרו נשארו.");pbProjectView(root,m.id)};
  const d2=$("#pbDelAll",root);if(d2)d2.onclick=async()=>{if(!confirmInline(d2,"ללחוץ שוב כדי למחוק הכול"))return;await pbDeleteProject(m.id);toast("התמונה, האיורים והספר נמחקו מהמכשיר");location.hash="#personal"}}
 
+if(S.cart.some(i=>!String(i.book).startsWith("pb:"))){S.cart=S.cart.filter(i=>String(i.book).startsWith("pb:"));save("cart");updateCartBadge()} // the old catalog was removed
 routes.books={...routes.personal,title:()=>"כל הספרים",mount(el){return routes.personal.mount(el,{})}};
 {const go=(q,slug)=>{const id=slug&&pbBy(slug)?slug:null;setTimeout(()=>location.replace(id?"#personal?book="+id:"#personal"),0);return `<div class="wrap" style="padding:48px 0">מעבירים לספרים...</div>`};
  routes.book={title:()=>"הספרים",html:go,mount(){}};
