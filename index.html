@@ -673,7 +673,8 @@ footer.site{background:var(--canvas)}
 .pb-hero{max-width:760px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}.pb-hero h1{font-size:clamp(28px,4vw,44px);line-height:1.15}
 .pb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
 .pb-card{display:flex;flex-direction:column;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px;color:inherit;text-decoration:none;box-shadow:var(--shadow);transition:transform .15s}.pb-card:hover{transform:translateY(-3px)}.pb-card .btn{align-self:flex-start}
-.pb-cover-art{aspect-ratio:4/5;border-radius:16px;background:radial-gradient(circle at 70% 25%,var(--c) 0 18%,transparent 19%),linear-gradient(160deg,var(--a),color-mix(in srgb,var(--a) 55%,#000));display:flex;align-items:flex-end;padding:16px;box-shadow:inset 0 -60px 60px -30px rgba(0,0,0,.35)}
+.pb-cover-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1}.pb-cover-t{position:relative}.pb-cover-art:has(img){background:#ddd;box-shadow:inset 0 -90px 70px -30px rgba(10,8,30,.65)}.pb-cov{background:linear-gradient(160deg,#4B3FD1,#2B2F7A)}.pb-cov>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1}
+.pb-cover-art{position:relative;isolation:isolate;overflow:hidden;aspect-ratio:4/5;border-radius:16px;background:radial-gradient(circle at 70% 25%,var(--c) 0 18%,transparent 19%),linear-gradient(160deg,var(--a),color-mix(in srgb,var(--a) 55%,#000));display:flex;align-items:flex-end;padding:16px;box-shadow:inset 0 -60px 60px -30px rgba(0,0,0,.35)}
 .pb-cover-t{color:#fff;font-family:Fredoka,var(--font-display,inherit);font-weight:700;font-size:clamp(18px,2.2vw,22px);line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,.35)}
 .pb-mine-row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:12px}
 .pb-form{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:28px;align-items:start}@media (max-width:760px){.pb-form{grid-template-columns:1fr}.pb-form>div:first-child{max-width:240px}}
@@ -705,12 +706,12 @@ footer.site{background:var(--canvas)}
       <button class="icon-btn burger" data-act="drawer" aria-label="פתיחת תפריט"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
       <a class="logo" href="#home" aria-label="לומורה, דף הבית"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="3" y="7" width="34" height="26" rx="7" fill="#4B3FD1"/><path d="M20 11v18M20 11c-4-2-8-2-12 0v18c4-2 8-2 12 0M20 11c4-2 8-2 12 0v18c-4-2-8-2-12 0" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/><circle cx="31" cy="9" r="4" fill="#FFCC75"/></svg><span id="brandName">לומורה</span></a>
       <nav class="main" aria-label="ניווט ראשי">
-        <a href="#books">כל הספרים</a><a href="#how">איך זה עובד</a><a href="#personal">ספר מאויר מתמונה</a><a href="#create-own">סיפור משלכם</a><a href="#corporate">מתנות לחברות</a><a href="#redeem">מימוש מתנה</a>
+        <a href="#personal">הספרים</a><a href="#how">איך זה עובד</a><a href="#create-own">סיפור משלכם</a><a href="#corporate">מתנות לחברות</a><a href="#redeem">מימוש מתנה</a>
       </nav>
       <div class="hdr-actions">
         <a class="icon-btn" href="#account" aria-label="החשבון שלי"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></a>
         <a class="icon-btn" href="#cart" aria-label="עגלת קניות"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l-1.5 11a2 2 0 0 1-2 1.7H8.5a2 2 0 0 1-2-1.7L5 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg><span class="badge-dot" id="cartCount" hidden>0</span></a>
-        <a class="btn btn-primary cta-hdr" href="#books">תצוגה מקדימה חינם</a>
+        <a class="btn btn-primary cta-hdr" href="#personal">תצוגה מקדימה חינם</a>
       </div>
     </div>
   </header>
@@ -727,7 +728,7 @@ footer.site{background:var(--canvas)}
             <span class="tiny muted" id="newsMsg" aria-live="polite"></span>
           </form>
         </div>
-        <div><h4>חנות</h4><a href="#books">כל הספרים</a><a href="#books?cat=bedtime">לפני השינה</a><a href="#books?cat=birthday">ימי הולדת</a><a href="#personal">ספר מאויר מתמונה</a><a href="#create-own">סיפור משלכם</a><a href="#redeem">מימוש קוד מתנה</a></div>
+        <div><h4>חנות</h4><a href="#personal">כל הספרים</a><a href="#create-own">סיפור משלכם</a><a href="#redeem">מימוש קוד מתנה</a></div>
         <div><h4>עזרה</h4><a href="#how">איך זה עובד</a><a href="#faq">שאלות נפוצות</a><a href="#contact">צור קשר</a><a href="#account">ההזמנות שלי</a><a href="#corporate">מתנות לחברות</a></div>
         <div><h4>מדיניות</h4><a href="#privacy">פרטיות ותמונות ילדים</a><a href="#terms">תנאי שימוש</a><a href="#shipping">משלוחים והחזרות</a><a href="#accessibility">הצהרת נגישות</a><a href="#admin" id="adminLink" hidden>ניהול האתר</a></div>
       </div>
@@ -1044,13 +1045,13 @@ routes.home={html(){
    <div class="hero-copy">
     <h1>הילד שלכם הוא<br>הגיבור של הסיפור</h1>
     <p class="lead">מעלים תמונה אחת, ומקבלים ספר מאויר שבו הילד או הילדה שלכם מופיעים בכל עמוד, עם השם שלהם. את התצוגה המקדימה רואים בחינם, לפני שמשלמים.</p>
-    <div class="row hero-ctas"><a class="btn btn-primary btn-lg" href="#books">צרו תצוגה מקדימה חינם</a><a class="btn btn-night" href="#how">איך זה עובד</a></div>
+    <div class="row hero-ctas"><a class="btn btn-primary btn-lg" href="#personal">צרו תצוגה מקדימה חינם</a><a class="btn btn-night" href="#how">איך זה עובד</a></div>
     <ul class="hero-checks"><li>${ICON.check}בלי כרטיס אשראי</li><li>${ICON.check}מוכן תוך כמה דקות</li><li>${ICON.check}ספר מ־${fmtPrice(FORMATS.digital.price)}</li></ul>
     ${PROOF.demo?"":`<div class="hero-proof">${avatarStack()}<div class="stack" style="gap:0"><span class="row" style="gap:6px">${starsRow()}<b>${PROOF.rating} מתוך 5</b></span><span>${PROOF.families.toLocaleString("he-IL")} משפחות כבר יצרו ספר</span></div></div>`}
    </div>
    <div class="hero-stage" aria-hidden="true">
     <div class="lamp"></div>
-    <div class="hs-book">${book3D(BOOKS[1],SAMPLE.f,dc)}</div>
+    <div class="hs-book"><div class="book3d">${pbCover(PB[2],"נועה")}</div></div>
     <figure class="hs-photo"><div class="photoish">${portraitSVG({...dc,hair:2},"#E3D3C1")}</div><figcaption>התמונה שלכם</figcaption></figure>
     <svg class="hs-arrow" viewBox="0 0 90 120" fill="none"><path d="M70 6 C 92 44, 70 86, 22 104" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 9"/><path d="M34 94 L20 105 L37 112" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <figure class="hs-char"><div class="ring">${portraitSVG({...dc,hair:2},"#ECE8FF")}</div><figcaption>הדמות של נועה</figcaption></figure>
@@ -1062,17 +1063,17 @@ routes.home={html(){
  <section class="section" id="how-sec"><div class="wrap">
   <div class="sec-head center"><div class="stack"><h2>שלושה צעדים, כמה דקות</h2><p class="muted">ואת התשלום משאירים לסוף, רק אם אוהבים את מה שרואים.</p></div></div>
   ${howSteps()}
-  <div class="sec-cta"><a class="btn btn-primary btn-lg" href="#books">צרו תצוגה מקדימה חינם</a><span class="small muted">בלי חשבון ובלי כרטיס אשראי</span></div>
+  <div class="sec-cta"><a class="btn btn-primary btn-lg" href="#personal">צרו תצוגה מקדימה חינם</a><span class="small muted">בלי חשבון ובלי כרטיס אשראי</span></div>
  </div></section>
  <section class="section tint"><div class="wrap">
-  <div class="sec-head"><div class="stack"><h2>הספרים שמשפחות בוחרות</h2><p class="muted">הדוגמאות מוצגות עם השם נועה. בתצוגה המקדימה יופיעו השם והדמות של הילד שלכם.</p></div><a class="btn btn-ghost btn-sm" href="#books">לכל ${BOOKS.length} הספרים</a></div>
-  <div class="grid-books">${best.map(bookCard).join("")}</div>
+  <div class="sec-head"><div class="stack"><h2>הספרים שלנו</h2><p class="muted">כריכות לדוגמה. בספר שלכם הכריכה ו-12 העמודים מצוירים עם הילד שלכם והשם שלו.</p></div></div>
+  <div class="pb-grid">${PB.map(b=>pbCardHTML(b)).join("")}</div>
  </div></section>
  <section class="section"><div class="wrap ba-wrap">
   <div class="stack">
    <h2>מכירים את הפנים האלה?</h2>
    <p class="lead">מעלים תמונה אחת ברורה, ואנחנו בונים ממנה דמות מאוירת שמופיעה בכל עמוד בספר. אפשר לנסות כאן עם תמונה שלכם: היא מעובדת רק בדפדפן שלכם ולא נשלחת לשום מקום.</p>
-   <div class="row"><label class="btn btn-ghost" for="baFile">${ICON.upload.replace("<svg",'<svg width="20" height="20"')}לנסות עם תמונה</label><input id="baFile" type="file" accept="image/jpeg,image/png,image/webp" class="sr"><a class="btn btn-primary" href="#books">לבחור ספר</a></div>
+   <div class="row"><label class="btn btn-ghost" for="baFile">${ICON.upload.replace("<svg",'<svg width="20" height="20"')}לנסות עם תמונה</label><input id="baFile" type="file" accept="image/jpeg,image/png,image/webp" class="sr"><a class="btn btn-primary" href="#personal">לבחור ספר</a></div>
    <p class="small muted">${ICON.shield.replace("<svg",'<svg width="18" height="18" style="vertical-align:-4px;margin-inline-end:6px;color:var(--ok)"')}התמונה משמשת רק ליצירת הדמות, ואפשר למחוק אותה בכל רגע.</p>
    <span class="pill demo" style="align-self:flex-start">הדמות מצוירת בסגנון הספרים לפי מה שזוהה בתמונה</span>
   </div>
@@ -1094,23 +1095,20 @@ routes.home={html(){
   <div class="price-foot">${BRAND.demoPricing?'<span class="pill demo">מחירים לדוגמה, כולל מע״מ</span>':""}${cutoffNote()}</div>
  </div></section>
  <section class="section tint"><div class="wrap quality">
-  <div class="quality-art">${book3D(BOOKS[0],SAMPLE.f,dc)}<div class="spread-mini"><div class="txtpage">${esc(GT(BOOKS[0].story[0][1],"f","נועה"))}</div><div>${sceneSVG("night",dc)}</div></div></div>
+  <div class="quality-art"><div class="book3d">${pbCover(PB[3],"נועה")}</div></div>
   <div class="stack">
    <h2>ספר שמרגישים ביד</h2>
    <p class="lead">כריכה קשה, נייר מט עבה שלא מקמט, וצבעים חיים. כל ספר מודפס בנפרד עבור הילד שלו.</p>
    <div class="spec-list">
     <div><b>21×25 ס״מ</b><span class="small muted">גודל נוח לידיים קטנות</span></div>
-    <div><b>24–32 עמודים</b><span class="small muted">לפי הספר</span></div>
+    <div><b>כריכה ו-12 עמודים</b><span class="small muted">מאוירים עם הילד שלכם</span></div>
     <div><b>נייר מט 200 גר׳</b><span class="small muted">עמיד לדפדוף</span></div>
     <div><b>כריכה קשה</b><span class="small muted">או קופסת מתנה</span></div>
    </div>
    <span class="pill demo" style="align-self:flex-start">מפרט הדפסה לדוגמה, יאושר מול בית הדפוס</span>
   </div>
  </div></section>
- <section class="section"><div class="wrap">
-  <div class="sec-head"><div class="stack"><h2>ספר לכל רגע</h2></div><a class="btn btn-ghost btn-sm" href="#books">לכל הספרים</a></div>
-  <div class="cats">${Object.entries(CATS).map(([k,v],i)=>`<a class="cat" href="#books?cat=${k}"><div class="art">${sceneSVG(catScene[k],i%2?dm:dc,k==="family"?extrasFor("family",dc):"",v)}</div><b>${v}</b></a>`).join("")}</div>
- </div></section>
+ 
  <section class="section" style="padding-top:0"><div class="wrap">
   <div class="corp-band">
    <div class="stack"><span class="eyebrow">לחברות ולמשאבי אנוש</span><h2>מתנה אישית לילדים של העובדים</h2><p class="lead" style="color:var(--ink);opacity:.8">החברה רוכשת חבילת מתנות, וכל עובד מקבל קוד אישי. ההורים יוצרים את הספר בעצמם, והחברה לא צריכה לאסוף תמונות של ילדים.</p><div class="row"><a class="btn btn-primary" href="#corporate">לפרטים ולהצעת מחיר</a></div></div>
@@ -1118,11 +1116,11 @@ routes.home={html(){
   </div>
  </div></section>
  <section class="section tint"><div class="wrap faq-split">
-  <div class="stack faq-side"><h2>שאלות לפני שמתחילים</h2><p class="muted">התצוגה המקדימה חינם, ואפשר לעצור בכל שלב. לא מצאתם תשובה? <a href="#contact">כתבו לנו</a>.</p><a class="btn btn-primary" href="#books" style="align-self:flex-start">צרו תצוגה מקדימה חינם</a><a href="#faq" class="small">לכל השאלות</a></div>
+  <div class="stack faq-side"><h2>שאלות לפני שמתחילים</h2><p class="muted">התצוגה המקדימה חינם, ואפשר לעצור בכל שלב. לא מצאתם תשובה? <a href="#contact">כתבו לנו</a>.</p><a class="btn btn-primary" href="#personal" style="align-self:flex-start">צרו תצוגה מקדימה חינם</a><a href="#faq" class="small">לכל השאלות</a></div>
   ${faqHTML(FAQ.slice(0,6))}
  </div></section>
- <section class="section"><div class="wrap"><div class="final"><svg class="sky" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${stars(60,1200,400,5)}</svg><h2>מוכנים לראות את הילד שלכם בתוך סיפור?</h2><p>זה לוקח כמה דקות, והתצוגה המקדימה חינם.</p><a class="btn btn-lg" href="#books">צרו תצוגה מקדימה חינם</a></div></div></section>
- <div class="sticky-cta" id="homeSticky"><a class="btn btn-primary btn-block" href="#books">צרו תצוגה מקדימה חינם</a></div>`},
+ <section class="section"><div class="wrap"><div class="final"><svg class="sky" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${stars(60,1200,400,5)}</svg><h2>מוכנים לראות את הילד שלכם בתוך סיפור?</h2><p>זה לוקח כמה דקות, והתצוגה המקדימה חינם.</p><a class="btn btn-lg" href="#personal">צרו תצוגה מקדימה חינם</a></div></div></section>
+ <div class="sticky-cta" id="homeSticky"><a class="btn btn-primary btn-block" href="#personal">צרו תצוגה מקדימה חינם</a></div>`},
  mount(m){
   homeSticky(m);
   const r=$("#baRange",m),ba=$("#ba",m);r.addEventListener("input",()=>ba.style.setProperty("--cut",(100-r.value)+"%"));
@@ -1154,7 +1152,7 @@ routes.how={title:()=>"איך זה עובד",html:()=>`<div class="wrap page-hea
  <div><b>שלב 2</b><h3>מספרים על הילד</h3><p class="muted small">שם, בן או בת, גיל והקדשה.</p></div>
  <div><b>שלב 3</b><h3>מעלים תמונה ומאשרים דמות</h3><p class="muted small">אפשר לשנות שיער, משקפיים ועוד.</p></div>
  <div><b>שלב 4</b><h3>מדפדפים ומזמינים</h3><p class="muted small">בוחרים פורמט, ממלאים כתובת ומשלמים.</p></div></div></div>
- <div style="text-align:center;margin-top:40px"><a class="btn btn-primary" href="#books">להתחיל עכשיו</a></div></div>`};
+ <div style="text-align:center;margin-top:40px"><a class="btn btn-primary" href="#personal">להתחיל עכשיו</a></div></div>`};
 /* ================= CATALOG ================= */
 routes.books={title:()=>"כל הספרים",html(q){
  return `<div class="wrap page-head"><span class="eyebrow">החנות</span><h1>כל הספרים</h1><p class="lead">${BOOKS.length} ספרים מקוריים. כל אחד מהם יכול להיות על הילד שלכם.</p></div>
@@ -1194,7 +1192,7 @@ routes.book={title:(q,slug)=>{const b=bookBy(slug);return b?bookTitle(b):"ספר
  const g=q.g==="m"?"m":"f";const p=SAMPLE[g];const c=defaultChar(g);
  const similar=BOOKS.filter(x=>x.slug!==b.slug&&(x.cat===b.cat||x.themes.some(t=>b.themes.includes(t)))).slice(0,4);
  while(similar.length<4){const x=BOOKS.find(y=>y.slug!==b.slug&&!similar.includes(y));if(!x)break;similar.push(x)}
- return `<div class="wrap"><nav class="crumbs" aria-label="פירורי לחם"><a href="#home">דף הבית</a>›<a href="#books">כל הספרים</a>›<a href="#books?cat=${b.cat}">${CATS[b.cat]}</a>›<span aria-current="page">${esc(bookTitle(b,p))}</span></nav>
+ return `<div class="wrap"><nav class="crumbs" aria-label="פירורי לחם"><a href="#home">דף הבית</a>›<a href="#personal">כל הספרים</a>›<a href="#books?cat=${b.cat}">${CATS[b.cat]}</a>›<span aria-current="page">${esc(bookTitle(b,p))}</span></nav>
  <div class="pdp">
   <div class="gallery"><div class="main" id="gMain">${coverHTML(b,p,c)}</div>
    <div class="thumbs" role="group" aria-label="תמונות הספר"><button aria-pressed="true" data-g="0" aria-label="כריכה">${coverHTML(b,p,c)}</button><button data-g="1" aria-label="ספר בכריכה קשה" aria-pressed="false">${book3D(b,p,c)}</button><button data-g="2" aria-label="כפולת עמודים" aria-pressed="false">${sceneSVG(b.story[1][0],c)}</button><button data-g="3" aria-label="כפולת עמודים נוספת" aria-pressed="false">${sceneSVG(b.story[3][0],c)}</button></div></div>
@@ -1324,7 +1322,7 @@ routes.create={title:()=>"יצירת ספר",html(q){return `<div class="wrap wi
  const bindNav=(el,onNext)=>{const bk=$("[data-back]",el);if(bk)bk.onclick=()=>{step--;if(step===4)step=3;render()};const nx=$("[data-next]",el);if(nx&&onNext)nx.onclick=onNext};
  const child=()=>({name:P.child.name||"",gender:P.child.gender||"f",dedication:P.child.dedication});
  const STEP={
-  1:el=>{el.innerHTML=`<h2>הספר שבחרתם</h2><div class="selected-book box">${coverHTML(b)}<div class="stack" style="gap:8px"><h3>${esc(bookTitle(b))}</h3><p class="muted">${esc(GT(b.blurb,"f","נועה"))}</p><div class="row"><span class="pill">גילאי ${b.ages[0]}–${b.ages[1]}</span><span class="pill">${b.pages} עמ׳</span></div><a href="#books" class="small">להחליף ספר</a></div></div>
+  1:el=>{el.innerHTML=`<h2>הספר שבחרתם</h2><div class="selected-book box">${coverHTML(b)}<div class="stack" style="gap:8px"><h3>${esc(bookTitle(b))}</h3><p class="muted">${esc(GT(b.blurb,"f","נועה"))}</p><div class="row"><span class="pill">גילאי ${b.ages[0]}–${b.ages[1]}</span><span class="pill">${b.pages} עמ׳</span></div><a href="#personal" class="small">להחליף ספר</a></div></div>
    <div class="note info">${ICON.eye.replace("<svg",'<svg width="20" height="20" style="flex:none"')}<span>בעוד כמה דקות תראו את הספר עם השם והדמות של הילד שלכם. לא צריך חשבון ולא צריך לשלם כדי לראות.</span></div>${nav(null,"להמשיך")}`;bindNav(el,()=>{step=2;render()})},
   2:el=>{const c=P.child;el.innerHTML=`<h2>ספרו לנו על הגיבור או הגיבורה</h2><form class="stack box" id="cf" novalidate>
    <label class="f" for="cName">השם הפרטי של הילד <span class="hint">כך הוא יופיע בספר</span><input class="inp" id="cName" maxlength="16" autocomplete="off" value="${esc(c.name)}" required></label><span class="err-msg" id="eName" hidden></span>
@@ -1472,12 +1470,12 @@ function localTraits(t,c){let hit=false;const m=(re,f)=>{if(re.test(t)){f();hit=
 /* ================= CART ================= */
 function cartTotals(){const sub=S.cart.reduce((a,i)=>a+FORMATS[i.fmt].price*i.qty,0);let gift=0;if(S.gift&&S.cart.length){const elig=S.cart.filter(i=>!S.gift.formats||S.gift.formats.includes(i.fmt));if(elig.length){const best=Math.max(...elig.map(i=>FORMATS[i.fmt].price));gift=Math.min(best,S.gift.value||best)}}return {sub,gift}}
 routes.cart={title:()=>"עגלת קניות",html(){
- if(!S.cart.length)return `<div class="wrap"><div class="empty" style="padding-block:96px"><svg viewBox="0 0 140 110"><path d="M35 34h70l-7 52a8 8 0 0 1-8 7H50a8 8 0 0 1-8-7z" fill="var(--canvas)" stroke="var(--line)" stroke-width="2"/><path d="M55 44V30a15 15 0 0 1 30 0v14" fill="none" stroke="var(--muted)" stroke-width="3"/></svg><h1 style="font-size:32px">העגלה עדיין ריקה</h1><p class="muted">בחרו ספר, צרו תצוגה מקדימה, והוא יחכה לכם כאן.</p><a class="btn btn-primary" href="#books">לבחור ספר</a></div></div>`;
+ if(!S.cart.length)return `<div class="wrap"><div class="empty" style="padding-block:96px"><svg viewBox="0 0 140 110"><path d="M35 34h70l-7 52a8 8 0 0 1-8 7H50a8 8 0 0 1-8-7z" fill="var(--canvas)" stroke="var(--line)" stroke-width="2"/><path d="M55 44V30a15 15 0 0 1 30 0v14" fill="none" stroke="var(--muted)" stroke-width="3"/></svg><h1 style="font-size:32px">העגלה עדיין ריקה</h1><p class="muted">בחרו ספר, צרו תצוגה מקדימה, והוא יחכה לכם כאן.</p><a class="btn btn-primary" href="#personal">לבחור ספר</a></div></div>`;
  const {sub,gift}=cartTotals();
  return `<div class="wrap cart">${coSteps(1)}<div><h1 style="font-size:clamp(28px,3vw,38px)">העגלה שלכם</h1><div id="items">${S.cart.map(it=>{const b=bookBy(it.book);const p={name:it.child.name,gender:it.child.gender};return `<div class="citem">${coverHTML(b,p,it.char)}<div class="stack" style="gap:6px;min-width:0"><b>${esc(bookTitle(b,p))}</b><span class="small muted">${FORMATS[it.fmt].label} · ${it.child.gender==="m"?"זכר":"נקבה"}${it.child.dedication?" · עם הקדשה":""}</span><div class="row"><div class="qty"><button data-q="-1" data-id="${it.id}" aria-label="פחות">−</button><span>${it.qty}</span><button data-q="1" data-id="${it.id}" aria-label="יותר">+</button></div><a class="small" href="${it.pb?"#personal?p="+it.pb:"#create?resume="+it.project}">עריכה</a><button class="btn btn-ghost btn-sm" data-rm="${it.id}">הסרה</button></div></div><b class="price">${fmtPrice(FORMATS[it.fmt].price*it.qty)}</b></div>`}).join("")}</div></div>
  <aside class="summary box"><h3>סיכום</h3><div class="sumrow"><span>ביניים</span><span>${fmtPrice(sub)}</span></div>${gift?`<div class="sumrow" style="color:var(--ok)"><span>מתנה${S.gift.code?` (${esc(S.gift.code)})`:""}</span><span>−${fmtPrice(gift)}</span></div>`:""}<div class="sumrow"><span class="muted">משלוח</span><span class="muted">נבחר בקופה</span></div><div class="sumrow total"><span>סה״כ</span><span>${fmtPrice(sub-gift)}</span></div><span class="small muted">המחירים כוללים מע״מ.</span>${BRAND.demoPricing?'<span class="pill demo">מחירים לדוגמה</span>':""}
   <form class="row" id="codeF" style="flex-wrap:nowrap" novalidate><label class="sr" for="code">קוד מתנה</label><input class="inp" id="code" placeholder="קוד מתנה" dir="ltr" style="text-transform:uppercase"><button class="btn btn-ghost btn-sm" style="min-height:48px">החלה</button></form><span class="small" id="codeMsg" aria-live="polite"></span>
-  <a class="btn btn-primary btn-block btn-lg" href="#checkout">להמשיך לפרטים ולתשלום</a><a class="btn btn-ghost btn-block" href="#books">להוסיף עוד ספר</a>${cutoffNote()}${trustMini()}</aside></div>`},
+  <a class="btn btn-primary btn-block btn-lg" href="#checkout">להמשיך לפרטים ולתשלום</a><a class="btn btn-ghost btn-block" href="#personal">להוסיף עוד ספר</a>${cutoffNote()}${trustMini()}</aside></div>`},
  mount(m){
   $$("[data-q]",m).forEach(b=>b.onclick=()=>{const it=S.cart.find(i=>i.id===b.dataset.id);it.qty=Math.max(1,Math.min(10,it.qty+ +b.dataset.q));save("cart");route()});
   $$("[data-rm]",m).forEach(b=>b.onclick=()=>{S.cart=S.cart.filter(i=>i.id!==b.dataset.rm);save("cart");route();toast("הספר הוסר מהעגלה")});
@@ -1529,20 +1527,20 @@ routes.order={title:()=>"פרטי הזמנה",html(q,id){const o=S.orders.find(x
  <div class="box stack" style="margin-top:16px"><h3>מה הזמנתם</h3>${o.items.map((it,i)=>`<div class="citem" style="grid-template-columns:72px 1fr auto">${coverHTML(bookBy(it.book),it.child,it.char)}<div><b>${esc(it.title)}</b><div class="small muted">${FORMATS[it.fmt].label} · כמות ${it.qty}</div></div><b>${fmtPrice(it.price*it.qty)}</b></div>`).join("")}
   ${o.gift?`<div class="sumrow" style="color:var(--ok)"><span>מתנה</span><span>−${fmtPrice(o.gift.amount)}</span></div>`:""}<div class="sumrow"><span>משלוח</span><span>${fmtPrice(o.shipping.price)}</span></div><div class="sumrow total"><span>סה״כ לתשלום</span><span>${fmtPrice(o.total)}</span></div></div>
  ${o.shipping.city?`<div class="box" style="margin-top:16px"><h3>משלוח אל</h3><p class="muted" style="margin-top:8px">${esc(o.customer.name)}, ${esc(o.shipping.street)}${o.shipping.apt?", "+esc(o.shipping.apt):""}, ${esc(o.shipping.city)} · ${BRAND.shipping[o.shipping.method].label}</p></div>`:""}
- <div class="row" style="justify-content:center;margin-top:28px"><a class="btn btn-primary" href="#account">להזמנות שלי</a><a class="btn btn-ghost" href="#books">לספר נוסף</a></div></div>`}};
+ <div class="row" style="justify-content:center;margin-top:28px"><a class="btn btn-primary" href="#account">להזמנות שלי</a><a class="btn btn-ghost" href="#personal">לספר נוסף</a></div></div>`}};
 /* ================= ACCOUNT ================= */
 routes.account={title:()=>"החשבון שלי",html(q){const tab=q.tab||"books";const T={books:"הספרים שלי",characters:"הדמויות שלי",orders:"ההזמנות שלי",gifts:"המתנות שלי",settings:"הגדרות ופרטיות"};
  return `<div class="wrap page-head" style="padding-bottom:0"><h1 style="font-size:clamp(28px,3.6vw,42px)">החשבון שלי</h1><div class="note info" style="max-width:760px">${ICON.shield.replace("<svg",'<svg width="20" height="20" style="flex:none"')}<span>בגרסה הזו הספרים, הדמויות וההזמנות נשמרים בדפדפן הזה בלבד. התחברות עם חשבון ושמירה בענן יתווספו כשנחבר מסד נתונים.</span></div></div>
  <div class="wrap acct"><nav class="acct-nav" aria-label="אזורים בחשבון">${Object.entries(T).map(([k,v])=>`<button data-tab="${k}" aria-pressed="${k===tab}">${v}</button>`).join("")}</nav><div id="acctBody" class="stack"></div></div>`},
  mount(m,q){const tab=q.tab||"books";$$("[data-tab]",m).forEach(b=>b.onclick=()=>location.hash="#account?tab="+b.dataset.tab);const B=$("#acctBody",m);
-  if(tab==="books"){B.innerHTML=`<h2 style="font-size:26px">ספרים בתהליך</h2>${S.projects.length?`<div class="list">${S.projects.map(p=>{const b=bookBy(p.book);if(!b)return"";const ch={name:p.child.name||"?",gender:p.child.gender||"f"};return `<div class="li">${coverHTML(b,ch,p.char)}<div class="grow"><b>${esc(bookTitle(b,ch))}</b><div class="small muted">${p.inCart?"בעגלה":"שלב "+(p.step||1)+" מתוך 7"} · עודכן ${new Date(p.updatedAt||Date.now()).toLocaleDateString("he-IL")}</div></div><a class="btn btn-soft btn-sm" href="#create?resume=${p.id}">להמשיך</a><button class="btn btn-ghost btn-sm" data-delp="${p.id}">מחיקה</button></div>`}).join("")}</div>`:`<div class="box empty"><h3>עוד אין ספרים</h3><p class="muted">כשתתחילו ליצור ספר, הוא יישמר כאן ותוכלו לחזור אליו.</p><a class="btn btn-primary" href="#books">לבחור ספר</a></div>`}
+  if(tab==="books"){B.innerHTML=`<h2 style="font-size:26px">ספרים בתהליך</h2>${S.projects.length?`<div class="list">${S.projects.map(p=>{const b=bookBy(p.book);if(!b)return"";const ch={name:p.child.name||"?",gender:p.child.gender||"f"};return `<div class="li">${coverHTML(b,ch,p.char)}<div class="grow"><b>${esc(bookTitle(b,ch))}</b><div class="small muted">${p.inCart?"בעגלה":"שלב "+(p.step||1)+" מתוך 7"} · עודכן ${new Date(p.updatedAt||Date.now()).toLocaleDateString("he-IL")}</div></div><a class="btn btn-soft btn-sm" href="#create?resume=${p.id}">להמשיך</a><button class="btn btn-ghost btn-sm" data-delp="${p.id}">מחיקה</button></div>`}).join("")}</div>`:`<div class="box empty"><h3>עוד אין ספרים</h3><p class="muted">כשתתחילו ליצור ספר, הוא יישמר כאן ותוכלו לחזור אליו.</p><a class="btn btn-primary" href="#personal">לבחור ספר</a></div>`}
    <h2 style="font-size:26px;margin-top:16px">ספרים שהוזמנו</h2>${S.orders.length?`<div class="list">${S.orders.flatMap(o=>o.items.map(it=>`<div class="li">${coverHTML(bookBy(it.book),it.child,it.char)}<div class="grow"><b>${esc(it.title)}</b><div class="small muted">הזמנה ${esc(o.id)} · ${FORMATS[it.fmt].label}</div></div><span class="pill">הספר המלא ייפתח אחרי התשלום</span></div>`)).join("")}</div>`:'<p class="muted">עוד לא הוזמנו ספרים.</p>'}`;
    $$("[data-delp]",B).forEach(x=>x.onclick=()=>{S.projects=S.projects.filter(p=>p.id!==x.dataset.delp);save("projects");const w=getProject();if(w&&w.id===x.dataset.delp)store.del("wip");route()})}
   if(tab==="characters"){B.innerHTML=`<h2 style="font-size:26px">הדמויות שלי</h2><p class="muted">דמות שאישרתם אפשר להכניס לכל ספר אחר בלי להעלות שוב תמונה.</p>${S.characters.length?`<div class="list">${S.characters.map(c=>`<div class="li"><div class="avatar">${c.art?`<img src="${c.art}" alt="">`:portraitSVG(c.traits)}</div><div class="avatar">${portraitSVG(c.traits)}</div><div class="grow"><b>${esc(c.name)}</b><div class="small muted">גרסה ${c.version} · ${new Date(c.updatedAt).toLocaleDateString("he-IL")}</div></div><label class="sr" for="use-${c.id}">ספר</label><select class="inp" id="use-${c.id}" style="width:auto;min-height:38px">${BOOKS.map(b=>`<option value="${b.slug}">${esc(bookTitle(b,{name:c.name,gender:c.gender}))}</option>`).join("")}</select><button class="btn btn-soft btn-sm" data-use="${c.id}">ליצור ספר</button><button class="btn btn-ghost btn-sm" data-delc="${c.id}">מחיקה</button></div>`).join("")}</div>`:`<div class="box empty"><h3>עוד אין דמויות</h3><p class="muted">דמות נשמרת כאן ברגע שמאשרים אותה באשף.</p></div>`}`;
    $$("[data-use]",B).forEach(x=>x.onclick=()=>{location.hash=`#create?book=${$("#use-"+x.dataset.use,B).value}&fresh=1&char=${x.dataset.use}`});
    $$("[data-delc]",B).forEach(x=>x.onclick=()=>{S.characters=S.characters.filter(c=>c.id!==x.dataset.delc);save("characters");route();toast("הדמות והתמונה נמחקו")})}
-  if(tab==="orders"){B.innerHTML=`<h2 style="font-size:26px">ההזמנות שלי</h2>${S.orders.length?`<div class="list">${S.orders.map(o=>`<a class="li" href="#order-${o.id}" style="text-decoration:none;color:inherit"><div class="grow"><b dir="ltr" style="display:inline-block">${esc(o.id)}</b><div class="small muted">${new Date(o.createdAt).toLocaleDateString("he-IL")} · ${o.items.length} ${o.items.length===1?"ספר":"ספרים"}</div></div><span class="pill ok">${STATUS[o.status]}</span><span class="pill bad">טרם שולמה</span><b class="price">${fmtPrice(o.total)}</b></a>`).join("")}</div>`:`<div class="box empty"><h3>עוד אין הזמנות</h3><a class="btn btn-primary" href="#books">לבחור ספר</a></div>`}`}
-  if(tab==="gifts"){B.innerHTML=`<h2 style="font-size:26px">המתנות שלי</h2>${S.gift?`<div class="giftcard" style="margin:0"><b>מתנה פעילה${S.gift.from?" מ"+esc(S.gift.from):""}</b><div class="code">${esc(S.gift.code)}</div><p class="small muted">${S.gift.demo?"קוד הדגמה. ":""}יקוזז אוטומטית בעגלה על ספר אחד.</p><a class="btn btn-primary btn-sm" href="#books">לבחור ספר</a></div>`:`<div class="box empty"><h3>אין מתנות פעילות</h3><p class="muted">קיבלתם קוד מתנה?</p><a class="btn btn-primary" href="#redeem">למימוש קוד</a></div>`}`}
+  if(tab==="orders"){B.innerHTML=`<h2 style="font-size:26px">ההזמנות שלי</h2>${S.orders.length?`<div class="list">${S.orders.map(o=>`<a class="li" href="#order-${o.id}" style="text-decoration:none;color:inherit"><div class="grow"><b dir="ltr" style="display:inline-block">${esc(o.id)}</b><div class="small muted">${new Date(o.createdAt).toLocaleDateString("he-IL")} · ${o.items.length} ${o.items.length===1?"ספר":"ספרים"}</div></div><span class="pill ok">${STATUS[o.status]}</span><span class="pill bad">טרם שולמה</span><b class="price">${fmtPrice(o.total)}</b></a>`).join("")}</div>`:`<div class="box empty"><h3>עוד אין הזמנות</h3><a class="btn btn-primary" href="#personal">לבחור ספר</a></div>`}`}
+  if(tab==="gifts"){B.innerHTML=`<h2 style="font-size:26px">המתנות שלי</h2>${S.gift?`<div class="giftcard" style="margin:0"><b>מתנה פעילה${S.gift.from?" מ"+esc(S.gift.from):""}</b><div class="code">${esc(S.gift.code)}</div><p class="small muted">${S.gift.demo?"קוד הדגמה. ":""}יקוזז אוטומטית בעגלה על ספר אחד.</p><a class="btn btn-primary btn-sm" href="#personal">לבחור ספר</a></div>`:`<div class="box empty"><h3>אין מתנות פעילות</h3><p class="muted">קיבלתם קוד מתנה?</p><a class="btn btn-primary" href="#redeem">למימוש קוד</a></div>`}`}
   if(tab==="settings"){B.innerHTML=`<h2 style="font-size:26px">הגדרות ופרטיות</h2><div class="box stack"><h3>מחיקת התמונות והפרטים</h3><p class="muted">מוחק מהדפדפן הזה את כל התמונות, הדמויות, הספרים בתהליך, העגלה וההזמנות. ${CLOUD.uid?"וגם את ההודעות וההזמנות ששלחתם אלינו מהחשבון הזה.":""}</p><button class="btn btn-ghost" id="wipe" style="color:var(--bad);border-color:var(--bad);align-self:flex-start">למחוק הכל</button></div><div class="box stack"><h3>ערכת צבעים</h3><div class="seg" role="group" aria-label="ערכת צבעים"><button data-th="" aria-pressed="${!document.documentElement.dataset.theme}">כמו במכשיר</button><button data-th="light" aria-pressed="${document.documentElement.dataset.theme==="light"}">בהיר</button><button data-th="dark" aria-pressed="${document.documentElement.dataset.theme==="dark"}">כהה</button></div></div>`;
    $$("[data-th]",B).forEach(x=>x.onclick=()=>{if(x.dataset.th)document.documentElement.dataset.theme=x.dataset.th;else delete document.documentElement.dataset.theme;store.set("theme",x.dataset.th);route()});
    $("#wipe",B).onclick=()=>modal(`<h3>למחוק את כל הפרטים?</h3><p class="muted">אי אפשר לשחזר אחרי המחיקה.</p><div class="row" style="justify-content:flex-end"><button class="btn btn-ghost" data-close>ביטול</button><button class="btn btn-primary" id="wipeGo" style="background:var(--bad)">כן, למחוק</button></div>`,(L,cl)=>{$("#wipeGo",L).onclick=async()=>{["cart","projects","characters","orders","gift","wip","own"].forEach(store.del);Object.assign(S,{cart:[],projects:[],characters:[],orders:[],gift:null,own:null});
@@ -1566,11 +1564,11 @@ routes.redeem={title:()=>"מימוש מתנה",html(){return `<div class="wrap s
  </div>`},
  mount(m,q){const f=$("#rf",m);if(q.code)$("#rcode",m).value=q.code;f.onsubmit=async e=>{e.preventDefault();const r=await validateGift($("#rcode",m).value);const box=$("#rmsg",m);
   if(!r.ok){box.innerHTML=`<div class="note bad">${esc(r.msg)}</div>`;return}S.gift=r.gift;save("gift");
-  box.innerHTML=`<div class="note ok" style="flex-direction:column;gap:10px"><b style="font-size:18px">🎉 המתנה נפתחה${r.gift.from?` מ${esc(r.gift.from)}`:""}</b><span>${r.gift.demo?"זה קוד הדגמה. ":""}בחרו ספר והתאימו אותו אישית. המתנה תקוזז אוטומטית בעגלה.</span>${r.gift.expires?`<span class="small">בתוקף עד ${new Date(r.gift.expires).toLocaleDateString("he-IL")}</span>`:""}<a class="btn btn-primary" href="#books" style="align-self:flex-start">לבחור ספר</a></div>`}}};
+  box.innerHTML=`<div class="note ok" style="flex-direction:column;gap:10px"><b style="font-size:18px">🎉 המתנה נפתחה${r.gift.from?` מ${esc(r.gift.from)}`:""}</b><span>${r.gift.demo?"זה קוד הדגמה. ":""}בחרו ספר והתאימו אותו אישית. המתנה תקוזז אוטומטית בעגלה.</span>${r.gift.expires?`<span class="small">בתוקף עד ${new Date(r.gift.expires).toLocaleDateString("he-IL")}</span>`:""}<a class="btn btn-primary" href="#personal" style="align-self:flex-start">לבחור ספר</a></div>`}}};
 /* ================= CORPORATE ================= */
 routes.corporate={title:()=>"מתנות לחברות",html(){const dc=defaultChar("f"),dm=defaultChar("m");return `
  <section class="wrap hero" style="grid-template-columns:1.1fr 1fr"><div><span class="eyebrow">לחברות, ועדי עובדים ומשאבי אנוש</span><h1 style="margin-top:12px;font-size:clamp(32px,4.6vw,54px)">מתנה שהילדים של העובדים יזכרו</h1><p class="lead">במקום עוד שובר, כל עובד מקבל קוד אישי ויוצר ספר מאויר שבו הילד שלו הוא הגיבור. אתם לא אוספים תמונות ולא מתעסקים בלוגיסטיקה.</p><div class="row"><a class="btn btn-primary" href="#corporate" onclick="event.preventDefault();document.getElementById('quote').scrollIntoView({behavior:'smooth'})">לקבל הצעת מחיר</a><a class="btn btn-ghost" href="#redeem">לנסות את חוויית המימוש</a></div></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end">${coverHTML(BOOKS[1],SAMPLE.m,dm)}${coverHTML(BOOKS[0],SAMPLE.f,dc)}</div></section>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end">${pbCover(PB[0],"איתי")}${pbCover(PB[2],"נועה")}</div></section>
  <section class="section tint"><div class="wrap"><div class="sec-head"><div class="stack"><span class="eyebrow">למה זה עובד</span><h2>מתנה אישית, בלי עבודה אישית</h2></div></div><div class="cards3">
   <div class="promise"><b style="font-size:18px">בלי תמונות של ילדים אצלכם</b><p class="muted">ההורים מעלים תמונה בעצמם. החברה לא רואה ולא שומרת מידע על הילדים.</p></div>
   <div class="promise"><b style="font-size:18px">מתאים לכל גיל ולכל משפחה</b><p class="muted">עובדים בוחרים מתוך כל הקטלוג, בלשון זכר או נקבה, לגילאי 0 עד 8.</p></div>
@@ -1685,7 +1683,7 @@ routes.shipping=staticPage("משלוחים והחזרות",`<div class="note dem
 routes.accessibility=staticPage("הצהרת נגישות",`<p>האתר נבנה לפי הנחיות WCAG 2.2 ברמה AA: ניווט מלא במקלדת, תוויות לכל שדה, ניגודיות צבעים, תמיכה בהקטנת תנועה ובקורא מסך, ופריסה מימין לשמאל.</p><p>נתקלתם בבעיה? <a href="#contact">כתבו לנו</a> ונתקן.</p><div class="note demo">רכז/ת נגישות ופרטי קשר יעודכנו לפני השקה.</div>`);
 routes.notfound={title:()=>"לא נמצא",html:()=>`<div class="wrap empty" style="padding-block:96px"><h1 style="font-size:34px">הדף הזה לא קיים</h1><p class="muted">אולי הקישור השתנה.</p><a class="btn btn-primary" href="#home">לדף הבית</a></div>`};
 /* ================= GLOBAL ================= */
-document.addEventListener("click",e=>{const d=e.target.closest("[data-act=drawer]");if(d){const close=()=>{$("#layer").innerHTML="";d.focus()};$("#layer").innerHTML=`<div class="drawer" role="dialog" aria-modal="true" aria-label="תפריט"><div class="scrim"></div><nav class="panel"><div class="row" style="justify-content:space-between;margin-bottom:12px"><a class="logo" href="#home">לומורה</a><button class="icon-btn" id="dClose" aria-label="סגירת התפריט">✕</button></div>${[["#books","כל הספרים"],["#how","איך זה עובד"],["#create-own","סיפור משלכם"],["#corporate","מתנות לחברות"],["#redeem","מימוש מתנה"],["#account","החשבון שלי"],["#faq","שאלות נפוצות"],["#contact","צור קשר"]].map(([h,t])=>`<a class="nav-l" href="${h}">${t}</a>`).join("")}<a class="btn btn-primary btn-block" href="#books" style="margin-top:12px">ליצור ספר</a></nav></div>`;const L=$("#layer");L.querySelector(".scrim").onclick=close;$("#dClose").onclick=close;L.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>setTimeout(close,0)));$("#dClose").focus();const k=ev=>{if(ev.key==="Escape"){close();document.removeEventListener("keydown",k)}};document.addEventListener("keydown",k)}});
+document.addEventListener("click",e=>{const d=e.target.closest("[data-act=drawer]");if(d){const close=()=>{$("#layer").innerHTML="";d.focus()};$("#layer").innerHTML=`<div class="drawer" role="dialog" aria-modal="true" aria-label="תפריט"><div class="scrim"></div><nav class="panel"><div class="row" style="justify-content:space-between;margin-bottom:12px"><a class="logo" href="#home">לומורה</a><button class="icon-btn" id="dClose" aria-label="סגירת התפריט">✕</button></div>${[["#personal","הספרים"],["#how","איך זה עובד"],["#create-own","סיפור משלכם"],["#corporate","מתנות לחברות"],["#redeem","מימוש מתנה"],["#account","החשבון שלי"],["#faq","שאלות נפוצות"],["#contact","צור קשר"]].map(([h,t])=>`<a class="nav-l" href="${h}">${t}</a>`).join("")}<a class="btn btn-primary btn-block" href="#personal" style="margin-top:12px">ליצור ספר</a></nav></div>`;const L=$("#layer");L.querySelector(".scrim").onclick=close;$("#dClose").onclick=close;L.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>setTimeout(close,0)));$("#dClose").focus();const k=ev=>{if(ev.key==="Escape"){close();document.removeEventListener("keydown",k)}};document.addEventListener("keydown",k)}});
 window.addEventListener("scroll",()=>$("#hdr").classList.toggle("scrolled",window.scrollY>8),{passive:true});
 $("#newsForm").addEventListener("submit",async e=>{e.preventDefault();const v=$("#newsEmail").value.trim();const msg=$("#newsMsg");if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){msg.textContent="כתובת האימייל לא נראית תקינה.";return}const nb=e.target.querySelector("button");if(nb)nb.disabled=true;msg.textContent="נרשמים...";const r=await sendInbox("newsletter",{email:v});if(nb)nb.disabled=false;msg.textContent=r.ok?"נרשמת! נעדכן רק כשיש ספר חדש.":"ההרשמה לא נשלחה. נסו שוב בעוד כמה דקות.";if(r.ok)$("#newsEmail").value=""});
 (()=>{const th=store.get("theme","");if(th)document.documentElement.dataset.theme=th})();
@@ -1750,11 +1748,14 @@ routes.personal={title:()=>"ספרים מאוירים מהתמונה",
   if(q.p)return pbProjectView(root,q.p);
   if(q.book&&pbBy(q.book))return pbFormView(root,pbBy(q.book));
   return pbHomeView(root)}};
-function pbCoverArt(b,name){const [a,c]=PB_PAL[b.id]||["#4B3FD1","#FFCC75"];return `<div class="pb-cover-art" style="--a:${a};--c:${c}"><span class="pb-cover-t">${esc(pbTitle(b,name))}</span></div>`}
+const PB_COVER_URL=id=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/"+id+".jpg";
+function pbCover(b,name,style){return `<div class="cover pb-cov" ${style?`style="${style}"`:""}><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="spine"></span><div class="ttl">${esc(pbTitle(b,name))}</div></div>`}
+function pbCardHTML(b){return `<a class="pb-card" href="#personal?book=${b.id}">${pbCoverArt(b)}<div class="stack" style="gap:4px"><b>${esc(pbTitle(b,"השם שלכם"))}</b><span class="small muted">${esc(b.genre)} · גילאי ${esc(b.ageRange)} · ${b.pageCount} עמודים</span><span class="small">${b.audience==="בנות"?"לגיבורה":"לגיבור"}</span></div><span class="btn btn-primary btn-sm">ליצור את הספר</span></a>`}
+function pbCoverArt(b,name){const [a,c]=PB_PAL[b.id]||["#4B3FD1","#FFCC75"];return `<div class="pb-cover-art" style="--a:${a};--c:${c}"><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="pb-cover-t">${esc(pbTitle(b,name))}</span></div>`}
 async function pbHomeView(root){const mine=await pbList().catch(()=>[]);
  root.innerHTML=`<section class="pb-hero"><span class="pill">חדש</span><h1>ספר שלם עם איורים אמיתיים של הילד שלכם</h1><p class="muted">בוחרים ספר, כותבים את השם ומעלים תמונה או בוחרים אווטאר. קודם מציירים דף דמויות קבוע ואתם מאשרים אותו, ואז נוצרים כריכה ו-12 עמודים עם אותן פנים, שיער, תלבושת וצבעים בכל העמודים.</p>
  ${AI_ON()?"":`<div class="note info">יצירת האיורים פועלת באתר המלא בלבד. כאן אפשר לראות את הספרים ואת התהליך.</div>`}</section>
- <div class="pb-grid">${PB.map(b=>`<a class="pb-card" href="#personal?book=${b.id}">${pbCoverArt(b)}<div class="stack" style="gap:4px"><b>${esc(pbTitle(b,"השם שלכם"))}</b><span class="small muted">${esc(b.genre)} · גילאי ${esc(b.ageRange)} · ${b.pageCount} עמודים</span><span class="small">${b.audience==="בנות"?"לגיבורה":"לגיבור"}</span></div><span class="btn btn-primary btn-sm">ליצור את הספר</span></a>`).join("")}</div>
+ <div class="pb-grid">${PB.map(b=>pbCardHTML(b)).join("")}</div>
  ${mine.length?`<section class="box stack pb-mine"><h2 style="font-size:22px">הספרים שיצרתם במכשיר הזה</h2><p class="small muted">התמונות והאיורים שמורים רק בדפדפן הזה, ונמחקים אוטומטית ${PB_KEEP_DAYS} ימים אחרי היצירה.</p>${mine.map(m=>{const b=pbBy(m.book);return b?`<div class="pb-mine-row"><b>${esc(pbTitle(b,m.name))}</b><span class="small muted">${m.approved?"אושר":"בתהליך"} · יימחק ב-${new Date(m.createdAt+PB_KEEP_DAYS*864e5).toLocaleDateString("he-IL")}</span><span class="row"><a class="btn btn-soft btn-sm" href="#personal?p=${m.id}">לפתוח</a><button class="btn btn-ghost btn-sm" data-del="${m.id}">מחיקת התמונות והספר</button></span></div>`:""}).join("")}</section>`:""}`;
  $$("[data-del]",root).forEach(bt=>bt.onclick=async()=>{if(!confirmInline(bt,"למחוק לצמיתות?"))return;await pbDeleteProject(bt.dataset.del);toast("התמונות והאיורים נמחקו מהמכשיר");pbHomeView(root)})}
 function confirmInline(bt,txt){if(bt.dataset.armed)return true;bt.dataset.armed="1";const o=bt.textContent;bt.textContent=txt;bt.classList.add("btn-danger");setTimeout(()=>{if(bt.isConnected){delete bt.dataset.armed;bt.textContent=o;bt.classList.remove("btn-danger")}},4000);return false}
@@ -1851,6 +1852,10 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
 function pbBindFoot(root,m){const d1=$("#pbDelPhoto",root);if(d1)d1.onclick=async()=>{if(!confirmInline(d1,"ללחוץ שוב כדי למחוק"))return;await PBDB.del("i:"+m.id+":photo");toast("התמונה נמחקה מהמכשיר. האיורים שכבר נוצרו נשארו.");pbProjectView(root,m.id)};
  const d2=$("#pbDelAll",root);if(d2)d2.onclick=async()=>{if(!confirmInline(d2,"ללחוץ שוב כדי למחוק הכול"))return;await pbDeleteProject(m.id);toast("התמונה, האיורים והספר נמחקו מהמכשיר");location.hash="#personal"}}
 
+routes.books={...routes.personal,title:()=>"כל הספרים",mount(el){return routes.personal.mount(el,{})}};
+{const go=(q,slug)=>{const id=slug&&pbBy(slug)?slug:null;setTimeout(()=>location.replace(id?"#personal?book="+id:"#personal"),0);return `<div class="wrap" style="padding:48px 0">מעבירים לספרים...</div>`};
+ routes.book={title:()=>"הספרים",html:go,mount(){}};
+ const oldCreate=routes.create;routes.create={...oldCreate,html(q){if(q&&q.resume)return oldCreate.html(q);return go(q,q&&q.book)},mount(m,q){if(q&&q.resume)return oldCreate.mount(m,q)}};}
 route();
 </script>
 
