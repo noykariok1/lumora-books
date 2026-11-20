@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
     // generic book render: image 1 = child photo/avatar, optional image 2 = approved character reference sheet
     const sheet = String(body.sheet || "");
     if (sheet.length > MAX_B64) return json({ error: "Sheet too large" }, 400, h);
-    const prompt = String(body.prompt || "").slice(0, 3000);
+    const prompt = String(body.prompt || "").slice(0, 4000);
     if (!prompt) return json({ error: "Missing prompt" }, 400, h);
     aspect = ["4:5", "16:9", "3:2", "1:1"].includes(String(body.aspect)) ? String(body.aspect) : "4:5";
     // optional extra photos of the same child (other angles / smile) for a stronger identity lock
