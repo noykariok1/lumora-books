@@ -2154,8 +2154,8 @@ async function pbRenderHero(m,n,fix){const b=pbBy(m.book);const photo=await pbIm
 async function pbRender(m){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  const hero=await pbImg(m.id,"hero");
  return aiCall({mode:"render",photo:b64(photo),...(hero?{sheet:b64(hero),sheetMime:pbMime(hero)}:{}),prompt:(hero?"תמונה 2 היא הדמות המאוירת של "+pbHero(b)+" שההורה אישר. לצייר את "+pbHero(b)+" בדף בדיוק כמו בתמונה 2, ולהוסיף לידו/ה את שאר הדמויות. | ":"")+pbSheetPrompt(b),aspect:"16:9",gender:pbG(b),...pbArt(b,"sheet")})}
-const PB_V2=new Set(["fairy_garden","soccer_hero","little_firefighter","space_captain"]);const PB_V2Q="?v=20261120c"; // cinematic 3D art (approved 2026-11-20)
-const PB_BASE_URL=(book,slot)=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+(PB_V2.has(book)?"v2/":"")+book+"/"+slot+".jpg"+(PB_V2.has(book)?PB_V2Q:"");
+const PB_V2=new Set(["fairy_garden","soccer_hero","little_firefighter","space_captain"]);const PB_V2Q="?v=20261120d";const PB_V2FILE={"space_captain/cover":"cover-b"}; // replaced art (storage is insert-only) // cinematic 3D art (approved 2026-11-20)
+const PB_BASE_URL=(book,slot)=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+(PB_V2.has(book)?"v2/":"")+book+"/"+(PB_V2.has(book)&&PB_V2FILE[book+"/"+slot]||slot)+".jpg"+(PB_V2.has(book)?PB_V2Q:"");
 const pbArt=(b,slot)=>b&&PB_V2.has(b.id)?{style:"cinema3d",book:b.id,slot}:{};
 const PB_BASE_CACHE={};
 function pbBaseData(book,slot){const k=book+"/"+slot;return PB_BASE_CACHE[k]=PB_BASE_CACHE[k]||fetch(PB_BASE_URL(book,slot)).then(r=>{if(!r.ok)throw new Error("no base");return r.blob()}).then(bl=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(bl)})).catch(e=>{delete PB_BASE_CACHE[k];throw e})}
@@ -2217,7 +2217,7 @@ routes.personal={title:()=>"ספרים מאוירים מהתמונה",
   if(q.book&&q.char&&pbBy(q.book))return pbFromChar(root,pbBy(q.book),q.char);
   if(q.book&&pbBy(q.book))return pbFormView(root,pbBy(q.book));
   return pbHomeView(root)}};
-const PB_COVER_URL=id=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+(typeof PB_V2!=="undefined"&&PB_V2.has(id)?"v2/":"")+id+"/cover.jpg"+(typeof PB_V2!=="undefined"&&PB_V2.has(id)?"?v=20261120c":""); // the same pre-made cover the child is placed into
+const PB_COVER_URL=id=>PB_BASE_URL(id,"cover"); // the same pre-made cover the child is placed into
 let PB_LT_N=0;
 function pbLetter(b,name,o){if(!window.AgadiCover)return "";const k="a"+(++PB_LT_N);try{return `<div class="pb-letter">${AgadiCover.svg({template:b.titleTemplate,name:name||pbDefName(b),theme:b.id,...(o||{})}).replace(/ag-(hero|gloss|scrim-t|scrim-b|soft|ph)\b/g,k+"-$1")}</div>`}catch(e){return ""}}
 function pbCover(b,name,style){return `<div class="cover pb-cov" ${style?`style="${style}"`:""}><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="spine"></span>${pbLetter(b,name)||`<div class="ttl">${esc(pbTitle(b,name))}</div>`}</div>`}
