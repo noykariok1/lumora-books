@@ -738,6 +738,7 @@ footer.site{background:var(--canvas)}
 @media (max-width:600px){.peek-tabs{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding:2px 16px 6px;scrollbar-width:none}.peek-tabs .chip{flex:none;padding:8px 14px;font-size:14px}
 .hs-char{right:auto;left:-1%;bottom:2%;width:29%}.hs-photo{width:31%}}
 @media (max-width:600px){.pb-grid{grid-template-columns:1fr 1fr;gap:12px}.pb-card .btn-sm{padding-inline:10px;font-size:13px}}
+.home-books{padding-top:56px}
 </style>
 
 <div id="app">
@@ -1101,15 +1102,15 @@ routes.home={html(){
   <svg class="hero-wave" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0 70V38C220 6 470 0 720 26S1220 66 1440 30V70z"/></svg>
  </section>
  <section class="wrap trust-wrap"><div class="trust">${trustStrip()}</div></section>
+ <section class="section home-books" id="books-sec"><div class="wrap">
+  <div class="sec-head"><div class="stack"><h2>בחרו ספר לילד שלכם</h2><p class="muted">כל הספרים שלנו. בכל ספר הכריכה ו־12 העמודים מצוירים עם הילד שלכם, והשם שלו בסיפור.</p></div></div>
+  <div class="pb-grid">${PB.map(b=>pbCardHTML(b)).join("")}</div>
+ </div></section>
  ${peekHTML()}
  <section class="section" id="how-sec"><div class="wrap">
   <div class="sec-head center"><div class="stack"><h2>שלושה צעדים, כמה דקות</h2><p class="muted">ואת התשלום משאירים לסוף, רק אם אוהבים את מה שרואים.</p></div></div>
   ${howSteps()}
   <div class="sec-cta"><a class="btn btn-primary btn-lg" href="#personal">צרו תצוגה מקדימה חינם</a><span class="small muted">בלי חשבון ובלי כרטיס אשראי</span></div>
- </div></section>
- <section class="section tint"><div class="wrap">
-  <div class="sec-head"><div class="stack"><h2>הספרים שלנו</h2><p class="muted">כריכות לדוגמה. בספר שלכם הכריכה ו-12 העמודים מצוירים עם הילד שלכם והשם שלו.</p></div></div>
-  <div class="pb-grid">${PB.map(b=>pbCardHTML(b)).join("")}</div>
  </div></section>
  <section class="section"><div class="wrap cmp-wrap">
   <div class="stack">
