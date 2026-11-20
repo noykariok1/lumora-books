@@ -699,6 +699,40 @@ footer.site{background:var(--canvas)}
 .pb-thumbs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;justify-content:flex-start}.pb-th{flex:none;width:56px;aspect-ratio:4/5;border-radius:8px;border:2px solid var(--line);padding:0;background:var(--canvas);cursor:pointer;overflow:hidden;display:grid;place-items:center;font-size:13px;color:var(--muted)}.pb-th img{width:100%;height:100%;object-fit:cover}.pb-th.on{border-color:var(--primary)}
 .pb-privacy{border-top:1px solid var(--line);padding-top:14px}
 .cover .pb-thumb{width:100%;height:100%;object-fit:cover;display:block}
+
+.peek-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 18px}
+.peek-tabs .chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer}
+.peek-tabs .chip[aria-selected=true]{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.peek{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 18px;scrollbar-width:thin}
+.spread{flex:none;width:min(760px,88vw);margin:0;display:grid;grid-template-columns:1fr 1fr;border-radius:14px;overflow:hidden;box-shadow:var(--shadow-lg);scroll-snap-align:start;background:#FFFBF3;position:relative}
+.spread::after{content:"";position:absolute;inset:0 50% 0 auto;width:28px;transform:translateX(50%);background:linear-gradient(90deg,transparent,rgba(0,0,0,.10),transparent);pointer-events:none}
+.sp-t{display:flex;flex-direction:column;justify-content:center;padding:9% 10%;color:#2A2540;position:relative}
+.sp-t p{margin:0;font-family:var(--f-display);font-size:clamp(14px,1.6vw,20px);line-height:1.75}
+.sp-t span{position:absolute;bottom:14px;inset-inline:0;text-align:center;font-size:12px;color:#8a8399}
+.sp-a{aspect-ratio:4/5;background:#eee}.sp-a img{width:100%;height:100%;object-fit:cover;display:block}
+.peek-foot{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:6px}
+.cmp-wrap{display:grid;grid-template-columns:1.25fr .9fr;gap:48px;align-items:center}
+.cmp{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:8px}
+.cmp th,.cmp td{padding:14px 16px;text-align:start;border-bottom:1px solid var(--line);font-size:15px}
+.cmp tr:last-child td{border-bottom:0}
+.cmp th{font-size:13px;color:var(--muted);font-weight:600;background:var(--canvas)}
+.cmp th:nth-child(n+2),.cmp td:nth-child(n+2){text-align:center;width:22%}
+.cmp th:last-child{color:var(--primary)}
+.cmp td:last-child{background:color-mix(in srgb,var(--primary) 7%,transparent)}
+.cmp .yes{color:var(--ok);font-weight:800;font-size:18px}.cmp .no{color:var(--muted);opacity:.6}
+.promise{background:var(--night);color:var(--night-ink);border-radius:var(--r-card);padding:30px 28px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow-lg)}
+.promise .eyebrow{color:var(--cta)}.promise h3{margin:0;font-size:24px;color:#fff}
+.promise ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.promise li{display:flex;gap:10px;align-items:flex-start;color:var(--night-muted);line-height:1.55}.promise li b{color:#fff}
+.promise li svg{flex:none;width:20px;height:20px;color:var(--cta);margin-top:3px}
+.how .step .art-img img{width:100%;height:100%;object-fit:cover;display:block}
+.pb-price{color:var(--primary);font-weight:600}
+.hs-photo img,.hs-char img{width:100%;height:100%;object-fit:cover;display:block}
+.hs-photo .photoish{aspect-ratio:4/5}
+.pb-cover-art:has(img){box-shadow:inset 0 -140px 90px -40px rgba(10,8,30,.82)}
+.pb-cover-t{text-shadow:0 2px 12px rgba(0,0,0,.6)}
+@media (max-width:900px){.cmp-wrap{grid-template-columns:1fr;gap:28px}.cmp th,.cmp td{padding:12px 10px;font-size:14px}}
+@media (max-width:600px){.spread{grid-template-columns:1fr;width:78vw}.spread::after{display:none}.sp-t{order:2;padding:18px 20px 34px}.peek-foot .btn{width:100%}}
 </style>
 
 <div id="app">
@@ -1049,20 +1083,20 @@ routes.home={html(){
     <h1>הילד שלכם הוא<br>הגיבור של הסיפור</h1>
     <p class="lead">מעלים תמונה אחת, ומקבלים ספר מאויר שבו הילד או הילדה שלכם מופיעים בכל עמוד, עם השם שלהם. את התצוגה המקדימה רואים בחינם, לפני שמשלמים.</p>
     <div class="row hero-ctas"><a class="btn btn-primary btn-lg" href="#personal">צרו תצוגה מקדימה חינם</a><a class="btn btn-night" href="#how">איך זה עובד</a></div>
-    <ul class="hero-checks"><li>${ICON.check}בלי כרטיס אשראי</li><li>${ICON.check}מוכן תוך כמה דקות</li><li>${ICON.check}ספר מ־${fmtPrice(FORMATS.digital.price)}</li></ul>
+    <ul class="hero-checks"><li>${ICON.check}משלמים רק אחרי שרואים את כל הספר</li><li>${ICON.check}בלי כרטיס אשראי</li><li>${ICON.check}ספר מ־${fmtPrice(FORMATS.digital.price)}</li></ul>
     ${PROOF.demo?"":`<div class="hero-proof">${avatarStack()}<div class="stack" style="gap:0"><span class="row" style="gap:6px">${starsRow()}<b>${PROOF.rating} מתוך 5</b></span><span>${PROOF.families.toLocaleString("he-IL")} משפחות כבר יצרו ספר</span></div></div>`}
    </div>
    <div class="hero-stage" aria-hidden="true">
     <div class="lamp"></div>
     <div class="hs-book"><div class="book3d">${pbCover(PB[2],"נועה")}</div></div>
-    <figure class="hs-photo"><div class="photoish">${portraitSVG({...dc,hair:2},"#E3D3C1")}</div><figcaption>התמונה שלכם</figcaption></figure>
-    <svg class="hs-arrow" viewBox="0 0 90 120" fill="none"><path d="M70 6 C 92 44, 70 86, 22 104" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 9"/><path d="M34 94 L20 105 L37 112" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <figure class="hs-char"><div class="ring">${portraitSVG({...dc,hair:2},"#ECE8FF")}</div><figcaption>הדמות של נועה</figcaption></figure>
+    <figure class="hs-photo"><div class="photoish"><img src="${PB_BASE_URL(PB[2].id,"p2")}" alt="" onerror="this.closest('figure').remove()"></div><figcaption>עמוד מתוך הספר</figcaption></figure>
+    <figure class="hs-char"><div class="ring"><img src="${PB_BASE_URL(PB[2].id,"hero")}" alt="" onerror="this.closest('figure').remove()"></div><figcaption>אותה דמות בכל עמוד</figcaption></figure>
    </div>
   </div>
   <svg class="hero-wave" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0 70V38C220 6 470 0 720 26S1220 66 1440 30V70z"/></svg>
  </section>
  <section class="wrap trust-wrap"><div class="trust">${trustStrip()}</div></section>
+ ${peekHTML()}
  <section class="section" id="how-sec"><div class="wrap">
   <div class="sec-head center"><div class="stack"><h2>שלושה צעדים, כמה דקות</h2><p class="muted">ואת התשלום משאירים לסוף, רק אם אוהבים את מה שרואים.</p></div></div>
   ${howSteps()}
@@ -1072,20 +1106,27 @@ routes.home={html(){
   <div class="sec-head"><div class="stack"><h2>הספרים שלנו</h2><p class="muted">כריכות לדוגמה. בספר שלכם הכריכה ו-12 העמודים מצוירים עם הילד שלכם והשם שלו.</p></div></div>
   <div class="pb-grid">${PB.map(b=>pbCardHTML(b)).join("")}</div>
  </div></section>
- <section class="section"><div class="wrap ba-wrap">
+ <section class="section"><div class="wrap cmp-wrap">
   <div class="stack">
-   <h2>מכירים את הפנים האלה?</h2>
-   <p class="lead">מעלים תמונה אחת ברורה, ואנחנו בונים ממנה דמות מאוירת שמופיעה בכל עמוד בספר. אפשר לנסות כאן עם תמונה שלכם: היא מעובדת רק בדפדפן שלכם ולא נשלחת לשום מקום.</p>
-   <div class="row"><label class="btn btn-ghost" for="baFile">${ICON.upload.replace("<svg",'<svg width="20" height="20"')}לנסות עם תמונה</label><input id="baFile" type="file" accept="image/jpeg,image/png,image/webp" class="sr"><a class="btn btn-primary" href="#personal">לבחור ספר</a></div>
-   <p class="small muted">${ICON.shield.replace("<svg",'<svg width="18" height="18" style="vertical-align:-4px;margin-inline-end:6px;color:var(--ok)"')}התמונה משמשת רק ליצירת הדמות, ואפשר למחוק אותה בכל רגע.</p>
-   <span class="pill demo" style="align-self:flex-start">הדמות מצוירת בסגנון הספרים לפי מה שזוהה בתמונה</span>
+   <h2>למה ספר שהילד הוא הגיבור שלו?</h2>
+   <p class="lead">ילדים מתאהבים בספר שבו הם רואים את עצמם. זה גם הסיבה שספר כזה הופך למתנה שחוזרים אליה שוב ושוב.</p>
+   <table class="cmp"><thead><tr><th></th><th>ספר רגיל מהמדף</th><th>ספר של לומורה</th></tr></thead><tbody>
+    <tr><td>הילד שלכם מצויר כגיבור, עם הפנים, השיער וצבע העור שלו</td><td class="no">✕</td><td class="yes">✓</td></tr>
+    <tr><td>השם שלו בכותרת ובכל עמוד</td><td class="no">✕</td><td class="yes">✓</td></tr>
+    <tr><td>מתנה שאין לאף ילד אחר</td><td class="no">✕</td><td class="yes">✓</td></tr>
+    <tr><td>רואים את כל העמודים לפני שקונים</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+   </tbody></table>
   </div>
-  <div class="ba" id="ba" style="--cut:50%">
-   <div class="layer before photoish" id="baBefore">${portraitSVG({...dc,style:"long"},"#E3D3C1")}</div>
-   <div class="layer after" id="baAfter">${portraitSVG(dc,"#E7E0FF")}</div>
-   <div class="handle"><i>⇆</i></div>
-   <span class="lbl r">תמונה</span><span class="lbl l">דמות</span>
-   <input type="range" min="0" max="100" value="50" aria-label="הזזת קו ההשוואה" id="baRange">
+  <div class="promise">
+   <span class="eyebrow">ההבטחה שלנו</span>
+   <h3>קודם רואים, אחר כך מחליטים</h3>
+   <ul>
+    <li>${ICON.check}<span><b>כל 12 העמודים מאוירים לפני תשלום.</b> לא רק כריכה, כל הספר עם הילד שלכם.</span></li>
+    <li>${ICON.check}<span><b>מאשרים את הדמות לפני שממשיכים.</b> לא דומה? מציירים שוב.</span></li>
+    <li>${ICON.check}<span><b>מודפס רק אחרי ההזמנה שלכם,</b> בכריכה קשה ובנייר עבה.</span></li>
+    <li>${ICON.check}<span><b>התמונה שלכם בשליטה שלכם.</b> אפשר למחוק אותה בכל רגע.</span></li>
+   </ul>
+   <a class="btn btn-primary btn-block" href="#personal">צרו תצוגה מקדימה חינם</a>
   </div>
  </div></section>
  ${PROOF.demo?"":`<section class="section tint"><div class="wrap">
@@ -1126,17 +1167,29 @@ routes.home={html(){
  <div class="sticky-cta" id="homeSticky"><a class="btn btn-primary btn-block" href="#personal">צרו תצוגה מקדימה חינם</a></div>`},
  mount(m){
   homeSticky(m);
-  const r=$("#baRange",m),ba=$("#ba",m);r.addEventListener("input",()=>ba.style.setProperty("--cut",(100-r.value)+"%"));
-  $("#baFile",m).addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;if(!/image\/(jpeg|png|webp)/.test(f.type)){toast("אפשר להעלות JPG, PNG או WEBP");return}
+  peekMount(m);
+  const r=$("#baRange",m),ba=$("#ba",m);if(r)r.addEventListener("input",()=>ba.style.setProperty("--cut",(100-r.value)+"%"));
+  $("#baFile",m)&&$("#baFile",m).addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;if(!/image\/(jpeg|png|webp)/.test(f.type)){toast("אפשר להעלות JPG, PNG או WEBP");return}
    const img=await loadImg(URL.createObjectURL(f));const cv=document.createElement("canvas");cv.width=cv.height=480;const s=Math.min(img.width,img.height);cv.getContext("2d").drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,480,480);
    $("#baBefore",m).innerHTML="";$("#baBefore",m).appendChild(cv);const e2=analyzePhotoExact(cv);let ch={...defaultChar("f"),...e2};$("#baAfter",m).innerHTML=portraitSVG(ch,"#E7E0FF");toast("זיהינו את הצבעים מהתמונה");
    try{const blob=await new Promise(r=>cv.toBlob(r,"image/jpeg",.9));const v=await visionTraits(blob,"f");if(v){delete v.notes;ch={...ch,...v};$("#baAfter",m).innerHTML=portraitSVG(ch,"#E7E0FF");toast("Claude זיהה תסרוקת, עיניים ותווי פנים")}}catch(err){}});
  }};
 function howSteps(){const dc=defaultChar("f");return `<div class="how">
-  <div class="step"><div class="art">${sceneSVG("castle",dc,"","בוחרים סיפור")}</div><div class="tx"><span class="num">1</span><h3>בוחרים סיפור</h3><p class="muted">ספרים לפני השינה, ליום הולדת, לגן החדש ועוד.</p></div></div>
-  <div class="step"><div class="art" style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:8px;padding:16px"><div class="photoish">${portraitSVG({...dc,hair:2},"#E3D3C1")}</div><div style="border-radius:14px;overflow:hidden">${portraitSVG({...dc,hair:2},"#E7E0FF")}</div></div><div class="tx"><span class="num">2</span><h3>הופכים את זה לאישי</h3><p class="muted">שם, גיל ותמונה אחת. אנחנו בונים דמות ואתם מאשרים.</p></div></div>
-  <div class="step"><div class="art" style="padding:16px;display:grid;place-items:center"><div class="spread-mini" style="width:100%"><div class="txtpage">נועה עצמה את העיניים וביקשה משאלה.</div><div>${sceneSVG("birthday",dc)}</div></div></div><div class="tx"><span class="num">3</span><h3>רואים ונהנים</h3><p class="muted">מדפדפים בתצוגה המקדימה, ומזמינים ספר מודפס או דיגיטלי.</p></div></div>
+  <div class="step"><div class="art art-img"><img src="${PB_COVER_URL(PB[0].id)}" alt="" loading="lazy"></div><div class="tx"><span class="num">1</span><h3>בוחרים סיפור</h3><p class="muted">ספרים לפני השינה, ליום הולדת, לגן החדש ועוד.</p></div></div>
+  <div class="step"><div class="art art-img"><img src="${PB_BASE_URL(PB[0].id,"hero")}" alt="" loading="lazy" style="object-position:50% 20%"></div><div class="tx"><span class="num">2</span><h3>הופכים את זה לאישי</h3><p class="muted">שם, גיל ותמונה אחת. אנחנו בונים דמות ואתם מאשרים.</p></div></div>
+  <div class="step"><div class="art" style="padding:16px;display:grid;place-items:center"><div class="spread-mini" style="width:100%"><div class="txtpage">${esc(pbFill(PB[0].pages[3].textTemplate,"איתי"))}</div><div><img src="${PB_BASE_URL(PB[0].id,"p4")}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div></div></div><div class="tx"><span class="num">3</span><h3>רואים ונהנים</h3><p class="muted">מדפדפים בכל הספר המאויר, ומזמינים רק אם אוהבים.</p></div></div>
  </div>`}
+/* ================= PEEK INSIDE ================= */
+const PEEK_SLOTS=["p1","p2","p4","p9","p11","p12"];
+const pbDefName=b=>pbG(b)==="f"?"נועה":"איתי";
+function peekSpreads(b){const n=pbDefName(b);return PEEK_SLOTS.map(sl=>{const pg=b.pages[+sl.slice(1)-1];return `<figure class="spread"><div class="sp-t"><p>${esc(pbFill(pg.textTemplate,n))}</p><span>${pg.pageNumber}</span></div><div class="sp-a"><img src="${PB_BASE_URL(b.id,sl)}" alt="" loading="lazy" onerror="this.closest('figure').remove()"></div></figure>`}).join("")}
+function peekHTML(){return `<section class="section peek-sec"><div class="wrap">
+  <div class="sec-head"><div class="stack"><span class="eyebrow">הצצה לתוך הספר</span><h2>ספר אמיתי, עם סיפור שלם ואיורים בכל עמוד</h2><p class="muted">כך נראים העמודים. בספר שלכם הגיבור מצויר לפי התמונה של הילד שלכם, והשם שלו מופיע בסיפור.</p></div></div>
+  <div class="peek-tabs" role="tablist">${PB.map((b,i)=>`<button role="tab" class="chip" data-peek="${b.id}" aria-selected="${i===0}">${esc(pbTitle(b,pbDefName(b)))}</button>`).join("")}</div>
+  <div class="peek" id="peek" tabindex="0" aria-label="עמודים מתוך הספר">${peekSpreads(PB[0])}</div>
+  <div class="peek-foot"><span class="small muted">גוללים הצידה לעוד עמודים. הדמות בעמודים לדוגמה.</span><a class="btn btn-primary" id="peekGo" href="#personal?book=${PB[0].id}">ליצור את הספר הזה עם הילד שלי</a></div>
+ </div></section>`}
+function peekMount(m){const pk=$("#peek",m);if(!pk)return;$$("[data-peek]",m).forEach(t=>t.addEventListener("click",()=>{const b=pbBy(t.dataset.peek);$$("[data-peek]",m).forEach(x=>x.setAttribute("aria-selected",x===t));pk.innerHTML=peekSpreads(b);pk.scrollLeft=0;$("#peekGo",m).href="#personal?book="+b.id}))}
 /* ================= FAQ ================= */
 const FAQ=[
  ["כמה זמן לוקח ליצור ספר?","כמה דקות. ממלאים שם ופרטים, מעלים תמונה, מאשרים את הדמות ורואים את התצוגה המקדימה מיד."],
@@ -1803,7 +1856,7 @@ routes.personal={title:()=>"ספרים מאוירים מהתמונה",
   return pbHomeView(root)}};
 const PB_COVER_URL=id=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+id+"/cover.jpg"; // the same pre-made cover the child is placed into
 function pbCover(b,name,style){return `<div class="cover pb-cov" ${style?`style="${style}"`:""}><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="spine"></span><div class="ttl">${esc(pbTitle(b,name))}</div></div>`}
-function pbCardHTML(b){return `<a class="pb-card" href="#personal?book=${b.id}">${pbCoverArt(b)}<div class="stack" style="gap:4px"><b>${esc(pbTitle(b,"השם שלכם"))}</b><span class="small muted">${esc(b.genre)} · גילאי ${esc(b.ageRange)} · ${b.pageCount} עמודים</span><span class="small">${b.audience==="בנות"?"לגיבורה":"לגיבור"}</span></div><span class="btn btn-primary btn-sm">ליצור את הספר</span></a>`}
+function pbCardHTML(b){return `<a class="pb-card" href="#personal?book=${b.id}">${pbCoverArt(b)}<div class="stack" style="gap:4px"><b>${esc(pbTitle(b,"השם שלכם"))}</b><span class="small muted">${esc(b.genre)} · גילאי ${esc(b.ageRange)} · ${b.pageCount} עמודים</span><span class="small pb-price">ספר מ־${fmtPrice(FORMATS.digital.price)} · מודפס מ־${fmtPrice(FORMATS.hard.price)}</span></div><span class="btn btn-primary btn-sm">תצוגה מקדימה חינם</span></a>`}
 function pbCoverArt(b,name){const [a,c]=PB_PAL[b.id]||["#4B3FD1","#FFCC75"];return `<div class="pb-cover-art" style="--a:${a};--c:${c}"><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="pb-cover-t">${esc(pbTitle(b,name))}</span></div>`}
 async function pbHomeView(root){const mine=await pbList().catch(()=>[]);
  root.innerHTML=`<section class="pb-hero"><span class="pill">חדש</span><h1>ספר שלם עם איורים אמיתיים של הילד שלכם</h1><p class="muted">בוחרים ספר, כותבים את השם ומעלים תמונה או בוחרים אווטאר. קודם מציירים רק את הילד ואתם מאשרים, ומיד נפתח הספר המלא, כתוב ומאויר, ובכריכה ובכל 12 העמודים מופיע הילד שלכם, עם אותן פנים, שיער וצבעים.</p>
