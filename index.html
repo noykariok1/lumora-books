@@ -1914,13 +1914,17 @@ async function charSaveFromProject(pid){const sb=await sbClient();const u=await 
  const hero=await pbImg(pid,"hero");if(!hero)return null;const b=pbBy(m.book);const id=crypto.randomUUID?crypto.randomUUID():([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
  const path=u.id+"/"+id+".jpg";const up=await sb.storage.from("characters").upload(path,dataURLtoBlob(await toJpeg(hero)),{contentType:"image/jpeg",upsert:true});if(up.error)throw up.error;
  const {error}=await sb.from("characters").insert({id,name:m.name,gender:b?pbG(b):"f",traits:{...(m.traits||{}),art:m.art||""},hero_path:path,source_book:m.book});if(error){await sb.storage.from("characters").remove([path]);throw error}
- m.charId=id;await pbSaveMeta(m);return id}
-async function charDelete(c){const sb=await sbClient();await sb.storage.from("characters").remove([c.hero_path]);const {error}=await sb.from("characters").delete().eq("id",c.id);if(error)throw error}
+ m.charId=id;await pbSaveMeta(m);const face=await pbImg(pid,"face");if(face)charSaveFace(id,face).catch(e=>console.warn("face save",e));return id}
+async function charSaveFace(cid,face){const sb=await sbClient();const u=await meUser();if(!sb||!u||!face)return;
+ const up=await sb.storage.from("characters").upload(u.id+"/"+cid+"-face.jpg",dataURLtoBlob(await toJpeg(face)),{contentType:"image/jpeg",upsert:true});if(up.error)throw up.error}
+async function charLoadFace(cid){try{const sb=await sbClient();const u=await meUser();if(!sb||!u)return null;const {data,error}=await sb.storage.from("characters").download(u.id+"/"+cid+"-face.jpg");if(error||!data)return null;
+ return await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>res(null);fr.readAsDataURL(data)})}catch(e){return null}}
+async function charDelete(c){const sb=await sbClient();await sb.storage.from("characters").remove([c.hero_path,c.hero_path.replace(/\.jpg$/,"-face.jpg")]);const {error}=await sb.from("characters").delete().eq("id",c.id);if(error)throw error}
 /* start a new book from a saved character: no photo, no hero step */
 async function pbFromChar(root,b,cid){root.innerHTML=`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מכינים את הספר...</span></div>`;
  try{if(!await meUser()){location.hash="#me";return}const c=await charGet(cid);if(!c||!c.img)throw new Error("not found");
   const r=await fetch(c.img);const blob=await r.blob();const url=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(blob)});const hero=await toJpeg(url,1536);
-  const id=uid();await pbSetImg(id,"photo",hero);await pbSetImg(id,"hero",hero);
+  const id=uid();await pbSetImg(id,"photo",hero);await pbSetImg(id,"hero",hero);if((c.traits&&c.traits.art)==="v2b"){const face=await charLoadFace(c.id);if(face)await pbSetImg(id,"face",face)}
   await pbSaveMeta({id,book:b.id,name:c.name,src:"char",charId:c.id,traits:c.traits||{},avatar:null,consentAt:null,createdAt:Date.now(),heroOk:!PB_V2.has(b.id)||(c.traits&&c.traits.art)==="v2b",sheetOk:!PB_V2.has(b.id)||(c.traits&&c.traits.art)==="v2b",art:(c.traits&&c.traits.art)||"",approved:false,fmt:"hard"});
   location.hash="#personal?p="+id}
  catch(e){console.error(e);root.innerHTML=`<div class="empty" style="padding-block:64px"><h1 style="font-size:26px">לא הצלחנו לטעון את הדמות</h1><p class="muted">נסו שוב בעוד רגע, או התחברו שוב לאזור האישי.</p><a class="btn btn-primary" href="#me">לאזור האישי</a></div>`}}
@@ -2171,7 +2175,7 @@ function pbSheetPrompt(b){const others=b.characters.filter(c=>c.id!=="hero");
   b.recurringProps&&b.recurringProps.length?"אביזרים קבועים לצייר בתחתית הדף: "+b.recurringProps.join(", "):"",
   "התוצאה תשמש כבסיס לכל איורי הספר, לכן לקבוע במדויק פנים, שיער, בגדים, צבעים ופרופורציות."].filter(Boolean).join(" | ")}
 const pbSlotPrompt=(b,slot)=>slot==="cover"?pbImgText(b.coverPromptTemplate,b):pbImgText(b.pages[+slot.slice(1)-1].illustrationPromptTemplate,b);
-function pbTraitsText(t){if(!t)return "";const a=[];if(t.hairColor)a.push("hair colour: "+t.hairColor);if(t.hairType)a.push("hair texture: "+t.hairType);if(t.hairLen)a.push("hair length: "+t.hairLen);if(t.eyes)a.push("eye colour: "+t.eyes);if(t.marks&&t.marks.length)a.push("has: "+t.marks.join(", "));if(t.notes)a.push("parent's note (Hebrew): \""+t.notes+"\"");return a.join("; ")}
+function pbTraitsText(t){if(!t)return "";const a=[];if(t.hairColor)a.push("hair colour: "+t.hairColor);if(t.hairType)a.push("hair texture: "+t.hairType);if(t.hairLen)a.push("hair length: "+t.hairLen);if(t.eyes)a.push("eye colour: "+t.eyes);if(t.age)a.push("age: "+t.age+" years old (draw a "+t.age+"-year-old's head-to-body proportions)");if(t.skin)a.push("skin tone: "+t.skin);if(t.marks&&t.marks.length)a.push("has: "+t.marks.join(", "));if(t.notes)a.push("parent's note (Hebrew): \""+t.notes+"\"");return a.join("; ")}
 function pbHeroPrompt(b,n,m,fix){const tr=pbTraitsText(m&&m.traits),v2=PB_V2.has(b.id);return [
  v2?"TASK: create a completely NEW image from scratch. Image 1 is reference only for who the child is: do NOT edit, retouch, extend or restyle image 1, and nothing of image 1 (background, furniture, blurred hair, photo texture) may appear in the output.":"",
  "Draw ONE character only: the hero of this children's book, drawn from the real child in the reference photo(s). Full body, front view,"+(v2?" the child fills about 90% of the image height,":"")+" standing relaxed and smiling, face large and clearly lit, on a plain very light cream background. No other characters, no animals, no props, no scenery, no text.",
@@ -2182,9 +2186,9 @@ function pbHeroPrompt(b,n,m,fix){const tr=pbTraitsText(m&&m.traits),v2=PB_V2.has
  fix?"The parent saw an earlier attempt and asked for this correction (written in Hebrew): \""+fix+"\". Apply it while keeping everything else.":"",
  n?"Variation "+(n+1)+": a slightly different expression, same features.":"",
  v2?"Art style: the HOUSE STYLE (premium 3D animated feature film character), matching the rest of the book.":""].filter(Boolean).join("\n")}
-async function pbRenderHero(m,n,fix){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
+async function pbRenderHero(m,n,fix,prev){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  const extra=[];for(const k of ["photo2","photo3"]){const u=await pbImg(m.id,k);if(u)extra.push(b64(u))}
- return aiCall({mode:"render",photo:b64(photo),extra,prompt:pbHeroPrompt(b,n,m,fix),aspect:"4:5",gender:pbG(b),...(PB_V2.has(b.id)?{size:"2K"}:{}),...pbArt(b,"hero")})}
+ return aiCall({mode:"render",photo:b64(photo),extra,prompt:pbHeroPrompt(b,n,m,fix),aspect:"4:5",gender:pbG(b),...(PB_V2.has(b.id)?{size:"2K"}:{}),...(fix&&prev&&PB_V2.has(b.id)?{prev:b64(prev),prevMime:pbMime(prev)}:{}),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,"hero")})}
 async function pbRender(m){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  const hero=await pbImg(m.id,"hero");
  return aiCall({mode:"render",photo:b64(photo),...(hero?{sheet:b64(hero),sheetMime:pbMime(hero)}:{}),prompt:(hero?"תמונה 2 היא הדמות המאוירת של "+pbHero(b)+" שההורה אישר. לצייר את "+pbHero(b)+" בדף בדיוק כמו בתמונה 2, ולהוסיף לידו/ה את שאר הדמויות. | ":"")+pbSheetPrompt(b),aspect:"16:9",gender:pbG(b),...pbArt(b,"sheet")})}
@@ -2197,21 +2201,21 @@ const PB_QA=true; // per-page likeness check (cheap text model). A weak page is 
 async function pbExtra(m){const extra=[];for(const k of ["photo2","photo3"]){const u=await pbImg(m.id,k);if(u)extra.push(b64(u))}return extra}
 async function pbFaceSheet(m,hero){const b=pbBy(m.book);if(!PB_V2.has(b.id))return null;const have=await pbImg(m.id,"face");if(have)return have;
  try{const photo=await pbImg(m.id,"photo");if(!photo)return null;
-  const u=await aiCall({mode:"render",photo:b64(photo),extra:await pbExtra(m),sheet:b64(hero),sheetMime:pbMime(hero),aspect:"16:9",size:"2K",gender:pbG(b),...pbArt(b,"face"),
-   prompt:"TASK: create a completely NEW image from scratch; do NOT edit image 1 or image 2 and nothing of their backgrounds may appear. Draw the identity sheet of the hero exactly as approved in image 2 (same 3D character, face, glasses, hair, skin), with the face matching the real child in image 1."});
-  await pbSetImg(m.id,"face",u);return u}catch(e){console.warn("face sheet",e);return null}}
+  const u=await aiCall({mode:"render",photo:b64(photo),extra:await pbExtra(m),sheet:b64(hero),sheetMime:pbMime(hero),aspect:"16:9",size:"2K",gender:pbG(b),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,"face"),
+   prompt:"TASK: create a completely NEW image from scratch; do NOT edit image 1 or image 2 and nothing of their backgrounds may appear. Draw the identity sheet of the hero exactly as approved in image 2 (same 3D character, face, glasses, hair, skin)"+(m.src==="char"?".":", with the face matching the real child in image 1.")});
+  await pbSetImg(m.id,"face",u);if(m.charId)charSaveFace(m.charId,u).catch(e=>console.warn("face save",e));return u}catch(e){console.warn("face sheet",e);return null}}
 async function pbCheck(hero,face,page){try{const r=await fetch(AI.endpoint,{method:"POST",signal:AbortSignal.timeout(60000),headers:{"Content-Type":"application/json",apikey:AI.anonKey,Authorization:"Bearer "+AI.anonKey},
   body:JSON.stringify({mode:"check",hero:b64(hero),heroMime:pbMime(hero),...(face?{face:b64(face),faceMime:pbMime(face)}:{}),page:b64(page),pageMime:pbMime(page)})});const j=await r.json();return r.ok&&typeof j.score==="number"?j:null}catch(e){return null}}
 async function pbSwapPage(m,slot,hero){const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  let base;try{base=await pbBaseData(m.book,slot)}catch(e){return pbRenderPage(m,slot,hero)} // no pre-made page: draw it fully
  const bk=pbBy(m.book),v2=PB_V2.has(bk.id),face=v2?await pbImg(m.id,"face"):null;
- const body={mode:"swap",photo:b64(photo),hero:b64(hero),heroMime:pbMime(hero),base:b64(base),baseMime:pbMime(base),aspect:"4:5",size:"2K",gender:pbG(bk),...(v2?{extra:await pbExtra(m)}:{}),...(face?{face:b64(face),faceMime:pbMime(face)}:{}),...pbArt(bk,slot==="cover"?"cover":"page")};
+ const body={mode:"swap",photo:b64(photo),hero:b64(hero),heroMime:pbMime(hero),base:b64(base),baseMime:pbMime(base),aspect:"4:5",size:"2K",gender:pbG(bk),...(v2?{extra:await pbExtra(m)}:{}),...(face?{face:b64(face),faceMime:pbMime(face)}:{}),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(bk,slot==="cover"?"cover":"page")};
  const u=await aiCall(body);await PBDB.del("i:"+m.id+":qa_"+slot);if(!(v2&&PB_QA))return u;
  const c=await pbCheck(hero,face,u); // a failed check never blocks the book
  if(c&&(c.found===false||c.score<=5))await pbSetImg(m.id,"qa_"+slot,String(c.issues||"").slice(0,300)||"1");
  return u}
 async function pbRenderPage(m,slot,sheet){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
- return aiCall({mode:"render",photo:b64(photo),sheet:b64(sheet),sheetMime:pbMime(sheet),prompt:pbSlotPrompt(b,slot),aspect:"4:5",size:"2K",gender:pbG(b),...pbArt(b,slot==="cover"?"cover":"page")})}
+ return aiCall({mode:"render",photo:b64(photo),sheet:b64(sheet),sheetMime:pbMime(sheet),prompt:pbSlotPrompt(b,slot),aspect:"4:5",size:"2K",gender:pbG(b),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,slot==="cover"?"cover":"page")})}
 const PB_HAS_NIKUD=b=>b.pages.some(p=>p.textTemplateNikud||hasNikud(p.textTemplate));
 const pbPageText=(p,name,on=NIKUD)=>on&&p.textTemplateNikud?pbFill(p.textTemplateNikud,name):noNikud(pbFill(p.textTemplate,name));
 const PB_ERR={blocked:"מסנן הבטיחות של שירות האיור חסם את הבקשה. אפשר לנסות שוב או להחליף תמונה.",rate_limited:"יותר מדי בקשות בזמן קצר. נסו שוב בעוד כמה דקות.",no_photo:"התמונה נמחקה. כדי לצייר שוב צריך להעלות אותה מחדש.",not_configured:"שירות האיור עוד לא מוגדר.",error:"תקלה זמנית בשירות האיור. אפשר לנסות שוב."};
@@ -2329,6 +2333,8 @@ function pbFormView(root,b){const g=pbG(b);let photo=null,avatar=-1,extras=[];
      <label class="f">צבע שיער<select class="inp" data-tr="hairColor"><option value="">כמו בתמונה</option><option value="black">שחור</option><option value="dark brown">חום כהה</option><option value="light brown">חום בהיר</option><option value="blond">בלונדיני</option><option value="red / ginger">ג׳ינג׳י</option></select></label>
      <label class="f">סוג שיער<select class="inp" data-tr="hairType"><option value="">כמו בתמונה</option><option value="straight">חלק</option><option value="wavy">גלי</option><option value="curly">מתולתל</option><option value="tight coily / afro">תלתלים קטנים / אפרו</option></select></label>
      <label class="f">אורך שיער<select class="inp" data-tr="hairLen"><option value="">כמו בתמונה</option><option value="very short / buzz cut">קצוץ</option><option value="short">קצר</option><option value="shoulder length">עד הכתפיים</option><option value="long">ארוך</option></select></label>
+     <label class="f">גיל<select class="inp" data-tr="age"><option value="">כמו בתמונה</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+     <label class="f">גוון עור<select class="inp" data-tr="skin"><option value="">כמו בתמונה</option><option value="very fair">בהיר מאוד</option><option value="fair">בהיר</option><option value="light olive">זית בהיר</option><option value="olive">זית</option><option value="medium brown">חום</option><option value="dark brown">חום כהה</option></select></label>
      <label class="f">צבע עיניים<select class="inp" data-tr="eyes"><option value="">כמו בתמונה</option><option value="dark brown">חום כהה</option><option value="light brown / hazel">חום בהיר / דבש</option><option value="green">ירוק</option><option value="blue">כחול</option><option value="grey">אפור</option></select></label>
     </div>
     <div class="pb-tr-chk">${[["glasses","משקפיים"],["freckles","נמשים"],["dimples","גומות חן"],["missing front tooth","שן קדמית חסרה"],["fringe / bangs","פוני"],["ponytail or braids","קוקו או צמות"]].map(([v,l])=>`<label class="chk"><input type="checkbox" data-trc="${v}"> ${l}</label>`).join("")}</div>
@@ -2383,7 +2389,7 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
   pbBindFoot(root,m);
   const bindC=()=>$$(".pb-cand",root).forEach(bt=>bt.onclick=async()=>{if(bt.dataset.k==="0")return;const h=await pbImg(id,"hero"),a2=await pbImg(id,"heroAlt");await pbSetImg(id,"hero",a2);await pbSetImg(id,"heroAlt",h);$("#pbHeroBox",root).innerHTML=cands([a2,h]);bindC()});
   const drawH=async fix=>{const box=$("#pbHeroBox",root),msg=$("#pbMsg",root);msg.textContent="";box.innerHTML=wait;$("#pbOkHero",root).disabled=true;$("#pbFixBox",root).hidden=true;
-   const r=await Promise.allSettled([pbRenderHero(m,n,fix),pbRenderHero(m,n+1,fix)]);n+=2;const ok=r.filter(x=>x.status==="fulfilled").map(x=>x.value);
+   const cur=fix?await pbImg(id,"hero"):null;const r=await Promise.allSettled([pbRenderHero(m,n,fix,cur),pbRenderHero(m,n+1,fix,cur)]);n+=2;const ok=r.filter(x=>x.status==="fulfilled").map(x=>x.value);
    if(!root.isConnected)return;
    if(ok.length){await pbSetImg(id,"hero",ok[0]);if(ok[1])await pbSetImg(id,"heroAlt",ok[1]);else await PBDB.del("i:"+id+":heroAlt");m.heroN=n;if(fix)m.heroFix=fix;await pbSaveMeta(m);box.innerHTML=cands(ok);bindC();$("#pbOkHero",root).disabled=false}
    else{msg.textContent=pbErr(r[0].reason);const h=await pbImg(id,"hero");box.innerHTML=h?cands([h,await pbImg(id,"heroAlt")]):"";if(h)bindC();$("#pbOkHero",root).disabled=!h}
