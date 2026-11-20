@@ -195,11 +195,12 @@ Deno.serve(async (req) => {
       { inline_data: { mime_type: "image/jpeg", data: photo } },
       { inline_data: { mime_type: mt(body.heroMime), data: hero } },
       { inline_data: { mime_type: mt(body.baseMime), data: base } },
-      { text: `Image 1 is a photo (or avatar) of the real child. Image 2 is this child's approved illustrated character. Image 3 is a finished children's-book illustration.
-Redraw image 3 EXACTLY: same composition, camera, background, lighting, colours, style, other characters, props and the hero's pose, position, size and outfit.
-Change ONLY the main hero child's face, skin tone, hair and body proportions so that the hero becomes the child of image 2 (with the face of image 1).
+      { text: `Image 1 is a photo (or avatar) of the real child. Image 2 is this child's approved illustrated character. Image 3 is a finished children's-book illustration whose main hero is a PLACEHOLDER child.
+Redraw image 3 EXACTLY: same composition, camera, background, lighting, colours, rendering style, other characters, props, and the hero's pose, position and outfit.
+Replace the placeholder hero's identity with the child of image 2 (face from image 1): face, eyes, skin tone and hair. The placeholder's face must not remain anywhere; a parent must recognise their child at once.
+SIZE IS FIXED: the hero keeps EXACTLY the placeholder's height, head size, body size and body proportions in the frame, with the top of the head in the same place. The hero is a young child: never taller or bigger than in image 3, never adult-sized, the same height as the other children in the picture.
+STYLE IS FIXED: render the hero in exactly the same style, lighting, materials and detail as image 3. Use images 1 and 2 only for who the child is (identity), never for drawing style, outfit, size or proportions.
 ${RENDER_RULES}
-${body.style ? "Keep the rendering style of image 3 exactly (lighting, materials, detail); the new face must be rendered in that same style." : ""}
 ${extra}` },
     ];
   } else if (body.mode === "page") {
