@@ -729,10 +729,12 @@ footer.site{background:var(--canvas)}
 .pb-price{color:var(--primary);font-weight:600}
 .hs-photo img,.hs-char img{width:100%;height:100%;object-fit:cover;display:block}
 .hs-photo .photoish{aspect-ratio:4/5}
-.pb-cover-art:has(img){box-shadow:inset 0 -140px 90px -40px rgba(10,8,30,.82)}
-.pb-cover-t{text-shadow:0 2px 12px rgba(0,0,0,.6)}
 @media (max-width:900px){.cmp-wrap{grid-template-columns:1fr;gap:28px}.cmp th,.cmp td{padding:12px 10px;font-size:14px}}
 @media (max-width:600px){.spread{grid-template-columns:1fr;width:78vw}.spread::after{display:none}.sp-t{order:2;padding:18px 20px 34px}.peek-foot .btn{width:100%}}
+.pb-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.pb-cover-art:has(img){box-shadow:none}.pb-cover-art:has(img) .pb-cover-t{display:none}
+.pb-cov:has(>img) .ttl{inset:0 0 auto 0;padding:8% 9% 18%;background:linear-gradient(rgba(14,12,40,.78),rgba(14,12,40,.45) 60%,transparent);font-weight:700}
+.spread{width:min(680px,88vw)}
 </style>
 
 <div id="app">
