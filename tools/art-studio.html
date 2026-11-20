@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>סטודיו איורים</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Rubik:wght@700;900&display=swap">
+<style>
+:root{--bg:#F6F1E7;--card:#fff;--ink:#1B1F4B;--muted:#6b6f86;--line:#e6dfd0;--ok:#1f9d6b;--bad:#c9412f;--gold:#F3B23C}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Assistant,sans-serif}
+header{padding:20px 24px;background:#1B1F4B;color:#fff;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+header h1{margin:0;font:900 22px Rubik}header .s{opacity:.8;font-size:14px}
+main{padding:20px 24px;display:flex;flex-direction:column;gap:18px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select,button{font:inherit;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+button.p{background:var(--gold);border-color:var(--gold);font-weight:700}button:disabled{opacity:.5;cursor:default}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.it{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.it .im{position:relative;aspect-ratio:4/5;background:#efe8da;border-radius:10px;overflow:hidden;display:grid;place-items:center;color:var(--muted);font-size:13px;text-align:center}
+.it.wide .im{aspect-ratio:16/9}.it.wide{grid-column:span 2}
+.it img.art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.it .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.it .row button{padding:5px 10px;font-size:14px}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:#efe8da}.tag.ok{background:#d7f3e6;color:var(--ok)}.tag.bad{background:#fbe1dc;color:var(--bad)}
+textarea{width:100%;min-height:54px;font:13px Assistant;border:1px solid var(--line);border-radius:8px;padding:6px}
+.log{font:13px/1.4 monospace;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;max-height:160px;overflow:auto;white-space:pre-wrap;direction:ltr;text-align:left}
+.note{background:#fff8e6;border:1px solid #f3dca2;border-radius:10px;padding:10px 14px;font-size:14px}
+</style>
+</head>
+<body>
+<header><h1>סטודיו איורים · אגדיבוק</h1><span class="s">ציור מחדש של איורי הבסיס בסגנון הבית, בדיקה ואישור, והעלאה לאתר</span></header>
+<main>
+  <div class="note">כל איור עולה בערך 0.13–0.24 דולר מיתרת Gemini. הדמות בעמודי הבסיס היא ילד כללי בלבד (לא ילד של לקוח), והיא מוחלפת בילד של הלקוח בזמן ההזמנה. מה שמאושר עולה לתיקייה <b>base/v2</b> ולא נוגע באיורים שבאתר עד שמחליפים את הכתובת.</div>
+  <div class="bar">
+    <label>ספר <select id="book"></select></label>
+    <label>סגנון <select id="style"><option value="cinema3d">תלת־ממד קולנועי</option><option value="gouache">ציור גואש</option></select></label>
+    <button class="p" id="runAll">לצייר את כל מה שחסר</button>
+    <button id="upload">להעלות את כל המאושרים</button>
+    <span id="cost" class="s"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="log" id="log"></div>
+</main>
+<script src="../cover-title.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const log=(...a)=>{const l=$("#log");l.textContent+=a.join(" ")+"\n";l.scrollTop=1e9};
+let AI,PB,SUPA;
+const ST={}; // ST[book][slot] = {img, ok, prompt, busy, err}
+let spent=0;
+
+async function boot(){
+  const html=await (await fetch("../index.html",{cache:"no-store"})).text();
+  const m=html.match(/const AI=\{endpoint:"([^"]*)",anonKey:"([^"]*)"\}/);AI={endpoint:m[1],anonKey:m[2]};
+  const line=html.split("\n").find(l=>l.startsWith("const PB_DATA="));
+  PB=JSON.parse(line.slice("const PB_DATA=".length).replace(/;\s*$/,"")).books;
+  SUPA=AI.endpoint.replace("/functions/v1/generate-character","");
+  $("#book").innerHTML=PB.map(b=>`<option value="${b.id}">${b.titleTemplate.replace("{{childName}}","…")}</option>`).join("");
+  $("#book").onchange=draw;$("#runAll").onclick=runAll;$("#upload").onclick=uploadAll;
+  await AgadiCover.ready();draw();
+}
+const book=()=>PB.find(b=>b.id===$("#book").value);
+const SLOTS=b=>["hero","sheet","cover",...b.pages.map((_,i)=>"p"+(i+1))];
+const st=(id,slot)=>((ST[id]=ST[id]||{})[slot]=ST[id][slot]||{});
+const noName=(s,b)=>String(s||"").replaceAll("{{childName}}",b.audience==="בנות"?"הגיבורה":"הגיבור");
+
+function promptFor(b,slot){
+  const hero=noName(b.heroAppearanceRule,b);
+  if(slot==="hero")return `Draw ONE character only: the hero of this book, a generic friendly ${b.audience==="בנות"?"girl":"boy"} aged ${b.ageRange}, based on the reference image's face. Full body, no other characters, no props, no text.\nFixed outfit and look: ${hero}`;
+  if(slot==="sheet"){const o=b.characters.filter(c=>c.id!=="hero");
+    return `Character reference sheet. The hero exactly as in the hero reference image. ${o.length?"Other characters, each drawn exactly as described: "+o.map(c=>c.nameTemplate+": "+c.appearance).join("; ")+".":""} ${b.recurringProps?.length?"Key props along the bottom: "+b.recurringProps.join(", ")+".":""} No text, names, labels or numbers.\nHero's fixed look: ${hero}`}
+  if(slot==="cover")return `Book cover scene: ${noName(b.coverScene,b)}\nHero's fixed look: ${hero}`;
+  const p=b.pages[+slot.slice(1)-1];
+  const who=(p.charactersPresent||[]).map(id=>b.characters.find(c=>c.id===id)).filter(Boolean).map(c=>noName(c.nameTemplate,b)+": "+c.appearance).join("; ");
+  return `Page ${p.pageNumber} of ${b.pages.length}. The story text on this page (Hebrew, for mood only, never draw it): "${noName(p.textTemplate,b)}"\nScene: ${noName(p.illustrationScene,b)}\nCharacters in this picture: ${who}\nHero's fixed look: ${hero}\nOnly these characters; same designs, outfits and colours as the reference sheet.`;
+}
+
+async function asB64(src){const bl=await (await fetch(src)).blob();return await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(bl)})}
+const b64=u=>u.split(",")[1];const mime=u=>(u.match(/^data:([^;]+)/)||[])[1]||"image/jpeg";
+
+async function call(body,tries=6){
+  for(let i=0;;i++){
+    const r=await fetch(AI.endpoint,{method:"POST",headers:{"Content-Type":"application/json",apikey:AI.anonKey,Authorization:"Bearer "+AI.anonKey},body:JSON.stringify(body)});
+    const d=await r.json().catch(()=>({}));
+    if(r.ok&&d.image){spent+=body.size==="2K"?0.134:0.134;$("#cost").textContent=`הוצאה משוערת בסשן: $${spent.toFixed(2)}`;return `data:${d.mime||"image/png"};base64,${d.image}`}
+    if(d.code==="rate_limited"&&i<tries-1){log("rate limited, waiting");await new Promise(r=>setTimeout(r,6000+i*5000));continue}
+    throw new Error(d.error||("HTTP "+r.status));
+  }
+}
+
+async function refPhoto(b){
+  // the generic placeholder child used for the current base art (never a customer photo)
+  const s=st(b.id,"_ref");if(s.img)return s.img;
+  try{s.img=await asB64(`${SUPA}/storage/v1/object/public/covers/base/${b.id}/hero.jpg`)}catch{throw new Error("no reference hero image")}
+  return s.img;
+}
+
+async function gen(b,slot){
+  const s=st(b.id,slot);if(s.busy)return;s.busy=true;s.err="";s.ok=false;draw();
+  try{
+    const photo=await refPhoto(b);const style=$("#style").value;
+    const fix=s.fix?`\nCorrection requested by the art director: ${s.fix}`:"";
+    const prompt=promptFor(b,slot)+fix;
+    let ref=null;
+    if(slot==="sheet")ref=st(b.id,"hero").img;
+    else if(slot!=="hero")ref=st(b.id,"sheet").img||st(b.id,"hero").img;
+    if(slot!=="hero"&&!ref)throw new Error("צריך קודם דמות ראשית ודף דמויות");
+    const body={mode:"render",photo:b64(slot==="hero"?photo:(st(b.id,"hero").img||photo)),prompt,style,book:b.id,
+      slot:slot.startsWith("p")?"page":slot,aspect:slot==="sheet"?"16:9":"4:5",size:slot==="hero"||slot==="sheet"?"1K":"2K",gender:b.audience==="בנות"?"f":"m"};
+    if(ref){body.sheet=b64(ref);body.sheetMime=mime(ref)}
+    log(b.id,slot,"…");s.img=await call(body);s.prompt=prompt;log(b.id,slot,"done");
+  }catch(e){s.err=e.message;log(b.id,slot,"ERROR",e.message)}
+  s.busy=false;draw();
+}
+
+async function runAll(){
+  const b=book();
+  for(const slot of ["hero","sheet"]){if(!st(b.id,slot).img)await gen(b,slot);if(!st(b.id,slot).img)return}
+  const rest=SLOTS(b).slice(2).filter(sl=>!st(b.id,sl).img);
+  // 3 at a time (the image API allows ~20 requests a minute)
+  for(let i=0;i<rest.length;i+=3)await Promise.all(rest.slice(i,i+3).map(sl=>gen(b,sl)));
+}
+
+async function toJpeg(src){
+  const im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=src});
+  const c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext("2d").drawImage(im,0,0);
+  return await new Promise(r=>c.toBlob(r,"image/jpeg",.92));
+}
+async function uploadAll(){
+  const b=book();const ok=SLOTS(b).filter(sl=>st(b.id,sl).ok&&st(b.id,sl).img&&!st(b.id,sl).up);
+  if(!ok.length){log("nothing approved to upload");return}
+  for(const sl of ok){
+    const blob=await toJpeg(st(b.id,sl).img);
+    const r=await fetch(`${SUPA}/storage/v1/object/covers/base/v2/${b.id}/${sl}.jpg`,{method:"POST",headers:{apikey:AI.anonKey,Authorization:"Bearer "+AI.anonKey,"Content-Type":"image/jpeg","cache-control":"3600"},body:blob});
+    if(r.ok){st(b.id,sl).up=true;log("uploaded",b.id,sl)}else log("upload failed",b.id,sl,r.status,await r.text());
+  }
+  draw();
+}
+
+function draw(){
+  const b=book();if(!b)return;
+  $("#grid").innerHTML=SLOTS(b).map(sl=>{const s=st(b.id,sl);
+    const label=sl==="hero"?"דמות ראשית":sl==="sheet"?"דף דמויות":sl==="cover"?"כריכה":"עמוד "+sl.slice(1);
+    const art=s.img?`<img class="art" src="${s.img}" alt="">${sl==="cover"?AgadiCover.svg({template:b.titleTemplate,name:b.audience==="בנות"?"נועה":"איתי",theme:b.id}):""}`:(s.busy?"מצייר…":s.err?`<span style="color:var(--bad)">${s.err}</span>`:"עוד לא צויר");
+    return `<div class="it ${sl==="sheet"?"wide":""}" data-sl="${sl}"><div class="im">${art}</div>
+      <div class="row"><b>${label}</b>${s.up?'<span class="tag ok">הועלה</span>':s.ok?'<span class="tag ok">מאושר</span>':""}${s.busy?'<span class="tag">מצייר</span>':""}</div>
+      <textarea placeholder="מה לתקן בציור הבא (לא חובה)" data-fix>${s.fix||""}</textarea>
+      <div class="row"><button data-gen ${s.busy?"disabled":""}>${s.img?"לצייר שוב":"לצייר"}</button>${s.img?`<button data-ok>${s.ok?"לבטל אישור":"לאשר"}</button><a href="${s.img}" download="${b.id}-${sl}.png">הורדה</a>`:""}</div></div>`}).join("");
+  document.querySelectorAll(".it").forEach(el=>{const sl=el.dataset.sl,s=st(b.id,sl);
+    el.querySelector("[data-fix]").oninput=e=>s.fix=e.target.value;
+    el.querySelector("[data-gen]").onclick=()=>gen(b,sl);
+    const ok=el.querySelector("[data-ok]");if(ok)ok.onclick=()=>{s.ok=!s.ok;draw()}});
+}
+boot().catch(e=>log("boot failed",e.message));
+</script>
+</body>
+</html>
