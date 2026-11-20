@@ -86,11 +86,11 @@
       base = Math.min(base, maxW / (w || 1) / k);
     }
     const heights = () => L.reduce((a, l) => a + (l.hero ? 1.5 : 1) * base * 1.18, 0);
-    while (heights() > H * 0.40 && base > 40) base -= 2;
+    while (heights() > H * 0.31 && base > 40) base -= 2;
     base = Math.max(40, Math.floor(base));
 
     const bottom = opts.position === "bottom";
-    let y = bottom ? H - 70 - heights() : 70;
+    let y = bottom ? H - 70 - heights() : 46;
     const rows = [];
     const rots = [-3, 2, -1.5, 2.5];
     L.forEach((l, i) => {
@@ -101,7 +101,7 @@
     });
 
     // twinkles around the title block (echo the star in the Agadibook logo)
-    const top = bottom ? H - 70 - heights() : 70;
+    const top = bottom ? H - 70 - heights() : 46;
     const tw = [
       sparkle(W * 0.1, top + 40, 26, th.star), sparkle(W * 0.9, top + heights() * 0.55, 20, th.star),
       sparkle(W * 0.16, top + heights() * 0.85, 12, "#fff", 0.9), sparkle(W * 0.84, top + 20, 11, "#fff", 0.9),
