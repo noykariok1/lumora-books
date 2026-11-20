@@ -84,7 +84,7 @@ const ART: Record<string, string> = {
 Stylized, appealing characters (not photoreal, not plastic): soft subsurface-scattering skin with natural rosy cheeks, large expressive eyes that keep the child's real eye shape and colour,
 hair modelled as soft groomed strands with gentle specular highlights, fabrics with visible weave and stitching, believable materials (wood grain, grass blades, metal, glass).
 Cinematic lighting: warm key light, soft bounce fill, a clear rim light that separates the hero from the background, light rays and gentle atmospheric depth, shallow depth of field so the background is softly out of focus.
-A rich, lived-in, detailed world with storytelling props and a foreground framing element for depth. Harmonious saturated colours, never neon, clean natural skin tones.
+A rich, lived-in, detailed world with storytelling props and depth through layered planes; vary the framing from page to page and never repeat the same frame of plants or objects around the edges. Harmonious saturated colours, never neon, clean natural skin tones.
 Faces read clearly with one strong emotion. Correct anatomy: five fingers per hand, no extra limbs, both eyes looking the same way. Crisp, clean, high detail, no artefacts, no blur on the hero's face.`,
   gouache: `HOUSE STYLE (overrides any style words in the scene text): a premium hand-painted picture-book illustration in gouache and coloured pencil, visible paper grain and brush texture,
 rich layered detail in the background, soft directional light with warm highlights and cool shadows, rounded friendly shapes, slightly larger head and eyes than real proportions but clearly the same child.
@@ -104,7 +104,7 @@ const COMPOSE: Record<string, string> = {
 The hero stands or moves in the LOWER 62% of the frame, three-quarter view toward the viewer, face lit and the brightest point of the image, a confident joyful expression.
 The TOP 35% of the frame is calm, simple background only (sky, space, soft foliage or light) with no faces, no characters and no important detail: a title will be printed there.
 Keep the bottom 6% free of important detail. Depth in three layers: a foreground element, the hero, then the world behind.`,
-  page: `COMPOSITION (picture-book page, portrait 4:5): choose the camera the moment needs (wide establishing shot, medium shot or close-up), eye level with the child.
+  page: `COMPOSITION (picture-book page, portrait 4:5): choose the camera the moment needs (wide establishing shot, high or low angle, side tracking shot, medium two-shot or close-up) and show the ACTION of the scene, not a standing pose; the hero must be doing what the scene says.
 The hero's face is always visible, lit and in focus, never hidden, cropped or turned away. Clear staging: the action of the scene reads in one second.
 Keep one calm, uncluttered area of the image. Keep every page of the book in the same style, outfit, palette and character design.`,
   hero: `COMPOSITION: character model of the hero alone, full body, front three-quarter view, relaxed happy pose, on a plain soft light-cream seamless background with a soft floor shadow.`,
