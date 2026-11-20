@@ -107,14 +107,17 @@ Keep the bottom 6% free of important detail. Depth in three layers: a foreground
   page: `COMPOSITION (picture-book page, portrait 4:5): choose the camera the moment needs (wide establishing shot, high or low angle, side tracking shot, medium two-shot or close-up) and show the ACTION of the scene, not a standing pose; the hero must be doing what the scene says.
 The hero's face is always visible, lit and in focus, never hidden, cropped or turned away. Clear staging: the action of the scene reads in one second.
 Keep one calm, uncluttered area of the image. Keep every page of the book in the same style, outfit, palette and character design.`,
-  hero: `COMPOSITION: character model of the hero alone, full body, front three-quarter view, relaxed happy pose, on a plain soft light-cream seamless background with a soft floor shadow.`,
+  hero: `COMPOSITION: character model of the hero alone, full body, front three-quarter view, relaxed happy pose, on a plain soft light-cream seamless studio background with only a soft floor shadow: no scenery, no flowers, no props, nothing else in the image.`,
   sheet: `COMPOSITION (character reference sheet, 16:9): every character of the book side by side on a plain soft light-cream background, full body, evenly lit, same scale, plus the key props, so later pages can match them exactly.`,
 };
 
 function artDirection(body: Record<string, unknown>) {
   const style = ART[String(body.style || "")];
   if (!style) return "";
-  return [style, WORLD[String(body.book || "")] || "", COMPOSE[String(body.slot || "page")] || COMPOSE.page].filter(Boolean).join("\n");
+  const slot = String(body.slot || "page");
+  // character models stay on a plain background: the book's world is only for covers and pages
+  const world = slot === "hero" || slot === "sheet" ? "" : WORLD[String(body.book || "")] || "";
+  return [style, world, COMPOSE[slot] || COMPOSE.page].filter(Boolean).join("\n");
 }
 
 async function callGemini(parts: unknown[], aspect?: string, size?: string) {
