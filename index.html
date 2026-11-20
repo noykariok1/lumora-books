@@ -755,6 +755,27 @@ footer.site{background:var(--canvas)}
 .logo .wm{display:flex;flex-direction:column;line-height:1}.logo .wm b{font-weight:700;letter-spacing:-.01em}.logo .wm small{font-family:var(--f-display);font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--muted);margin-top:3px}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--logo-book:#ABA4FF}}:root[data-theme=dark]{--logo-book:#ABA4FF}
 .hb-head{max-width:760px;margin-inline:auto;text-align:center;gap:10px}.hb-head h2{text-wrap:balance}.hb-head .lead{color:var(--muted);text-wrap:pretty}
+.icon-btn.signed::after{content:"";position:absolute;top:7px;inset-inline-end:7px;width:9px;height:9px;border-radius:50%;background:#2BB37B;border:2px solid var(--card)}
+.me h1{font-size:clamp(28px,3.6vw,42px);text-wrap:balance}.me h2{font-size:24px}
+.me-login{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start;max-width:1040px;margin-inline:auto}
+.me-pitch .lead{font-size:18px;text-wrap:pretty}.me-list{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:14px}.me-list li{display:flex;gap:12px;align-items:center;font-weight:500}
+.me-list svg{flex:none;width:40px;height:40px;padding:9px;border-radius:12px;background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary)}
+.me-form h2{font-size:22px}.me-code{font-size:26px;letter-spacing:.3em;text-align:center}
+.me-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.me-sec-h{display:flex;align-items:baseline;gap:12px}.me>section{margin-top:28px}
+.me-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+.me-char{display:flex;flex-direction:column;gap:4px;padding:10px;border:1px solid var(--line);border-radius:20px;background:var(--card);color:var(--ink);text-decoration:none;transition:transform .15s,box-shadow .15s}
+.me-char:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(26,23,72,.12)}
+.me-char-img{display:grid;place-items:center;aspect-ratio:4/5;border-radius:14px;overflow:hidden;background:#FFF6E6;margin-bottom:6px}.me-char-img img{width:100%;height:100%;object-fit:cover}
+.me-add{border-style:dashed}.me-add .me-char-img{font-size:56px;font-weight:300;color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent)}
+.me-thumb{width:52px;height:64px;border-radius:10px;object-fit:cover;background:#FFF6E6;flex:none;display:block}
+.me-char-page{display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:32px;align-items:start;margin-top:12px}
+.me-hero{margin:0;border-radius:24px;overflow:hidden;background:#FFF6E6;box-shadow:0 14px 34px rgba(26,23,72,.14)}.me-hero img{width:100%;display:block;aspect-ratio:4/5;object-fit:cover}
+.me-books{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.me-book{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--card)}.me-book img{width:72px;height:86px;object-fit:cover;border-radius:10px;flex:none}
+.me-manage{border-top:1px solid var(--line);padding-top:12px}.me-manage summary{cursor:pointer;font-weight:600}
+.me-inv{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0}
+@media (max-width:760px){.me-login,.me-char-page{grid-template-columns:1fr;gap:24px}.me-grid{grid-template-columns:1fr 1fr;gap:10px}.me-hero{max-width:300px;margin-inline:auto}}
 </style>
 
 <div id="app">
@@ -767,7 +788,7 @@ footer.site{background:var(--canvas)}
         <a href="#personal">הספרים</a><a href="#how">איך זה עובד</a><a href="#create-own">סיפור משלכם</a><a href="#corporate">מתנות לחברות</a><a href="#redeem">מימוש מתנה</a>
       </nav>
       <div class="hdr-actions">
-        <a class="icon-btn" href="#account" aria-label="החשבון שלי"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></a>
+        <a class="icon-btn" href="#me" aria-label="האזור האישי"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></a>
         <a class="icon-btn" href="#cart" aria-label="עגלת קניות"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l-1.5 11a2 2 0 0 1-2 1.7H8.5a2 2 0 0 1-2-1.7L5 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg><span class="badge-dot" id="cartCount" hidden>0</span></a>
         <a class="btn btn-primary cta-hdr" href="#personal">תצוגה מקדימה חינם</a>
       </div>
@@ -1644,6 +1665,98 @@ async function validateGift(raw){const code=String(raw||"").trim().toUpperCase()
   if((g.used||0)>=(g.maxUses||1))return {ok:false,msg:"הקוד כבר מומש."};
   return {ok:true,gift:{code,from:g.from||"",value:g.value||189,formats:g.formats||null,expires:g.expires||null,cloud:true},msg:"הקוד תקין!"}}catch(e){return {ok:false,msg:"לא הצלחנו לבדוק את הקוד כרגע. נסו שוב בעוד דקה."}}}
 async function markGiftUsed(code,orderId){/* only editors may write gift codes; record redemption in inbox for the owner */await sendInbox("redemption",{code,orderId})}
+
+/* ---- cloud account: email-code login + saved characters (Supabase Auth, table "characters", private bucket "characters") ---- */
+const SB_URL="https://lxcpmmiahrllakahhrch.supabase.co";
+let SB=null,SBP=null;
+function sbClient(){if(SB)return Promise.resolve(SB);const key=INBOX.key||AI.anonKey;if(!key)return Promise.resolve(null);if(SBP)return SBP;
+ SBP=new Promise(res=>{const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js";sc.crossOrigin="anonymous";
+  sc.onload=()=>{try{SB=window.supabase.createClient(SB_URL,key,{auth:{flowType:"pkce",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"agadi-auth"}});res(SB)}catch(e){SBP=null;res(null)}};
+  sc.onerror=()=>{SBP=null;res(null)};document.head.appendChild(sc)});return SBP}
+async function meUser(){const sb=await sbClient();if(!sb)return null;try{const {data}=await sb.auth.getSession();return data&&data.session?data.session.user:null}catch(e){return null}}
+function meUpdateIcon(u){$$('a[href="#me"]').forEach(a=>{a.classList.toggle("signed",!!u);a.setAttribute("aria-label",u?"האזור האישי (מחוברים)":"האזור האישי")})}
+async function meInit(){const hasCode=/[?&]code=/.test(location.search);const known=(()=>{try{return !!localStorage.getItem("agadi-auth")}catch(e){return false}})();
+ if(!hasCode&&!known)return;const sb=await sbClient();if(!sb)return;
+ if(hasCode){try{await sb.auth.getSession()}catch(e){}const back=(()=>{try{return localStorage.getItem("agadi-back")||"#me"}catch(e){return "#me"}})();history.replaceState(null,"",location.pathname+back);route()}
+ meUpdateIcon(await meUser());sb.auth.onAuthStateChange((ev,ses)=>meUpdateIcon(ses&&ses.user))}
+const dataURLtoBlob=u=>{const [h,d]=String(u).split(",");const bin=atob(d);const a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:(h.match(/:(.*?);/)||[])[1]||"image/jpeg"})};
+async function toJpeg(u,max=1024){const im=await loadImg(u);const W=im.naturalWidth||im.width,H=im.naturalHeight||im.height,r=Math.min(1,max/Math.max(W,H));const c=document.createElement("canvas");c.width=Math.round(W*r);c.height=Math.round(H*r);const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.9)}
+async function charList(){const sb=await sbClient();const {data,error}=await sb.from("characters").select("*").order("created_at",{ascending:false});if(error)throw error;
+ const paths=data.map(c=>c.hero_path).filter(Boolean);let urls={};if(paths.length){const r=await sb.storage.from("characters").createSignedUrls(paths,3600);(r.data||[]).forEach(x=>{if(x.signedUrl)urls[x.path]=x.signedUrl})}
+ return data.map(c=>({...c,img:urls[c.hero_path]||""}))}
+async function charGet(id){const sb=await sbClient();const {data,error}=await sb.from("characters").select("*").eq("id",id).maybeSingle();if(error)throw error;if(!data)return null;
+ const r=await sb.storage.from("characters").createSignedUrl(data.hero_path,3600);return {...data,img:r.data?r.data.signedUrl:""}}
+/* save the approved hero of a book-in-progress as a character in the account */
+async function charSaveFromProject(pid){const sb=await sbClient();const u=await meUser();if(!sb||!u)return null;const m=await pbMeta(pid);if(!m||m.charId)return m&&m.charId;
+ const hero=await pbImg(pid,"hero");if(!hero)return null;const b=pbBy(m.book);const id=crypto.randomUUID?crypto.randomUUID():([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
+ const path=u.id+"/"+id+".jpg";const up=await sb.storage.from("characters").upload(path,dataURLtoBlob(await toJpeg(hero)),{contentType:"image/jpeg",upsert:true});if(up.error)throw up.error;
+ const {error}=await sb.from("characters").insert({id,name:m.name,gender:b?pbG(b):"f",traits:m.traits||{},hero_path:path,source_book:m.book});if(error){await sb.storage.from("characters").remove([path]);throw error}
+ m.charId=id;await pbSaveMeta(m);return id}
+async function charDelete(c){const sb=await sbClient();await sb.storage.from("characters").remove([c.hero_path]);const {error}=await sb.from("characters").delete().eq("id",c.id);if(error)throw error}
+/* start a new book from a saved character: no photo, no hero step */
+async function pbFromChar(root,b,cid){root.innerHTML=`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מכינים את הספר...</span></div>`;
+ try{if(!await meUser()){location.hash="#me";return}const c=await charGet(cid);if(!c||!c.img)throw new Error("not found");
+  const r=await fetch(c.img);const blob=await r.blob();const url=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(blob)});const hero=await toJpeg(url,1536);
+  const id=uid();await pbSetImg(id,"photo",hero);await pbSetImg(id,"hero",hero);
+  await pbSaveMeta({id,book:b.id,name:c.name,src:"char",charId:c.id,traits:c.traits||{},avatar:null,consentAt:null,createdAt:Date.now(),heroOk:true,sheetOk:true,approved:false,fmt:"hard"});
+  location.hash="#personal?p="+id}
+ catch(e){console.error(e);root.innerHTML=`<div class="empty" style="padding-block:64px"><h1 style="font-size:26px">לא הצלחנו לטעון את הדמות</h1><p class="muted">נסו שוב בעוד רגע, או התחברו שוב לאזור האישי.</p><a class="btn btn-primary" href="#me">לאזור האישי</a></div>`}}
+const ME_ICON='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+function meLoginHTML(){return `<div class="me-login"><div class="stack me-pitch"><span class="eyebrow">האזור האישי</span><h1>כל הילדים שלכם, כל הדמויות, במקום אחד</h1>
+ <p class="lead muted">שומרים את הדמות המצוירת של כל ילד פעם אחת, ואז יוצרים לו או לה עוד ספרים בלחיצה, בלי להעלות שוב תמונה.</p>
+ <ul class="me-list"><li>${ME_ICON}<circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9" r="2.6"/><path d="M3 20c.8-3.4 3.2-5.2 6-5.2s5.2 1.8 6 5.2M15 14.6c2.6.1 4.6 1.8 5.4 5"/></svg><span>דמות נפרדת לכל ילד, לאחים ולאחיות</span></li>
+ <li>${ME_ICON}<path d="M4 19.5V5a2 2 0 0 1 2-2h12v15H6a2 2 0 0 0-2 2zM8 7h6"/></svg><span>ספר חדש לאותה דמות בלי לחכות לציור מחדש</span></li>
+ <li>${ME_ICON}<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>הדמויות פרטיות, רק אתם רואים אותן. התמונה המקורית לא נשמרת</span></li></ul></div>
+ <form class="box stack me-form" id="meF" novalidate><h2>כניסה או הרשמה</h2><p class="small muted">בלי סיסמה. נשלח לכם קוד למייל.</p>
+  <label class="f" for="meEmail">האימייל שלכם<input class="inp" id="meEmail" type="email" autocomplete="email" inputmode="email" dir="ltr" required placeholder="name@example.com"></label>
+  <div id="meCodeBox" hidden class="stack"><label class="f" for="meCode">הקוד מהמייל<input class="inp me-code" id="meCode" inputmode="numeric" autocomplete="one-time-code" dir="ltr" maxlength="10" placeholder="••••••"></label><p class="small muted">המייל יגיע תוך דקה. לא הגיע? בדקו בקידומי מכירות או בספאם. אפשר גם ללחוץ על הקישור שבמייל.</p></div>
+  <span class="small bad" id="meMsg" aria-live="polite"></span>
+  <button class="btn btn-primary btn-lg" id="meBtn">לשלוח לי קוד</button><button type="button" class="linkbtn small" id="meAgain" hidden>לשלוח קוד חדש או לשנות מייל</button></form></div>`}
+function meBindLogin(el){const f=$("#meF",el),msg=$("#meMsg",el),btn=$("#meBtn",el);let step="email";
+ const send=async()=>{const email=$("#meEmail",el).value.trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){msg.textContent="נראה שהאימייל לא תקין";return}
+  btn.disabled=true;msg.textContent="";const sb=await sbClient();try{localStorage.setItem("agadi-back",location.hash||"#me")}catch(e){}
+  const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:location.origin+location.pathname}});btn.disabled=false;
+  if(error){msg.textContent=/rate|seconds|limit/i.test(error.message)?"שלחנו כבר קוד לפני רגע. חכו דקה ונסו שוב.":"לא הצלחנו לשלוח את הקוד. נסו שוב בעוד רגע.";return}
+  step="code";$("#meCodeBox",el).hidden=false;$("#meEmail",el).readOnly=true;btn.textContent="כניסה";$("#meAgain",el).hidden=false;$("#meCode",el).focus()};
+ const verify=async()=>{const token=$("#meCode",el).value.replace(/\D/g,"");if(token.length<6){msg.textContent="הקוד צריך להיות באורך 6 ספרות לפחות";return}
+  btn.disabled=true;msg.textContent="";const sb=await sbClient();const {error}=await sb.auth.verifyOtp({email:$("#meEmail",el).value.trim(),token,type:"email"});btn.disabled=false;
+  if(error){msg.textContent="הקוד לא נכון או שפג תוקפו. אפשר לבקש קוד חדש.";return}meUpdateIcon(await meUser());route()};
+ f.onsubmit=e=>{e.preventDefault();step==="email"?send():verify()};
+ $("#meAgain",el).onclick=()=>{step="email";$("#meCodeBox",el).hidden=true;$("#meEmail",el).readOnly=false;btn.textContent="לשלוח לי קוד";$("#meAgain",el).hidden=true;$("#meEmail",el).focus()}}
+function meCharCard(c){const b=pbBy(c.source_book);return `<a class="me-char" href="#me?c=${c.id}"><span class="me-char-img">${c.img?`<img src="${c.img}" alt="הדמות של ${esc(c.name)}" loading="lazy">`:""}</span><b>${esc(c.name)}</b><span class="small muted">${c.gender==="f"?"בת":"בן"} · נוצרה ב${b?"ספר "+esc(pbTitle(b,c.name)):"אגדיבוק"}</span></a>`}
+async function meDash(el,u,q){const box=$("#meBody",el);
+ if(q.save){try{await charSaveFromProject(q.save);toast("הדמות נשמרה באזור האישי")}catch(e){console.error(e);toast("לא הצלחנו לשמור את הדמות")}history.replaceState(null,"","#me")}
+ let chars=[],err="";try{chars=await charList()}catch(e){console.error(e);err="לא הצלחנו לטעון את הדמויות. נסו לרענן את הדף."}
+ const local=(await pbList().catch(()=>[])).filter(m=>!m.ordered);
+ const unsaved=[];for(const m of local)if(m.heroOk&&!m.charId&&m.src!=="char"&&!unsaved.some(x=>x.name===m.name)&&!chars.some(c=>c.name===m.name))unsaved.push(m);
+ const arts={};for(const m of local)arts[m.id]=await pbImg(m.id,"hero").catch(()=>null);
+ if(!el.isConnected)return;
+ box.innerHTML=`<div class="me-top"><div><span class="eyebrow">האזור האישי</span><h1>שלום, שמחים שחזרתם</h1><p class="small muted" dir="ltr" style="text-align:right">${esc(u.email||"")}</p></div><div class="row"><a class="btn btn-ghost btn-sm" href="#account?tab=orders">ההזמנות שלי</a><button class="btn btn-ghost btn-sm" id="meOut">יציאה</button></div></div>
+ <section class="stack"><div class="me-sec-h"><h2>הילדים שלי</h2><span class="small muted">${chars.length?chars.length===1?"דמות אחת":chars.length+" דמויות":""}</span></div>${err?`<p class="bad">${err}</p>`:""}
+  <div class="me-grid">${chars.map(meCharCard).join("")}<a class="me-char me-add" href="#personal"><span class="me-char-img">+</span><b>להוסיף ילד או ילדה</b><span class="small muted">בוחרים ספר ומעלים תמונה</span></a></div></section>
+ ${unsaved.length?`<section class="box stack me-unsaved"><h2 style="font-size:22px">דמויות שציירנו במכשיר הזה</h2><p class="muted small">שמרו אותן באזור האישי, כדי ליצור להן עוד ספרים גם ממכשיר אחר.</p><div class="list">${unsaved.map(m=>`<div class="li">${arts[m.id]?`<img class="me-thumb" src="${arts[m.id]}" alt="">`:""}<div class="grow"><b>${esc(m.name)}</b></div><button class="btn btn-soft btn-sm" data-save="${m.id}">לשמור את ${esc(m.name)}</button></div>`).join("")}</div></section>`:""}
+ ${local.length?`<section class="stack"><h2>ספרים שהתחלתם</h2><div class="list">${local.map(m=>{const b=pbBy(m.book);if(!b)return"";return `<a class="li" href="#personal?p=${m.id}">${arts[m.id]?`<img class="me-thumb" src="${arts[m.id]}" alt="">`:`<span class="me-thumb"></span>`}<div class="grow"><b>${esc(pbTitle(b,m.name))}</b><div class="small muted">${m.approved?"מוכן להזמנה":m.heroOk?"הספר מאויר, מחכה לאישור שלכם":"מחכה לאישור הדמות"}</div></div><span class="btn btn-soft btn-sm">להמשיך</span></a>`}).join("")}</div><p class="small muted">ספרים בתהליך נשמרים במכשיר הזה בלבד.</p></section>`:""}`;
+ $("#meOut",box).onclick=async()=>{const sb=await sbClient();await sb.auth.signOut();meUpdateIcon(null);toast("יצאתם מהאזור האישי");route()};
+ $$("[data-save]",box).forEach(bt=>bt.onclick=async()=>{bt.disabled=true;try{await charSaveFromProject(bt.dataset.save);toast("הדמות נשמרה");route()}catch(e){console.error(e);bt.disabled=false;toast("לא הצלחנו לשמור, נסו שוב")}})}
+async function meCharView(el,cid){const box=$("#meBody",el);let c=null;try{c=await charGet(cid)}catch(e){console.error(e)}if(!el.isConnected)return;
+ if(!c){box.innerHTML=`<div class="empty"><h1 style="font-size:26px">הדמות לא נמצאה</h1><a class="btn btn-primary" href="#me">לכל הדמויות</a></div>`;return}
+ const books=PB.filter(b=>pbG(b)===c.gender);const he=c.gender==="f";
+ box.innerHTML=`<a class="small" href="#me">→ כל הילדים</a><div class="me-char-page"><figure class="me-hero"><img src="${c.img}" alt="הדמות של ${esc(c.name)}"></figure>
+ <div class="stack"><h1>${esc(c.name)}</h1><p class="muted">${he?"היא מוכנה":"הוא מוכן"} לעוד הרפתקה. בחרו ספר, ו${esc(c.name)} ${he?"תופיע":"יופיע"} בכריכה ובכל העמודים, בלי להעלות שוב תמונה.</p>
+  <div class="me-books">${books.map(b=>`<div class="me-book">${PB_COVER_URL?`<img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy">`:""}<div class="stack" style="gap:6px"><b>${esc(pbTitle(b,c.name))}</b><span class="small muted">${esc(b.genre)} · גילאי ${esc(b.ageRange)}</span><a class="btn btn-primary btn-sm" href="#personal?book=${b.id}&char=${c.id}">ליצור את הספר הזה</a></div></div>`).join("")}</div>
+  <details class="me-manage"><summary>ניהול הדמות</summary><div class="stack" style="gap:10px;margin-top:10px">
+   <label class="f" for="meName">שם בספרים<input class="inp" id="meName" maxlength="20" value="${esc(c.name)}"></label><div class="row"><button class="btn btn-soft btn-sm" id="meRen">לשמור שם</button></div>
+   <div class="row"><button class="btn btn-ghost btn-sm bad" id="meDel">למחוק את הדמות</button><span id="meDelQ" hidden class="row small"><b>הדמות תימחק לצמיתות.</b><button class="btn btn-sm btn-primary" id="meDelYes">כן, למחוק</button><button class="btn btn-sm btn-ghost" id="meDelNo">ביטול</button></span></div>
+   <p class="small muted">כדי ליצור דמות חדשה ודומה יותר, התחילו ספר חדש עם תמונה, ושמרו את הדמות החדשה.</p></div></details></div></div>`;
+ $("#meRen",box).onclick=async()=>{const n=$("#meName",box).value.trim().replace(/[<>{}]/g,"");if(!n)return;const sb=await sbClient();const {error}=await sb.from("characters").update({name:n,updated_at:new Date().toISOString()}).eq("id",c.id);toast(error?"לא הצלחנו לשמור":"השם עודכן");if(!error)route()};
+ $("#meDel",box).onclick=()=>{$("#meDelQ",box).hidden=false};$("#meDelNo",box).onclick=()=>{$("#meDelQ",box).hidden=true};
+ $("#meDelYes",box).onclick=async()=>{try{await charDelete(c);toast("הדמות נמחקה");location.hash="#me"}catch(e){toast("לא הצלחנו למחוק, נסו שוב")}}}
+routes.me={title:()=>"האזור האישי",html(){return `<div class="wrap section me" id="meBody"><div class="pb-load muted">טוען...</div></div>`},
+ async mount(el,q){const box=$("#meBody",el);const sb=await sbClient();
+  if(!sb){box.innerHTML=`<div class="empty"><h1 style="font-size:26px">האזור האישי פועל באתר המלא</h1><p class="muted">כאן אפשר לראות את <a href="#account">הספרים וההזמנות שבמכשיר הזה</a>.</p></div>`;return}
+  const u=await meUser();if(!el.isConnected)return;
+  if(!u){box.innerHTML=meLoginHTML();meBindLogin(box);return}
+  if(q.c)return meCharView(el,q.c);return meDash(el,u,q)}};
 routes.redeem={title:()=>"מימוש מתנה",html(){return `<div class="wrap section" style="max-width:720px"><div class="stack" style="align-items:center;text-align:center;gap:14px"><div style="width:84px;height:84px;border-radius:24px;background:var(--mint);display:grid;place-items:center;color:var(--ok)">${ICON.gift.replace("<svg",'<svg width="44" height="44"')}</div><span class="eyebrow">קיבלתם מתנה</span><h1 style="font-size:clamp(32px,4.4vw,48px)">ספר אישי מחכה לכם</h1><p class="lead">הקלידו את הקוד מהמייל או מהכרטיס, ותבחרו ספר שבו הילד שלכם הוא הגיבור.</p></div>
  <form class="box stack" id="rf" style="margin-top:28px" novalidate><label class="f" for="rcode">קוד המתנה<input class="inp" id="rcode" dir="ltr" style="text-transform:uppercase;font-size:20px;letter-spacing:2px;text-align:center" placeholder="GIFT-XXXX-XX" autocomplete="off"></label><button class="btn btn-primary btn-block">לפתוח את המתנה</button><div id="rmsg" aria-live="polite"></div></form>
  </div>`},
@@ -1801,6 +1914,7 @@ async function pbDeleteProject(id){const ks=(await PBDB.keys())||[];for(const k 
 async function pbList(){const ks=((await PBDB.keys())||[]).filter(k=>String(k).startsWith("p:"));const out=[];for(const k of ks){const m=await PBDB.get(k);if(m)out.push(m)}return out.sort((a,b)=>b.createdAt-a.createdAt)}
 async function pbPurge(){try{for(const m of await pbList())if(Date.now()-m.createdAt>PB_KEEP_DAYS*864e5)await pbDeleteProject(m.id)}catch(e){console.warn("purge",e)}}
 pbPurge();
+setTimeout(meInit,0);
 /* ---- images ---- */
 async function pbPrepPhoto(src,max=1024){const im=await loadImg(src);const r=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement("canvas");c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.9)}
 async function pbThumb(src,w=300){try{const im=await loadImg(src);const h=Math.round(w*im.height/im.width);const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(im,0,0,w,h);return c.toDataURL("image/jpeg",.8)}catch(e){return null}}
@@ -1894,6 +2008,7 @@ routes.personal={title:()=>"ספרים מאוירים מהתמונה",
  html(q){return `<div class="wrap pb" id="pbRoot"><div class="pb-load muted">טוען...</div></div>`},
  async mount(el,q){const root=$("#pbRoot",el);
   if(q.p)return pbProjectView(root,q.p);
+  if(q.book&&q.char&&pbBy(q.book))return pbFromChar(root,pbBy(q.book),q.char);
   if(q.book&&pbBy(q.book))return pbFormView(root,pbBy(q.book));
   return pbHomeView(root)}};
 const PB_COVER_URL=id=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+id+"/cover.jpg"; // the same pre-made cover the child is placed into
@@ -1951,12 +2066,17 @@ function pbFormView(root,b){const g=pbG(b);let photo=null,avatar=-1,extras=[];
    const traits={};if(src==="photo"){$$("[data-tr]",root).forEach(x=>{const v=x.value.trim();if(v)traits[x.dataset.tr]=v.slice(0,120)});const ch=$$("[data-trc]:checked",root).map(x=>x.dataset.trc);if(ch.length)traits.marks=ch}
    await pbSaveMeta({id,book:b.id,name,src,traits,avatar:src==="avatar"?avatar:null,consentAt:src==="photo"?Date.now():null,createdAt:Date.now(),sheetOk:false,approved:false,fmt:"hard"});
    location.hash="#personal?p="+id}catch(x){console.error(x);err.textContent="לא הצלחנו לשמור במכשיר. ייתכן שהדפדפן במצב פרטי.";btn.disabled=false}}}
+async function pbInvHTML(m){if(!m.heroOk||m.charId||m.src!=="photo")return "";const u=await Promise.race([meUser(),new Promise(r=>setTimeout(()=>r(undefined),1500))]);if(u===undefined)return "";
+ return u?`<div class="note ok small me-inv" id="pbInv"><span>הדמות של ${esc(m.name)} לא נשמרה עדיין באזור האישי.</span><button class="btn btn-soft btn-sm" data-savenow="${m.id}">לשמור עכשיו</button></div>`
+  :`<div class="note info me-inv" id="pbInv"><span><b>שומרים את ${esc(m.name)} לפעם הבאה?</b> באזור האישי הדמות נשמרת, וכל ספר נוסף נוצר בלחיצה, בלי להעלות שוב תמונה.</span><a class="btn btn-soft btn-sm" href="#me?save=${m.id}" id="pbSaveGo" data-saveback="${m.id}">לשמור את הדמות</a></div>`}
+document.addEventListener("click",async e=>{const go=e.target.closest("[data-saveback]");if(go){try{localStorage.setItem("agadi-back","#me?save="+go.dataset.saveback)}catch(x){}return}
+ const bt=e.target.closest("[data-savenow]");if(!bt)return;bt.disabled=true;try{await charSaveFromProject(bt.dataset.savenow);const x=bt.closest(".me-inv");if(x)x.outerHTML=`<div class="note ok small me-inv">נשמר. <a href="#me">לאזור האישי</a></div>`}catch(err){bt.disabled=false;toast("לא הצלחנו לשמור, נסו שוב")}});
 async function pbProjectView(root,id){const m=await pbMeta(id);
  if(!m){root.innerHTML=`<div class="empty" style="padding-block:64px"><h1 style="font-size:28px">הספר לא נמצא במכשיר הזה</h1><p class="muted">ייתכן שנמחק, או שעברו ${PB_KEEP_DAYS} ימים מאז שנוצר.</p><a class="btn btn-primary" href="#personal">ליצור ספר חדש</a></div>`;return}
  const b=pbBy(m.book);if(!b){root.innerHTML="";return}
  const photo=await pbImg(id,"photo"),sheet=await pbImg(id,"sheet");if(!m.heroOk&&sheet)m.heroOk=true; // books started before the hero step
  const head=`<div class="pb-head"><a class="small" href="#personal">→ כל הספרים</a><h1>${esc(pbTitle(b,m.name))}</h1>
-  <ol class="pb-steps"><li class="${m.heroOk?"done":"cur"}">הדמות של ${esc(m.name)}</li><li class="${m.sheetOk?(m.approved?"done":"cur"):""}">כריכה ו-12 עמודים</li><li class="${m.approved?"done":""}">אישור הספר</li></ol></div>`;
+  <ol class="pb-steps"><li class="${m.heroOk?"done":"cur"}">הדמות של ${esc(m.name)}</li><li class="${m.sheetOk?(m.approved?"done":"cur"):""}">כריכה ו-12 עמודים</li><li class="${m.approved?"done":""}">אישור הספר</li></ol></div>${await pbInvHTML(m)}`;
  const foot=`<div class="pb-privacy small muted">${photo?`התמונה שמורה רק במכשיר הזה ותימחק אוטומטית ב-${new Date(m.createdAt+PB_KEEP_DAYS*864e5).toLocaleDateString("he-IL")}.`:"התמונה כבר נמחקה מהמכשיר."} <button class="linkbtn" id="pbDelPhoto" ${photo?"":"hidden"}>למחוק את התמונה עכשיו</button> · <button class="linkbtn" id="pbDelAll">למחוק את כל הספר והאיורים</button></div>`;
  if(!m.heroOk){const hero=await pbImg(id,"hero"),alt=await pbImg(id,"heroAlt");let n=m.heroN||0;const G=pbG(b)==="f";
   const wait=`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים שתי גרסאות של ${esc(m.name)}. זה לוקח פחות מדקה.</span></div>`;
@@ -1976,7 +2096,7 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
    $("#pbFixBox",root).hidden=false};
   bindC();
   $("#pbReHero",root).onclick=()=>{const fix=$("#pbFix",root).value.trim().replace(/[<>{}]/g,"").slice(0,200);drawH(fix)};
-  $("#pbOkHero",root).onclick=async()=>{m.heroOk=true;m.sheetOk=true;for(const s of pbSlots())await PBDB.del("i:"+id+":"+s);await PBDB.del("i:"+id+":heroAlt");await pbSaveMeta(m);pbProjectView(root,id)};
+  $("#pbOkHero",root).onclick=async()=>{m.heroOk=true;m.sheetOk=true;for(const s of pbSlots())await PBDB.del("i:"+id+":"+s);await PBDB.del("i:"+id+":heroAlt");await pbSaveMeta(m);if(m.src!=="char")meUser().then(u=>u&&charSaveFromProject(id).then(()=>toast("הדמות של "+m.name+" נשמרה באזור האישי"))).catch(e=>console.warn("char save",e));pbProjectView(root,id)};
   if(!hero&&AI_ON())drawH();else if(!hero){$("#pbMsg",root).textContent="יצירת האיורים פועלת באתר המלא בלבד"}
   return}
  if(!m.sheetOk){
