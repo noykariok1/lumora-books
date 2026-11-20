@@ -6,6 +6,7 @@
 // Request (POST JSON):
 //   extra?: ["<base64>", ...] up to 2 more photos of the child (render mode)
 //   size?: "1K"|"2K" on any mode with an aspect (2K is used for printed pages)
+//   style?: "cinema3d"|"gouache", book?: <book id>, slot?: "cover"|"page"|"hero"|"sheet"  (render/swap: house art direction, v7)
 //   { mode: "swap", photo, hero: "<base64 approved hero>", base: "<base64 finished page>", heroMime?, baseMime?, aspect?, prompt? }
 //   { mode: "character", photo: "<base64 jpeg>", gender: "m"|"f", traits?: {...}, notes?: string, variant?: 0..3 }
 //   { mode: "page", photo: "<base64>", sheet: "<base64 approved character>", scene: "text", gender, variant?: number }
@@ -76,6 +77,46 @@ Leave calm space in the sky or background; never add any text.`;
 const RENDER_RULES = `Children's picture-book illustration. Absolutely no text, letters, numbers, captions, logos or watermarks anywhere in the image.
 ${LIKENESS}`;
 
+// ---- Art direction (v7): one house look for every book, chosen with `style` on render/swap requests ----
+// The scene text that comes from the book data may still mention the old gouache look; the house style below wins.
+const ART: Record<string, string> = {
+  cinema3d: `HOUSE STYLE (overrides any style words in the scene text): a still frame from a premium 3D animated feature film.
+Stylized, appealing characters (not photoreal, not plastic): soft subsurface-scattering skin with natural rosy cheeks, large expressive eyes that keep the child's real eye shape and colour,
+hair modelled as soft groomed strands with gentle specular highlights, fabrics with visible weave and stitching, believable materials (wood grain, grass blades, metal, glass).
+Cinematic lighting: warm key light, soft bounce fill, a clear rim light that separates the hero from the background, light rays and gentle atmospheric depth, shallow depth of field so the background is softly out of focus.
+A rich, lived-in, detailed world with storytelling props and a foreground framing element for depth. Harmonious saturated colours, never neon, clean natural skin tones.
+Faces read clearly with one strong emotion. Correct anatomy: five fingers per hand, no extra limbs, both eyes looking the same way. Crisp, clean, high detail, no artefacts, no blur on the hero's face.`,
+  gouache: `HOUSE STYLE (overrides any style words in the scene text): a premium hand-painted picture-book illustration in gouache and coloured pencil, visible paper grain and brush texture,
+rich layered detail in the background, soft directional light with warm highlights and cool shadows, rounded friendly shapes, slightly larger head and eyes than real proportions but clearly the same child.
+Harmonious palette, clean skin tones, clear emotion, correct anatomy, crisp clean edges.`,
+};
+
+// Each book has its own world and light, so the four books look like one family but never the same.
+const WORLD: Record<string, string> = {
+  soccer_hero: "World: a friendly neighbourhood football pitch at late-afternoon golden hour; long soft shadows, glowing dust in the air, turquoise, sunny yellow, grass green and coral accents.",
+  little_firefighter: "World: a cheerful, safe neighbourhood fire station on a bright morning; sunlight through big bay doors, polished brass and red paint, warm amber light, nothing frightening, any fire is tiny and under control.",
+  fairy_garden: "World: an enchanted garden seen at fairy scale on a dewy morning; flowers bigger than the child, glowing pollen, soft bokeh, lilac, blush pink, mint and butter yellow, magical but gentle.",
+  space_captain: "World: a cosy, wondrous outer space; deep indigo and teal nebulae, sparkling stars, cyan light from friendly instruments, warm light on the hero's face, awe and curiosity, never scary.",
+};
+
+const COMPOSE: Record<string, string> = {
+  cover: `COMPOSITION (book cover, portrait 4:5): one iconic, instantly readable image that works as a small thumbnail.
+The hero stands or moves in the LOWER 62% of the frame, three-quarter view toward the viewer, face lit and the brightest point of the image, a confident joyful expression.
+The TOP 35% of the frame is calm, simple background only (sky, space, soft foliage or light) with no faces, no characters and no important detail: a title will be printed there.
+Keep the bottom 6% free of important detail. Depth in three layers: a foreground element, the hero, then the world behind.`,
+  page: `COMPOSITION (picture-book page, portrait 4:5): choose the camera the moment needs (wide establishing shot, medium shot or close-up), eye level with the child.
+The hero's face is always visible, lit and in focus, never hidden, cropped or turned away. Clear staging: the action of the scene reads in one second.
+Keep one calm, uncluttered area of the image. Keep every page of the book in the same style, outfit, palette and character design.`,
+  hero: `COMPOSITION: character model of the hero alone, full body, front three-quarter view, relaxed happy pose, on a plain soft light-cream seamless background with a soft floor shadow.`,
+  sheet: `COMPOSITION (character reference sheet, 16:9): every character of the book side by side on a plain soft light-cream background, full body, evenly lit, same scale, plus the key props, so later pages can match them exactly.`,
+};
+
+function artDirection(body: Record<string, unknown>) {
+  const style = ART[String(body.style || "")];
+  if (!style) return "";
+  return [style, WORLD[String(body.book || "")] || "", COMPOSE[String(body.slot || "page")] || COMPOSE.page].filter(Boolean).join("\n");
+}
+
 async function callGemini(parts: unknown[], aspect?: string, size?: string) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
   const res = await fetch(url, {
@@ -138,7 +179,7 @@ Deno.serve(async (req) => {
       { inline_data: { mime_type: "image/jpeg", data: photo } },
       ...extra.map((d) => ({ inline_data: { mime_type: "image/jpeg", data: d } })),
       ...(sheet ? [{ inline_data: { mime_type: /^image\/(png|jpeg|webp)$/.test(String(body.sheetMime)) ? String(body.sheetMime) : "image/png", data: sheet } }] : []),
-      { text: `${intro}\n${RENDER_RULES}\n${prompt}` },
+      { text: `${intro}\n${artDirection(body)}\n${RENDER_RULES}\n${prompt}` },
     ];
   } else if (body.mode === "swap") {
     // pre-illustrated book page: image 1 = child photo/avatar, image 2 = approved hero character, image 3 = finished page with a placeholder hero
@@ -155,6 +196,7 @@ Deno.serve(async (req) => {
 Redraw image 3 EXACTLY: same composition, camera, background, lighting, colours, style, other characters, props and the hero's pose, position, size and outfit.
 Change ONLY the main hero child's face, skin tone, hair and body proportions so that the hero becomes the child of image 2 (with the face of image 1).
 ${RENDER_RULES}
+${body.style ? "Keep the rendering style of image 3 exactly (lighting, materials, detail); the new face must be rendered in that same style." : ""}
 ${extra}` },
     ];
   } else if (body.mode === "page") {
