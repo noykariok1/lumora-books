@@ -754,6 +754,7 @@ footer.site{background:var(--canvas)}
 .note.warn{background:var(--warn-soft);color:var(--warn);display:block}
 .logo .wm{display:flex;flex-direction:column;line-height:1}.logo .wm b{font-weight:700;letter-spacing:-.01em}.logo .wm small{font-family:var(--f-display);font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--muted);margin-top:3px}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--logo-book:#ABA4FF}}:root[data-theme=dark]{--logo-book:#ABA4FF}
+.hb-head{max-width:760px;margin-inline:auto;text-align:center;gap:10px}.hb-head h2{text-wrap:balance}.hb-head .lead{color:var(--muted);text-wrap:pretty}
 </style>
 
 <div id="app">
@@ -1120,7 +1121,7 @@ routes.home={html(){
  </section>
  <section class="wrap trust-wrap"><div class="trust">${trustStrip()}</div></section>
  <section class="section home-books" id="books-sec"><div class="wrap">
-  <div class="sec-head"><div class="stack"><h2>בחרו ספר לילד שלכם</h2><p class="muted">כל הספרים שלנו. בכל ספר הכריכה ו־12 העמודים מצוירים עם הילד שלכם, והשם שלו בסיפור.</p></div></div>
+  <div class="sec-head center"><div class="stack hb-head"><span class="eyebrow">מתנה מכל הלב, לשנים</span><h2>הרגע שבו הילד שלכם מגלה את עצמו בתוך הסיפור</h2><p class="lead">עיניים שנפתחות בהפתעה, חיוך של "זה אני!", ובקשה לקרוא שוב ושוב לפני השינה. בחרו את ההרפתקה שמתאימה ללב הקטן שלכם: בכל ספר הוא או היא מצוירים בדמותם, עם השם שלהם בכל עמוד.</p></div></div>
   <div class="pb-grid">${PB.map(b=>pbCardHTML(b)).join("")}</div>
  </div></section>
  ${peekHTML()}
