@@ -4,6 +4,7 @@
 //   GEMINI_IMAGE_MODEL  optional, default "gemini-3-pro-image" (Nano Banana Pro, best identity consistency; cheaper: gemini-nano-banana-2.1)
 //   ALLOWED_ORIGINS     optional, comma separated, e.g. "https://lumora.onrender.com,http://localhost:8080"
 // Request (POST JSON):
+//   extra?: ["<base64>", ...] up to 2 more photos of the child (render mode)
 //   size?: "1K"|"2K" on any mode with an aspect (2K is used for printed pages)
 //   { mode: "swap", photo, hero: "<base64 approved hero>", base: "<base64 finished page>", heroMime?, baseMime?, aspect?, prompt? }
 //   { mode: "character", photo: "<base64 jpeg>", gender: "m"|"f", traits?: {...}, notes?: string, variant?: 0..3 }
@@ -125,11 +126,17 @@ Deno.serve(async (req) => {
     const prompt = String(body.prompt || "").slice(0, 3000);
     if (!prompt) return json({ error: "Missing prompt" }, 400, h);
     aspect = ["4:5", "16:9", "3:2", "1:1"].includes(String(body.aspect)) ? String(body.aspect) : "4:5";
+    // optional extra photos of the same child (other angles / smile) for a stronger identity lock
+    const extra = (Array.isArray(body.extra) ? body.extra : []).map(String).filter((x) => x && x.length <= MAX_B64).slice(0, 2);
+    const nP = 1 + extra.length;
+    const who = nP === 1 ? "Image 1 is the photo (or chosen avatar) of the real child, the hero."
+      : `Images 1 to ${nP} are photos of the same real child, the hero, from different moments and angles; use all of them together to get the face exactly right (image 1 is the main one).`;
     const intro = sheet
-      ? "Image 1 is the photo (or chosen avatar) of the real child, the hero. Image 2 is the approved character reference sheet for this book: keep every character, outfit, prop, colour and proportion exactly as in image 2, and the hero's face exactly as in image 1."
-      : "Image 1 is the photo (or chosen avatar) of the real child, the hero.";
+      ? `${who} Image ${nP + 1} is the approved character reference sheet for this book: keep every character, outfit, prop, colour and proportion exactly as in image ${nP + 1}, and the hero's face exactly as in the photo(s).`
+      : who;
     parts = [
       { inline_data: { mime_type: "image/jpeg", data: photo } },
+      ...extra.map((d) => ({ inline_data: { mime_type: "image/jpeg", data: d } })),
       ...(sheet ? [{ inline_data: { mime_type: /^image\/(png|jpeg|webp)$/.test(String(body.sheetMime)) ? String(body.sheetMime) : "image/png", data: sheet } }] : []),
       { text: `${intro}\n${RENDER_RULES}\n${prompt}` },
     ];

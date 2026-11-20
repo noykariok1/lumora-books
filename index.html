@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
-<title>לומורה ספרים אישיים</title>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="ספר ילדים מאויר שבו הילד שלכם הוא הגיבור, עם השם והפנים שלו בכל עמוד. רואים את כל הספר לפני שמשלמים."><meta property="og:type" content="website"><meta property="og:site_name" content="אגדיבוק"><meta property="og:locale" content="he_IL"><meta property="og:title" content="אגדיבוק: הילד שלכם הוא הגיבור של הסיפור"><meta property="og:description" content="ספר מאויר עם השם והדמות של הילד שלכם בכל עמוד. תצוגה מקדימה חינם."><meta property="og:image" content="https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/fairy_garden/cover.jpg"><meta property="og:url" content="https://noykariok1.github.io/lumora-books/"><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 40%27%3E%3Cpath d=%27M20 35c-4.4-2.7-9.6-3.4-16-2.6V17.2c6.4-.8 11.6 0 16 2.7 4.4-2.7 9.6-3.5 16-2.7v15.2c-6.4-.8-11.6-.1-16 2.6z%27 fill=%27%231A1748%27/%3E%3Cpath d=%27M20 2.2L21.5 6.1L25.7 6.3L22.5 9L23.5 13.1L20 10.8L16.5 13.1L17.5 9L14.3 6.3L18.5 6.1Z%27 fill=%27%23FFC83D%27/%3E%3C/svg%3E"><meta name="theme-color" content="#1A1748"><meta name="twitter:card" content="summary_large_image"></head><body>
+<title>אגדיבוק | ספרי ילדים אישיים</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Rubik:wght@500;600;700;800&display=swap">
 <style>
 /* Layout: book-first storefront. Clean white canvas, books and illustrations carry the colour; one container of 1280px. */
 /* Visual system "lamplight": a night-sky indigo for the storybook world, warm lamplight yellow for every primary action,
-   white paper for reading. Display: Fredoka (rounded, picture-book). Body: Assistant (calm, very legible Hebrew). */
+   white paper for reading. Display: Rubik (rounded, full Hebrew support). Body: Assistant (calm, very legible Hebrew). */
 :root{
   --primary:#4B3FD1; --primary-ink:#ffffff; --primary-soft:#EEEBFF;
   --cta:#FFC83D; --cta-ink:#1A1748; --cta-edge:#D99A00; --cta-glow:rgba(255,184,0,.32);
@@ -17,7 +17,7 @@
   --pink:#FBE1EC; --lav:#ECE8FF; --mint:#DDF4EA; --warm:#FFC83D; --warm-ink:#5A3D00; --berry:#C93A63; --star:#F5A000;
   --ok:#11734A; --ok-soft:#DDF5E9; --warn:#7F5200; --warn-soft:#FFF1D2; --bad:#B42318; --bad-soft:#FDE7E5;
   --card:#FFFFFF; --shadow:0 1px 2px rgba(30,27,75,.06),0 10px 28px -10px rgba(30,27,75,.16); --shadow-lg:0 2px 6px rgba(30,27,75,.06),0 28px 60px -18px rgba(30,27,75,.30);
-  --f-display:"Fredoka","Assistant",system-ui,sans-serif; --f-body:"Assistant","Heebo",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-display:"Rubik","Assistant",system-ui,sans-serif; --f-body:"Assistant","Heebo",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
   --r-card:24px; --r-btn:999px; --container:1240px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -490,7 +490,7 @@ nav.main a.on{background:var(--primary-soft);color:var(--primary)}
 .hs-char{animation:popc .7s 1.05s cubic-bezier(.2,.7,.3,1.2) both}
 @media (max-width:880px){
  .hero-night .hero{grid-template-columns:1fr;gap:20px;padding-bottom:72px}
- .hero-stage{max-width:430px;order:2}
+ .hero-stage{max-width:300px;order:-1;margin-top:-8px}
 }
 @media (max-width:480px){.hero-ctas .btn{width:100%}.hero-night h1{font-size:clamp(34px,10vw,44px)}}
 /* trust strip */
@@ -675,7 +675,7 @@ footer.site{background:var(--canvas)}
 .pb-card{display:flex;flex-direction:column;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px;color:inherit;text-decoration:none;box-shadow:var(--shadow);transition:transform .15s}.pb-card:hover{transform:translateY(-3px)}.pb-card .btn{align-self:flex-start}
 .pb-cover-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1}.pb-cover-t{position:relative}.pb-cover-art:has(img){background:#ddd;box-shadow:inset 0 -90px 70px -30px rgba(10,8,30,.65)}.pb-cov{background:linear-gradient(160deg,#4B3FD1,#2B2F7A)}.pb-cov>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1}
 .pb-cover-art{position:relative;isolation:isolate;overflow:hidden;aspect-ratio:4/5;border-radius:16px;background:radial-gradient(circle at 70% 25%,var(--c) 0 18%,transparent 19%),linear-gradient(160deg,var(--a),color-mix(in srgb,var(--a) 55%,#000));display:flex;align-items:flex-end;padding:16px;box-shadow:inset 0 -60px 60px -30px rgba(0,0,0,.35)}
-.pb-cover-t{color:#fff;font-family:Fredoka,var(--font-display,inherit);font-weight:700;font-size:clamp(18px,2.2vw,22px);line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+.pb-cover-t{color:#fff;font-family:var(--f-display);font-weight:700;font-size:clamp(18px,2.2vw,22px);line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,.35)}
 .pb-mine-row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:12px}
 .pb-form{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:28px;align-items:start}@media (max-width:760px){.pb-form{grid-template-columns:1fr}.pb-form>div:first-child{max-width:240px}}
 .pb-src{display:flex;gap:18px;flex-wrap:wrap}.pb-src label{display:flex;gap:8px;align-items:center;cursor:pointer}
@@ -692,7 +692,7 @@ footer.site{background:var(--canvas)}
 .pb-spread{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:100%;max-width:min(980px,calc((100vh - 220px)*1.6));background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-lg);touch-action:pan-y;user-select:none}
 .pb-spread.is-cover{grid-template-columns:1fr;max-width:min(440px,calc((100vh - 220px)*.8))}@media (max-width:700px){.pb-spread,.pb-spread.is-cover{max-width:100%}}
 .pb-art{position:relative;aspect-ratio:4/5;background:#f7f1e6;display:grid;place-items:center}.pb-art>img{width:100%;height:100%;object-fit:cover;display:block}
-.pb-title{position:absolute;inset:auto 0 0 0;padding:44px 20px 22px;background:linear-gradient(transparent,rgba(10,8,30,.7));color:#fff;font-family:Fredoka,inherit;font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.2;text-align:center}
+.pb-title{position:absolute;inset:auto 0 0 0;padding:44px 20px 22px;background:linear-gradient(transparent,rgba(10,8,30,.7));color:#fff;font-family:var(--f-display);font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.2;text-align:center}
 .pb-text{display:flex;flex-direction:column;justify-content:center;gap:16px;padding:clamp(20px,4vw,48px);background:#FFFBF3;color:#2A2540;text-align:right;position:relative}.pb-text p{font-size:clamp(17px,1.9vw,22px);line-height:1.75;margin:0}.pb-num{position:absolute;bottom:14px;left:18px;font-size:13px;color:#8a8399}
 @media (max-width:700px){.pb-spread{grid-template-columns:1fr}}
 .pb-nav{display:flex;gap:14px;align-items:center}
@@ -739,6 +739,21 @@ footer.site{background:var(--canvas)}
 .hs-char{right:auto;left:-1%;bottom:2%;width:29%}.hs-photo{width:31%}}
 @media (max-width:600px){.pb-grid{grid-template-columns:1fr 1fr;gap:12px}.pb-card .btn-sm{padding-inline:10px;font-size:13px}}
 .home-books{padding-top:56px}
+.wa-float{position:fixed;inset-inline-start:16px;bottom:16px;z-index:60;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+@media (max-width:880px){.wa-float{bottom:84px}}
+.pb-cands{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;max-width:620px}
+.pb-cand{border:3px solid transparent;border-radius:18px;padding:0;background:var(--card);cursor:pointer;overflow:hidden;display:flex;flex-direction:column;font:inherit;color:var(--ink)}
+.pb-cand img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block}
+.pb-cand span{padding:8px;font-weight:600;font-size:14px}
+.pb-cand[aria-pressed=true]{border-color:var(--primary)}.pb-cand[aria-pressed=true] span{color:var(--primary)}
+.pb-fix{max-width:620px}.pb-fix textarea{min-height:64px;resize:vertical}
+.pb-drop-sm{min-height:0;padding:14px;font-size:14px}.pb-drop-sm img{width:64px;height:64px;object-fit:cover;border-radius:10px;margin-inline-end:8px}
+.pb-traits{border:1px solid var(--line);border-radius:14px;padding:12px 14px}.pb-traits summary{cursor:pointer;font-weight:600}
+.pb-tr-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.pb-tr-chk{display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:10px}
+.pb-q .note ul{margin:4px 0;padding-inline-start:18px}
+.note.warn{background:var(--warn-soft);color:var(--warn);display:block}
+.logo .wm{display:flex;flex-direction:column;line-height:1}.logo .wm b{font-weight:700;letter-spacing:-.01em}.logo .wm small{font-family:var(--f-display);font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--muted);margin-top:3px}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--logo-book:#ABA4FF}}:root[data-theme=dark]{--logo-book:#ABA4FF}
 </style>
 
 <div id="app">
@@ -746,7 +761,7 @@ footer.site{background:var(--canvas)}
   <header class="site" id="hdr">
     <div class="wrap hdr">
       <button class="icon-btn burger" data-act="drawer" aria-label="פתיחת תפריט"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-      <a class="logo" href="#home" aria-label="לומורה, דף הבית"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="3" y="7" width="34" height="26" rx="7" fill="#4B3FD1"/><path d="M20 11v18M20 11c-4-2-8-2-12 0v18c4-2 8-2 12 0M20 11c4-2 8-2 12 0v18c-4-2-8-2-12 0" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/><circle cx="31" cy="9" r="4" fill="#FFCC75"/></svg><span id="brandName">לומורה</span></a>
+      <a class="logo" href="#home" aria-label="אגדיבוק, דף הבית"><svg viewBox="0 0 40 40" aria-hidden="true" class="logo-mark"><path d="M20 35c-4.4-2.7-9.6-3.4-16-2.6V17.2c6.4-.8 11.6 0 16 2.7 4.4-2.7 9.6-3.5 16-2.7v15.2c-6.4-.8-11.6-.1-16 2.6z" fill="var(--logo-book,#1A1748)"/><path d="M20 19.9V35" stroke="#FFC83D" stroke-width="1.8" stroke-linecap="round"/><path d="M7.5 21c4.4-.3 7.6.5 10 1.8M7.5 25c4.4-.3 7.6.5 10 1.8M32.5 21c-4.4-.3-7.6.5-10 1.8M32.5 25c-4.4-.3-7.6.5-10 1.8" stroke="#FFC83D" stroke-opacity=".55" stroke-width="1.3" stroke-linecap="round" fill="none"/><path d="M20 2.2L21.5 6.1L25.7 6.3L22.5 9L23.5 13.1L20 10.8L16.5 13.1L17.5 9L14.3 6.3L18.5 6.1Z" fill="#FFC83D" stroke="#FFC83D" stroke-width="1" stroke-linejoin="round"/><circle cx="12" cy="11" r="1.1" fill="#FFC83D"/><circle cx="28.5" cy="12.5" r=".9" fill="#FFC83D"/></svg><span id="brandName" class="wm"><b>אגדיבוק</b><small>Agadibook</small></span></a>
       <nav class="main" aria-label="ניווט ראשי">
         <a href="#personal">הספרים</a><a href="#how">איך זה עובד</a><a href="#create-own">סיפור משלכם</a><a href="#corporate">מתנות לחברות</a><a href="#redeem">מימוש מתנה</a>
       </nav>
@@ -762,8 +777,9 @@ footer.site{background:var(--canvas)}
     <div class="wrap">
       <div class="foot-grid">
         <div class="stack" style="gap:12px">
-          <a class="logo" href="#home"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="3" y="7" width="34" height="26" rx="7" fill="#4B3FD1"/><path d="M20 11v18M20 11c-4-2-8-2-12 0v18c4-2 8-2 12 0M20 11c4-2 8-2 12 0v18c-4-2-8-2-12 0" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/><circle cx="31" cy="9" r="4" fill="#FFCC75"/></svg>לומורה</a>
+          <a class="logo" href="#home"><svg viewBox="0 0 40 40" aria-hidden="true" class="logo-mark"><path d="M20 35c-4.4-2.7-9.6-3.4-16-2.6V17.2c6.4-.8 11.6 0 16 2.7 4.4-2.7 9.6-3.5 16-2.7v15.2c-6.4-.8-11.6-.1-16 2.6z" fill="var(--logo-book,#1A1748)"/><path d="M20 19.9V35" stroke="#FFC83D" stroke-width="1.8" stroke-linecap="round"/><path d="M7.5 21c4.4-.3 7.6.5 10 1.8M7.5 25c4.4-.3 7.6.5 10 1.8M32.5 21c-4.4-.3-7.6.5-10 1.8M32.5 25c-4.4-.3-7.6.5-10 1.8" stroke="#FFC83D" stroke-opacity=".55" stroke-width="1.3" stroke-linecap="round" fill="none"/><path d="M20 2.2L21.5 6.1L25.7 6.3L22.5 9L23.5 13.1L20 10.8L16.5 13.1L17.5 9L14.3 6.3L18.5 6.1Z" fill="#FFC83D" stroke="#FFC83D" stroke-width="1" stroke-linejoin="round"/><circle cx="12" cy="11" r="1.1" fill="#FFC83D"/><circle cx="28.5" cy="12.5" r=".9" fill="#FFC83D"/></svg><span class="wm"><b>אגדיבוק</b><small>Agadibook</small></span></a>
           <p class="muted small">ספרי ילדים מאוירים שבהם הילד שלכם הוא הגיבור. מתחילים מתמונה אהובה ומקבלים ספר לשמור לשנים.</p>
+          <p class="small" id="footContact" hidden></p>
           <form class="stack" id="newsForm" style="gap:8px" novalidate>
             <label class="f" for="newsEmail">עדכונים על ספרים חדשים</label>
             <div class="row" style="flex-wrap:nowrap"><input class="inp" id="newsEmail" type="email" placeholder="your@email.com" dir="ltr" autocomplete="email"><button class="btn btn-primary btn-sm" style="min-height:48px">הרשמה</button></div>
@@ -774,7 +790,7 @@ footer.site{background:var(--canvas)}
         <div><h4>עזרה</h4><a href="#how">איך זה עובד</a><a href="#faq">שאלות נפוצות</a><a href="#contact">צור קשר</a><a href="#account">ההזמנות שלי</a><a href="#corporate">מתנות לחברות</a></div>
         <div><h4>מדיניות</h4><a href="#privacy">פרטיות ותמונות ילדים</a><a href="#terms">תנאי שימוש</a><a href="#shipping">משלוחים והחזרות</a><a href="#accessibility">הצהרת נגישות</a><a href="#admin" id="adminLink" hidden>ניהול האתר</a></div>
       </div>
-      <div class="foot-bottom"><span>© 2026 לומורה (שם זמני). כל האיורים והסיפורים באתר מקוריים.</span><span>גרסת תצוגה: מחירים ומפרטים לדוגמה עד שיאושרו</span></div>
+      <div class="foot-bottom"><span>© 2026 אגדיבוק. כל האיורים והסיפורים באתר מקוריים.</span><span>גרסת תצוגה: מחירים ומפרטים לדוגמה עד שיאושרו</span></div>
     </div>
   </footer>
 </div>
@@ -793,7 +809,8 @@ async function aiCall(body,tries=6){for(let i=0;;i++){try{return await aiCall1(b
 async function aiCall1(body){const r=await fetch(AI.endpoint,{method:"POST",signal:AbortSignal.timeout(100000),headers:{"Content-Type":"application/json",...(AI.anonKey?{apikey:AI.anonKey,Authorization:"Bearer "+AI.anonKey}:{})},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok||!d.image)throw Object.assign(new Error(d.error||"AI error"),{code:d.code||"error"});return "data:"+(d.mime||"image/png")+";base64,"+d.image}
 const b64=u=>String(u||"").split(",")[1]||"";
 const SCENE_EN={night:"a starry night sky over soft hills with a crescent moon",birthday:"a cosy birthday party with a cake, candles, balloons and bunting",space:"outer space next to a ringed planet and a little rocket on the moon",sea:"a sunny beach with gentle waves, a sailboat and a friendly fish",forest:"a friendly green forest path with mushrooms and fireflies",castle:"a lavender fairy-tale castle with flags on a grassy hill",garden:"a blooming garden with flowers, a big sprout and the sun",home:"a warm living room with a sofa and a big window",school:"a cheerful kindergarten room with a chalkboard and drawings",mountain:"snowy mountains with a little red flag on the peak",rainbow:"a big rainbow over green hills and clouds",monster:"a dim cosy bedroom at night with a friendly purple fluffy monster and a night light"};
-const BRAND={name:"לומורה",demoPricing:true,currency:"ILS",vat:0.18,shipping:{home:{label:"משלוח עד הבית",price:29,days:"7–10 ימי עסקים"},pickup:{label:"איסוף מנקודת חלוקה",price:15,days:"7–12 ימי עסקים"},digital:{label:"ספר דיגיטלי, ללא משלוח",price:0,days:"מיד לאחר אישור"}}};
+const BRAND={name:"אגדיבוק",whatsapp:"",phone:"",hours:"", // whatsapp: digits with country code, e.g. "972501234567"; empty hides the button
+ demoPricing:true,currency:"ILS",vat:0.18,shipping:{home:{label:"משלוח עד הבית",price:29,days:"7–10 ימי עסקים"},pickup:{label:"איסוף מנקודת חלוקה",price:15,days:"7–12 ימי עסקים"},digital:{label:"ספר דיגיטלי, ללא משלוח",price:0,days:"מיד לאחר אישור"}}};
 const FORMATS={hard:{label:"כריכה קשה",desc:"21×25 ס״מ, נייר מט עבה",price:149},gift:{label:"כריכה קשה בקופסת מתנה",desc:"כולל קופסה וכרטיס ברכה",price:189},digital:{label:"ספר דיגיטלי (PDF)",desc:"לקריאה בטלפון, טאבלט ומחשב",price:69}};
 /* ================= SOCIAL PROOF, POLICY & SEASONAL SHIPPING (owner: replace before launch) =================
    PLACEHOLDERS: rating, reviewCount, families and every entry in REVIEWS are SAMPLE values for the layout only.
@@ -1072,7 +1089,7 @@ function route(){
   const main=$("#main");main.innerHTML=view.html(q,arg);window.scrollTo(0,0);
   $$("nav.main a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+path));
   view.mount&&view.mount(main,q,arg);
-  document.title=(view.title?view.title(q,arg)+" · ":"")+"לומורה ספרים אישיים";
+  document.title=(view.title?view.title(q,arg)+" · ":"")+"אגדיבוק ספרים אישיים";
   updateCartBadge();
 }
 window.addEventListener("hashchange",route);
@@ -1116,7 +1133,7 @@ routes.home={html(){
   <div class="stack">
    <h2>למה ספר שהילד הוא הגיבור שלו?</h2>
    <p class="lead">ילדים מתאהבים בספר שבו הם רואים את עצמם. זה גם הסיבה שספר כזה הופך למתנה שחוזרים אליה שוב ושוב.</p>
-   <table class="cmp"><thead><tr><th></th><th>ספר רגיל מהמדף</th><th>ספר של לומורה</th></tr></thead><tbody>
+   <table class="cmp"><thead><tr><th></th><th>ספר רגיל מהמדף</th><th>ספר של אגדיבוק</th></tr></thead><tbody>
     <tr><td>הילד שלכם מצויר כגיבור, עם הפנים, השיער וצבע העור שלו</td><td class="no">✕</td><td class="yes">✓</td></tr>
     <tr><td>השם שלו בכותרת ובכל עמוד</td><td class="no">✕</td><td class="yes">✓</td></tr>
     <tr><td>מתנה שאין לאף ילד אחר</td><td class="no">✕</td><td class="yes">✓</td></tr>
@@ -1745,12 +1762,12 @@ routes.admin={title:()=>"ניהול",html(){
 /* ================= STATIC PAGES ================= */
 const staticPage=(t,body)=>({title:()=>t,html:()=>`<div class="wrap page-head"><h1>${t}</h1></div><div class="wrap section" style="padding-top:16px"><div class="prose">${body}</div></div>`});
 routes.privacy=staticPage("פרטיות ותמונות ילדים",`<div class="note demo"><b>טיוטה.</b> המדיניות הסופית תעבור בדיקה משפטית לפני השקה, כולל חוק הגנת הפרטיות ותקנות אבטחת מידע.</div><p class="lead">אנחנו מתייחסים לתמונות של ילדים כמידע רגיש.</p><h2>מה אנחנו אוספים</h2><p>שם הילד, לשון הסיפור, גיל ותחומי עניין אם בחרתם למלא, ותמונה אחת ליצירת הדמות. בהזמנה: שם, טלפון, אימייל וכתובת למשלוח.</p><h2>מה עושים עם התמונה</h2><p>התמונה משמשת רק ליצירת הדמות לספר. היא לא מתפרסמת, לא נמכרת ולא משמשת לאימון מודלים בלי הסכמה נפרדת ומפורשת.</p><h2>איפה זה נשמר</h2><p>${AI_ON()?"כדי לצייר את הדמות ואת עמודי התצוגה המקדימה, התמונה נשלחת לשרת שלנו ומשם לשירות האיורים Google Gemini. השרת שלנו לא שומר את התמונה. עותק של התמונה והדמות נשמר בדפדפן שלכם, ונמחק אוטומטית אחרי 7 ימים. כשמזמינים ספר, איורי הספר המוכנים (בלי התמונה עצמה) נשמרים אצלנו בתיקייה פרטית לצורך ההדפסה.":"בגרסת התצוגה הנוכחית, התמונה והדמות נשמרות רק בדפדפן שלכם ולא נשלחות לשרת."} פרטי הזמנה וטפסים נשלחים לבעלי האתר בלבד.</p><h2>מחיקה</h2><p>בעמוד <a href="#account?tab=settings">הגדרות ופרטיות</a> אפשר למחוק את כל התמונות והפרטים בלחיצה.</p><h2>הסכמת הורה</h2><p>לפני העלאת תמונה מבקשים אישור שאתם ההורים או האפוטרופוסים של הילד.</p>`);
-routes.terms=staticPage("תנאי שימוש",`<div class="note demo"><b>טיוטה.</b> התנאים הסופיים ייכתבו עם עורך דין לפני השקה.</div><p>הספרים מיוצרים במיוחד עבור כל לקוח, ולכן לא ניתן לבטל הזמנה אחרי שנשלחה להדפסה, בכפוף לחוק הגנת הצרכן. אם יש פגם בהדפסה, נדפיס מחדש בלי עלות.</p><p>כל הסיפורים והאיורים באתר מקוריים ושייכים ללומורה. מותר להשתמש בספר שהזמנתם לשימוש אישי.</p>`);
+routes.terms=staticPage("תנאי שימוש",`<div class="note demo"><b>טיוטה.</b> התנאים הסופיים ייכתבו עם עורך דין לפני השקה.</div><p>הספרים מיוצרים במיוחד עבור כל לקוח, ולכן לא ניתן לבטל הזמנה אחרי שנשלחה להדפסה, בכפוף לחוק הגנת הצרכן. אם יש פגם בהדפסה, נדפיס מחדש בלי עלות.</p><p>כל הסיפורים והאיורים באתר מקוריים ושייכים לאגדיבוק. מותר להשתמש בספר שהזמנתם לשימוש אישי.</p>`);
 routes.shipping=staticPage("משלוחים והחזרות",`<div class="note demo"><b>לדוגמה.</b> הזמנים והמחירים יאושרו מול בית הדפוס וחברת השילוח.</div><p>${Object.values(BRAND.shipping).map(s=>`<b>${s.label}:</b> ${s.price?fmtPrice(s.price):"ללא עלות"}, ${s.days}.`).join("<br>")}</p><p>קיבלתם ספר פגום? צלמו ושלחו לנו דרך <a href="#contact">צור קשר</a> ונדפיס מחדש.</p>`);
 routes.accessibility=staticPage("הצהרת נגישות",`<p>האתר נבנה לפי הנחיות WCAG 2.2 ברמה AA: ניווט מלא במקלדת, תוויות לכל שדה, ניגודיות צבעים, תמיכה בהקטנת תנועה ובקורא מסך, ופריסה מימין לשמאל.</p><p>נתקלתם בבעיה? <a href="#contact">כתבו לנו</a> ונתקן.</p><div class="note demo">רכז/ת נגישות ופרטי קשר יעודכנו לפני השקה.</div>`);
 routes.notfound={title:()=>"לא נמצא",html:()=>`<div class="wrap empty" style="padding-block:96px"><h1 style="font-size:34px">הדף הזה לא קיים</h1><p class="muted">אולי הקישור השתנה.</p><a class="btn btn-primary" href="#home">לדף הבית</a></div>`};
 /* ================= GLOBAL ================= */
-document.addEventListener("click",e=>{const d=e.target.closest("[data-act=drawer]");if(d){const close=()=>{$("#layer").innerHTML="";d.focus()};$("#layer").innerHTML=`<div class="drawer" role="dialog" aria-modal="true" aria-label="תפריט"><div class="scrim"></div><nav class="panel"><div class="row" style="justify-content:space-between;margin-bottom:12px"><a class="logo" href="#home">לומורה</a><button class="icon-btn" id="dClose" aria-label="סגירת התפריט">✕</button></div>${[["#personal","הספרים"],["#how","איך זה עובד"],["#create-own","סיפור משלכם"],["#corporate","מתנות לחברות"],["#redeem","מימוש מתנה"],["#account","החשבון שלי"],["#faq","שאלות נפוצות"],["#contact","צור קשר"]].map(([h,t])=>`<a class="nav-l" href="${h}">${t}</a>`).join("")}<a class="btn btn-primary btn-block" href="#personal" style="margin-top:12px">ליצור ספר</a></nav></div>`;const L=$("#layer");L.querySelector(".scrim").onclick=close;$("#dClose").onclick=close;L.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>setTimeout(close,0)));$("#dClose").focus();const k=ev=>{if(ev.key==="Escape"){close();document.removeEventListener("keydown",k)}};document.addEventListener("keydown",k)}});
+document.addEventListener("click",e=>{const d=e.target.closest("[data-act=drawer]");if(d){const close=()=>{$("#layer").innerHTML="";d.focus()};$("#layer").innerHTML=`<div class="drawer" role="dialog" aria-modal="true" aria-label="תפריט"><div class="scrim"></div><nav class="panel"><div class="row" style="justify-content:space-between;margin-bottom:12px"><a class="logo" href="#home"><svg viewBox="0 0 40 40" aria-hidden="true" class="logo-mark"><path d="M20 35c-4.4-2.7-9.6-3.4-16-2.6V17.2c6.4-.8 11.6 0 16 2.7 4.4-2.7 9.6-3.5 16-2.7v15.2c-6.4-.8-11.6-.1-16 2.6z" fill="var(--logo-book,#1A1748)"/><path d="M20 19.9V35" stroke="#FFC83D" stroke-width="1.8" stroke-linecap="round"/><path d="M7.5 21c4.4-.3 7.6.5 10 1.8M7.5 25c4.4-.3 7.6.5 10 1.8M32.5 21c-4.4-.3-7.6.5-10 1.8M32.5 25c-4.4-.3-7.6.5-10 1.8" stroke="#FFC83D" stroke-opacity=".55" stroke-width="1.3" stroke-linecap="round" fill="none"/><path d="M20 2.2L21.5 6.1L25.7 6.3L22.5 9L23.5 13.1L20 10.8L16.5 13.1L17.5 9L14.3 6.3L18.5 6.1Z" fill="#FFC83D" stroke="#FFC83D" stroke-width="1" stroke-linejoin="round"/><circle cx="12" cy="11" r="1.1" fill="#FFC83D"/><circle cx="28.5" cy="12.5" r=".9" fill="#FFC83D"/></svg><span class="wm"><b>אגדיבוק</b><small>Agadibook</small></span></a><button class="icon-btn" id="dClose" aria-label="סגירת התפריט">✕</button></div>${[["#personal","הספרים"],["#how","איך זה עובד"],["#create-own","סיפור משלכם"],["#corporate","מתנות לחברות"],["#redeem","מימוש מתנה"],["#account","החשבון שלי"],["#faq","שאלות נפוצות"],["#contact","צור קשר"]].map(([h,t])=>`<a class="nav-l" href="${h}">${t}</a>`).join("")}<a class="btn btn-primary btn-block" href="#personal" style="margin-top:12px">ליצור ספר</a></nav></div>`;const L=$("#layer");L.querySelector(".scrim").onclick=close;$("#dClose").onclick=close;L.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>setTimeout(close,0)));$("#dClose").focus();const k=ev=>{if(ev.key==="Escape"){close();document.removeEventListener("keydown",k)}};document.addEventListener("keydown",k)}});
 window.addEventListener("scroll",()=>$("#hdr").classList.toggle("scrolled",window.scrollY>8),{passive:true});
 $("#newsForm").addEventListener("submit",async e=>{e.preventDefault();const v=$("#newsEmail").value.trim();const msg=$("#newsMsg");if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){msg.textContent="כתובת האימייל לא נראית תקינה.";return}const nb=e.target.querySelector("button");if(nb)nb.disabled=true;msg.textContent="נרשמים...";const r=await sendInbox("newsletter",{email:v});if(nb)nb.disabled=false;msg.textContent=r.ok?"נרשמת! נעדכן רק כשיש ספר חדש.":"ההרשמה לא נשלחה. נסו שוב בעוד כמה דקות.";if(r.ok)$("#newsEmail").value=""});
 (()=>{const th=store.get("theme","");if(th)document.documentElement.dataset.theme=th})();
@@ -1790,6 +1807,17 @@ const pbMime=u=>(String(u).match(/^data:([^;]+);/)||[])[1]||"image/png";
 const PB_AVATARS=[{skinHex:"#F4D2B5",hairHex:"#3B2314",texture:"straight"},{skinHex:"#E8B98F",hairHex:"#5A3825",texture:"wavy"},{skinHex:"#C68B5E",hairHex:"#1E140E",texture:"curly"},{skinHex:"#8D5A3B",hairHex:"#120C08",texture:"coily"},{skinHex:"#F6DCC4",hairHex:"#C9A25A",texture:"straight"},{skinHex:"#D9A47A",hairHex:"#7A3E1D",texture:"wavy"}];
 const pbAvatarChar=(i,g)=>normChar({...defaultChar(g),...PB_AVATARS[i],length:g==="f"?"long":"short"});
 async function pbAvatarPhoto(i,g){const svg=portraitSVG(pbAvatarChar(i,g),"#EFE8DA").replace("<svg",'<svg width="768" height="768"');const url="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);return pbPrepPhoto(url,768)}
+/* ---- photo quality gate: warns, never blocks ---- */
+async function pbPhotoCheck(src){const w=[];try{const im=await loadImg(src);const W=im.naturalWidth||im.width,H=im.naturalHeight||im.height;
+ if(Math.min(W,H)<500)w.push("התמונה קטנה. תמונה גדולה וחדה יותר תיתן דמות דומה יותר.");
+ const S=256,c=document.createElement("canvas");const r=S/Math.max(W,H);c.width=Math.round(W*r);c.height=Math.round(H*r);const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(im,0,0,c.width,c.height);
+ const d=x.getImageData(0,0,c.width,c.height).data,g=new Float32Array(c.width*c.height);let sum=0;for(let i=0;i<g.length;i++){g[i]=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2];sum+=g[i]}const mean=sum/g.length;
+ if(mean<65)w.push("התמונה חשוכה. עדיף תמונה באור יום.");else if(mean>220)w.push("התמונה בהירה מאוד. עדיף תמונה בלי אור חזק מאחור.");
+ let n=0,a=0,a2=0;for(let y=1;y<c.height-1;y++)for(let X=1;X<c.width-1;X++){const i=y*c.width+X;const l=4*g[i]-g[i-1]-g[i+1]-g[i-c.width]-g[i+c.width];a+=l;a2+=l*l;n++}const v=a2/n-(a/n)**2;
+ if(v<40)w.push("התמונה נראית מטושטשת. תמונה חדה יותר תיתן תוצאה טובה יותר.");
+ if("FaceDetector" in window){try{const f=await new FaceDetector({fastMode:true}).detect(im);if(!f.length)w.push("לא הצלחנו לזהות פנים. עדיף תמונה מלפנים.");else if(f.length>1)w.push("יש כמה אנשים בתמונה. עדיף תמונה שבה רק הילד.");else if(f[0].boundingBox.width/W<.18)w.push("הפנים קטנות בתמונה. עדיף תמונה קרובה יותר.")}catch(e){}}
+ }catch(e){}return w}
+function pbShowQ(el,w){if(!el)return;el.innerHTML=w.length?`<div class="note warn small"><b>כדאי לשים לב:</b><ul>${w.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>אפשר להמשיך גם כך, או לבחור תמונה אחרת.</div>`:`<div class="note ok small">התמונה נראית טובה ליצירת הדמות.</div>`}
 /* ---- prompts ---- */
 function pbSheetPrompt(b){const others=b.characters.filter(c=>c.id!=="hero");
  return ["דף ייחוס חזותי קבוע (character reference sheet) לספר ילדים, יחס 16:9. רקע שמנת בהיר ונקי. כל דמות מצוירת פעם אחת בגוף מלא במבט קדמי, בשורה אחת עם רווח ביניהן, ובנוסף ציור ראש וכתפיים מקרוב של "+pbHero(b)+" בצד ימין. ללא שום טקסט, שמות, תוויות, מספרים או לוגואים.",
@@ -1799,11 +1827,18 @@ function pbSheetPrompt(b){const others=b.characters.filter(c=>c.id!=="hero");
   b.recurringProps&&b.recurringProps.length?"אביזרים קבועים לצייר בתחתית הדף: "+b.recurringProps.join(", "):"",
   "התוצאה תשמש כבסיס לכל איורי הספר, לכן לקבוע במדויק פנים, שיער, בגדים, צבעים ופרופורציות."].filter(Boolean).join(" | ")}
 const pbSlotPrompt=(b,slot)=>slot==="cover"?pbImgText(b.coverPromptTemplate,b):pbImgText(b.pages[+slot.slice(1)-1].illustrationPromptTemplate,b);
-function pbHeroPrompt(b,n){return ["דמות אחת בלבד: "+pbHero(b)+" של הספר, מצויר/ת לפי התמונה של הילד. גוף מלא, מבט קדמי, עומד/ת ומחייך/ת, על רקע שמנת בהיר ונקי. בלי דמויות נוספות, בלי חיות, בלי אביזרים ובלי רקע מצויר. ללא שום טקסט.",
-  b.illustrationStyle,"מראה ותלבושת קבועים: "+pbImgText(b.heroAppearanceRule,b),
-  "הדמות תשמש כבסיס לכל הספר, לכן לשמור במדויק על הפנים, צבע העור, העיניים, השיער (צבע, אורך, מרקם ותסרוקת) והפרופורציות של הילד מהתמונה."+(n?" גרסה "+(n+1)+", עם הבעה מעט שונה.":"")].join(" | ")}
-async function pbRenderHero(m,n){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
- return aiCall({mode:"render",photo:b64(photo),prompt:pbHeroPrompt(b,n),aspect:"4:5",gender:pbG(b)})}
+function pbTraitsText(t){if(!t)return "";const a=[];if(t.hairColor)a.push("hair colour: "+t.hairColor);if(t.hairType)a.push("hair texture: "+t.hairType);if(t.hairLen)a.push("hair length: "+t.hairLen);if(t.eyes)a.push("eye colour: "+t.eyes);if(t.marks&&t.marks.length)a.push("has: "+t.marks.join(", "));if(t.notes)a.push("parent's note (Hebrew): \""+t.notes+"\"");return a.join("; ")}
+function pbHeroPrompt(b,n,m,fix){const tr=pbTraitsText(m&&m.traits);return [
+ "Draw ONE character only: the hero of this children's book, drawn from the real child in the reference photo(s). Full body, front view, standing relaxed and smiling, face large and clearly lit, on a plain very light cream background. No other characters, no animals, no props, no scenery, no text.",
+ "Art style (keep exactly): "+b.illustrationStyle,
+ "Fixed outfit and look for this book: "+pbImgText(b.heroAppearanceRule,b),
+ "LIKENESS IS THE TOP PRIORITY. A parent must instantly recognise their own child. Copy from the photo(s): face shape and cheeks, eye shape, eye spacing and eye colour, eyebrows, nose shape, mouth and smile (including gaps or missing teeth), ears, the exact skin tone, freckles, moles or marks, hair colour, hair length, hair texture (straight, wavy, curly or coily), fringe and parting, and glasses if worn. Keep the child's real age, head-to-body proportion and build. Do not idealise, slim, age up, lighten or darken the skin, or change ethnicity. Stylise only the rendering, never the features.",
+ tr?"Features confirmed by the parent (they override anything unclear in the photo): "+tr+".":"",
+ fix?"The parent saw an earlier attempt and asked for this correction (written in Hebrew): \""+fix+"\". Apply it while keeping everything else.":"",
+ n?"Variation "+(n+1)+": a slightly different expression, same features.":""].filter(Boolean).join("\n")}
+async function pbRenderHero(m,n,fix){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
+ const extra=[];for(const k of ["photo2","photo3"]){const u=await pbImg(m.id,k);if(u)extra.push(b64(u))}
+ return aiCall({mode:"render",photo:b64(photo),extra,prompt:pbHeroPrompt(b,n,m,fix),aspect:"4:5",gender:pbG(b)})}
 async function pbRender(m){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  const hero=await pbImg(m.id,"hero");
  return aiCall({mode:"render",photo:b64(photo),...(hero?{sheet:b64(hero),sheetMime:pbMime(hero)}:{}),prompt:(hero?"תמונה 2 היא הדמות המאוירת של "+pbHero(b)+" שההורה אישר. לצייר את "+pbHero(b)+" בדף בדיוק כמו בתמונה 2, ולהוסיף לידו/ה את שאר הדמויות. | ":"")+pbSheetPrompt(b),aspect:"16:9",gender:pbG(b)})}
@@ -1834,12 +1869,12 @@ const PRINT={trimW:210,trimH:250,bleed:3,dpi:300}; // change to the printer's sp
 const pxMM=mm=>Math.round(mm/25.4*PRINT.dpi);
 function pbWrap(x,text,maxW){const words=String(text).split(/\s+/);const lines=[];let cur="";for(const w of words){const t=cur?cur+" "+w:w;if(x.measureText(t).width>maxW&&cur){lines.push(cur);cur=w}else cur=t}if(cur)lines.push(cur);return lines}
 async function pbPrintPages(pid,m){const b=pbBy(m.book);const W=pxMM(PRINT.trimW+2*PRINT.bleed),H=pxMM(PRINT.trimH+2*PRINT.bleed),safe=pxMM(PRINT.bleed+14);
- try{await document.fonts.load('700 120px "Assistant"');await document.fonts.load('500 80px "Assistant"')}catch(e){}
+ try{await document.fonts.load('700 120px "Rubik"');await document.fonts.load('700 120px "Assistant"');await document.fonts.load('500 80px "Assistant"')}catch(e){}
  const out=[];const mk=()=>{const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.direction="rtl";return [c,x]};
  // 00 cover: art + title
  {const [c,x]=mk();const im=await loadImg(await pbImg(pid,"cover"));const sc=Math.max(W/im.width,H/im.height);x.drawImage(im,(W-im.width*sc)/2,(H-im.height*sc)/2,im.width*sc,im.height*sc);
   const g=x.createLinearGradient(0,H*.62,0,H);g.addColorStop(0,"rgba(10,8,30,0)");g.addColorStop(1,"rgba(10,8,30,.72)");x.fillStyle=g;x.fillRect(0,H*.62,W,H*.38);
-  x.font='700 190px "Assistant", sans-serif';x.textAlign="center";x.fillStyle="#fff";x.shadowColor="rgba(0,0,0,.45)";x.shadowBlur=24;
+  x.font='700 180px "Rubik", "Assistant", sans-serif';x.textAlign="center";x.fillStyle="#fff";x.shadowColor="rgba(0,0,0,.45)";x.shadowBlur=24;
   const lines=pbWrap(x,pbTitle(b,m.name),W-2*safe);let y=H-safe-(lines.length-1)*220;lines.forEach(l=>{x.fillText(l,W/2,y);y+=220});out.push(c)}
  // 01..12 text pages
  for(let i=0;i<12;i++){const [c,x]=mk();x.fillStyle="#FFFBF3";x.fillRect(0,0,W,H);x.fillStyle="#2A2540";x.textAlign="right";x.font='500 96px "Assistant", sans-serif';
@@ -1871,13 +1906,25 @@ async function pbHomeView(root){const mine=await pbList().catch(()=>[]);
  ${mine.length?`<section class="box stack pb-mine"><h2 style="font-size:22px">הספרים שיצרתם במכשיר הזה</h2><p class="small muted">התמונות והאיורים שמורים רק בדפדפן הזה, ונמחקים אוטומטית ${PB_KEEP_DAYS} ימים אחרי היצירה.</p>${mine.map(m=>{const b=pbBy(m.book);return b?`<div class="pb-mine-row"><b>${esc(pbTitle(b,m.name))}</b><span class="small muted">${m.approved?"אושר":"בתהליך"} · יימחק ב-${new Date(m.createdAt+PB_KEEP_DAYS*864e5).toLocaleDateString("he-IL")}</span><span class="row"><a class="btn btn-soft btn-sm" href="#personal?p=${m.id}">לפתוח</a><button class="btn btn-ghost btn-sm" data-del="${m.id}">מחיקת התמונות והספר</button></span></div>`:""}).join("")}</section>`:""}`;
  $$("[data-del]",root).forEach(bt=>bt.onclick=async()=>{if(!confirmInline(bt,"למחוק לצמיתות?"))return;await pbDeleteProject(bt.dataset.del);toast("התמונות והאיורים נמחקו מהמכשיר");pbHomeView(root)})}
 function confirmInline(bt,txt){if(bt.dataset.armed)return true;bt.dataset.armed="1";const o=bt.textContent;bt.textContent=txt;bt.classList.add("btn-danger");setTimeout(()=>{if(bt.isConnected){delete bt.dataset.armed;bt.textContent=o;bt.classList.remove("btn-danger")}},4000);return false}
-function pbFormView(root,b){const g=pbG(b);let photo=null,avatar=-1;
+function pbFormView(root,b){const g=pbG(b);let photo=null,avatar=-1,extras=[];
  root.innerHTML=`<a class="small" href="#personal">→ כל הספרים</a><div class="pb-form"><div>${pbCoverArt(b)}<p class="small muted" style="margin-top:10px">${esc(b.genre)} · גילאי ${esc(b.ageRange)}</p></div>
  <form class="stack box" id="pbF" novalidate><h1 style="font-size:clamp(24px,3vw,32px)">${esc(pbTitle(b,"השם שלכם"))}</h1>
  <label class="f" for="pbName">${g==="f"?"שם הגיבורה":"שם הגיבור"}<input class="inp" id="pbName" maxlength="20" autocomplete="off" placeholder="${g==="f"?"למשל: נועה":"למשל: איתי"}"></label>
  <div class="stack" style="gap:8px"><b>איך ${g==="f"?"היא תיראה":"הוא ייראה"}?</b>
   <div class="pb-src" role="radiogroup"><label><input type="radio" name="pbsrc" value="photo" checked> להעלות תמונה</label><label><input type="radio" name="pbsrc" value="avatar"> לבחור אווטאר</label></div>
-  <div id="pbPhotoBox"><label class="pb-drop" for="pbFile"><input type="file" id="pbFile" accept="image/*" hidden><span id="pbPrev">לבחור תמונה ברורה של הפנים, באור טוב, בלי משקפי שמש</span></label></div>
+  <div id="pbPhotoBox" class="stack" style="gap:10px"><label class="pb-drop" for="pbFile"><input type="file" id="pbFile" accept="image/*" hidden><span id="pbPrev">לבחור תמונה ברורה של הפנים, מלפנים, באור טוב, בלי משקפי שמש או כובע</span></label>
+   <div id="pbQ" class="pb-q" aria-live="polite"></div>
+   <label class="pb-drop pb-drop-sm" for="pbFile2"><input type="file" id="pbFile2" accept="image/*" multiple hidden><span id="pbPrev2">+ עוד 1 או 2 תמונות (לא חובה). תמונה בחיוך או מזווית אחרת עוזרת לדמות להיות דומה יותר</span></label>
+   <details class="pb-traits"><summary>פרטים שעוזרים לדמיון (לא חובה, לוקח 20 שניות)</summary>
+    <div class="pb-tr-grid">
+     <label class="f">צבע שיער<select class="inp" data-tr="hairColor"><option value="">כמו בתמונה</option><option value="black">שחור</option><option value="dark brown">חום כהה</option><option value="light brown">חום בהיר</option><option value="blond">בלונדיני</option><option value="red / ginger">ג׳ינג׳י</option></select></label>
+     <label class="f">סוג שיער<select class="inp" data-tr="hairType"><option value="">כמו בתמונה</option><option value="straight">חלק</option><option value="wavy">גלי</option><option value="curly">מתולתל</option><option value="tight coily / afro">תלתלים קטנים / אפרו</option></select></label>
+     <label class="f">אורך שיער<select class="inp" data-tr="hairLen"><option value="">כמו בתמונה</option><option value="very short / buzz cut">קצוץ</option><option value="short">קצר</option><option value="shoulder length">עד הכתפיים</option><option value="long">ארוך</option></select></label>
+     <label class="f">צבע עיניים<select class="inp" data-tr="eyes"><option value="">כמו בתמונה</option><option value="dark brown">חום כהה</option><option value="light brown / hazel">חום בהיר / דבש</option><option value="green">ירוק</option><option value="blue">כחול</option><option value="grey">אפור</option></select></label>
+    </div>
+    <div class="pb-tr-chk">${[["glasses","משקפיים"],["freckles","נמשים"],["dimples","גומות חן"],["missing front tooth","שן קדמית חסרה"],["fringe / bangs","פוני"],["ponytail or braids","קוקו או צמות"]].map(([v,l])=>`<label class="chk"><input type="checkbox" data-trc="${v}"> ${l}</label>`).join("")}</div>
+    <label class="f">עוד משהו מיוחד בפנים? <input class="inp" data-tr="notes" maxlength="120" placeholder="למשל: שומה קטנה מעל השפה, גבות עבות"></label>
+   </details></div>
   <div id="pbAvBox" hidden><div class="pb-avs">${PB_AVATARS.map((_,i)=>`<button type="button" class="pb-av" data-av="${i}" aria-pressed="false" aria-label="אווטאר ${i+1}">${portraitSVG(pbAvatarChar(i,g),"#EFE8DA")}</button>`).join("")}</div></div></div>
  <div class="stack box pb-consent"><b>פרטיות התמונה</b>
   <label class="chk"><input type="checkbox" id="pbC1"> אני ההורה או האפוטרופוס של ${g==="f"?"הילדה":"הילד"}, ואני מאשר/ת להשתמש בתמונה רק כדי ליצור את איורי הספר.</label>
@@ -1887,7 +1934,9 @@ function pbFormView(root,b){const g=pbG(b);let photo=null,avatar=-1;
  const f=$("#pbF",root),err=$("#pbErr",root);
  $$("input[name=pbsrc]",root).forEach(r=>r.onchange=()=>{const av=r.value==="avatar"&&r.checked;$("#pbAvBox",root).hidden=!av;$("#pbPhotoBox",root).hidden=av;$(".pb-consent",root).hidden=av});
  $("#pbFile",root).onchange=async e=>{const file=e.target.files[0];if(!file)return;if(!/^image\//.test(file.type)){err.textContent="צריך לבחור קובץ תמונה";return}if(file.size>15e6){err.textContent="התמונה גדולה מדי (עד 15MB)";return}
-  const url=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(file)});try{photo=await pbPrepPhoto(url);$("#pbPrev",root).innerHTML=`<img src="${photo}" alt="התמונה שנבחרה">`;err.textContent=""}catch(x){err.textContent="לא הצלחנו לקרוא את התמונה, נסו קובץ אחר"}};
+  const url=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(file)});try{photo=await pbPrepPhoto(url,1536);$("#pbPrev",root).innerHTML=`<img src="${photo}" alt="התמונה שנבחרה">`;err.textContent="";pbShowQ($("#pbQ",root),await pbPhotoCheck(photo))}catch(x){err.textContent="לא הצלחנו לקרוא את התמונה, נסו קובץ אחר"}};
+ $("#pbFile2",root).onchange=async e=>{const fs=[...e.target.files].filter(f=>/^image\//.test(f.type)&&f.size<=15e6).slice(0,2);extras=[];for(const file of fs){const url=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(file)});try{extras.push(await pbPrepPhoto(url,1024))}catch(x){}}
+  $("#pbPrev2",root).innerHTML=extras.length?extras.map(u=>`<img src="${u}" alt="">`).join("")+`<span class="small muted">${extras.length===1?"תמונה נוספת נבחרה":"2 תמונות נוספות נבחרו"}. לחיצה כדי להחליף</span>`:"+ עוד 1 או 2 תמונות (לא חובה)"};
  $$("[data-av]",root).forEach(bt=>bt.onclick=()=>{avatar=+bt.dataset.av;$$("[data-av]",root).forEach(x=>x.setAttribute("aria-pressed",x===bt))});
  f.onsubmit=async e=>{e.preventDefault();const name=$("#pbName",root).value.trim().replace(/\s+/g," ");const src=$("input[name=pbsrc]:checked",root).value;
   if(!name){err.textContent="צריך לכתוב שם";$("#pbName",root).focus();return}
@@ -1897,7 +1946,9 @@ function pbFormView(root,b){const g=pbG(b);let photo=null,avatar=-1;
   if(!AI_ON()){err.textContent="יצירת האיורים פועלת באתר המלא בלבד";return}
   const btn=f.querySelector("button[type=submit]");btn.disabled=true;
   try{const id=uid();const img=src==="photo"?photo:await pbAvatarPhoto(avatar,g);await pbSetImg(id,"photo",img);
-   await pbSaveMeta({id,book:b.id,name,src,avatar:src==="avatar"?avatar:null,consentAt:src==="photo"?Date.now():null,createdAt:Date.now(),sheetOk:false,approved:false,fmt:"hard"});
+   if(src==="photo")for(let i=0;i<extras.length;i++)await pbSetImg(id,"photo"+(i+2),extras[i]);
+   const traits={};if(src==="photo"){$$("[data-tr]",root).forEach(x=>{const v=x.value.trim();if(v)traits[x.dataset.tr]=v.slice(0,120)});const ch=$$("[data-trc]:checked",root).map(x=>x.dataset.trc);if(ch.length)traits.marks=ch}
+   await pbSaveMeta({id,book:b.id,name,src,traits,avatar:src==="avatar"?avatar:null,consentAt:src==="photo"?Date.now():null,createdAt:Date.now(),sheetOk:false,approved:false,fmt:"hard"});
    location.hash="#personal?p="+id}catch(x){console.error(x);err.textContent="לא הצלחנו לשמור במכשיר. ייתכן שהדפדפן במצב פרטי.";btn.disabled=false}}}
 async function pbProjectView(root,id){const m=await pbMeta(id);
  if(!m){root.innerHTML=`<div class="empty" style="padding-block:64px"><h1 style="font-size:28px">הספר לא נמצא במכשיר הזה</h1><p class="muted">ייתכן שנמחק, או שעברו ${PB_KEEP_DAYS} ימים מאז שנוצר.</p><a class="btn btn-primary" href="#personal">ליצור ספר חדש</a></div>`;return}
@@ -1906,16 +1957,25 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
  const head=`<div class="pb-head"><a class="small" href="#personal">→ כל הספרים</a><h1>${esc(pbTitle(b,m.name))}</h1>
   <ol class="pb-steps"><li class="${m.heroOk?"done":"cur"}">הדמות של ${esc(m.name)}</li><li class="${m.sheetOk?(m.approved?"done":"cur"):""}">כריכה ו-12 עמודים</li><li class="${m.approved?"done":""}">אישור הספר</li></ol></div>`;
  const foot=`<div class="pb-privacy small muted">${photo?`התמונה שמורה רק במכשיר הזה ותימחק אוטומטית ב-${new Date(m.createdAt+PB_KEEP_DAYS*864e5).toLocaleDateString("he-IL")}.`:"התמונה כבר נמחקה מהמכשיר."} <button class="linkbtn" id="pbDelPhoto" ${photo?"":"hidden"}>למחוק את התמונה עכשיו</button> · <button class="linkbtn" id="pbDelAll">למחוק את כל הספר והאיורים</button></div>`;
- if(!m.heroOk){const hero=await pbImg(id,"hero");let n=m.heroN||0;
-  root.innerHTML=head+`<section class="box stack pb-sheet"><h2>הדמות של ${esc(m.name)}</h2><p class="muted">קודם מציירים רק את ${esc(m.name)}, בלי שאר הדמויות. בודקים שהפנים, השיער, הצבעים והפרופורציות דומים, ואם צריך מציירים שוב. אחרי האישור נפתח הספר המלא, ו${esc(m.name)} מוכנס לכל העמודים.</p>
-   <div class="pb-hero-img" id="pbHeroBox">${hero?`<img src="${hero}" alt="הדמות של ${esc(m.name)}">`:`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים את ${esc(m.name)}. זה לוקח בערך חצי דקה.</span></div>`}</div>
+ if(!m.heroOk){const hero=await pbImg(id,"hero"),alt=await pbImg(id,"heroAlt");let n=m.heroN||0;const G=pbG(b)==="f";
+  const wait=`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים שתי גרסאות של ${esc(m.name)}. זה לוקח פחות מדקה.</span></div>`;
+  const cands=u=>u.filter(Boolean).map((x,k)=>`<button type="button" class="pb-cand" data-k="${k}" aria-pressed="${k===0}"><img src="${x}" alt="גרסה ${k+1} של ${esc(m.name)}"><span>${k===0?"נבחרה":"לבחור בגרסה הזו"}</span></button>`).join("");
+  root.innerHTML=head+`<section class="box stack pb-sheet"><h2>הדמות של ${esc(m.name)}</h2><p class="muted">קודם מציירים רק את ${esc(m.name)}. בחרו את הגרסה הכי דומה. אם משהו לא דומה, כתבו מה לתקן ונצייר שוב. אחרי האישור נפתח הספר המלא, ו${esc(m.name)} מוכנס לכל העמודים.</p>
+   <div class="pb-cands" id="pbHeroBox">${hero?cands([hero,alt]):wait}</div>
    <span class="small bad" id="pbMsg" aria-live="polite"></span>
-   <div class="row"><button class="btn btn-primary" id="pbOkHero" ${hero?"":"disabled"}>זה ${pbG(b)==="f"?"היא":"הוא"}, אפשר להמשיך</button><button class="btn btn-ghost" id="pbReHero" ${hero?"":"hidden"}>לצייר שוב</button><a class="btn btn-ghost" href="#personal?book=${b.id}">להתחיל מחדש עם תמונה אחרת</a></div></section>`+foot;
+   <div class="row"><button class="btn btn-primary" id="pbOkHero" ${hero?"":"disabled"}>זה ${G?"היא":"הוא"}, אפשר להמשיך</button><a class="btn btn-ghost" href="#personal?book=${b.id}">להתחיל מחדש עם תמונה אחרת</a></div>
+   <div class="pb-fix stack" id="pbFixBox" ${hero?"":"hidden"}><label class="f" for="pbFix">לא מספיק ${G?"דומה":"דומה"}? כתבו מה שונה, ונצייר שוב<textarea class="inp" id="pbFix" rows="2" maxlength="200" placeholder="למשל: השיער יותר מתולתל וכהה, העיניים יותר מלוכסנות, יש ${G?"לה":"לו"} גומות"></textarea></label><button class="btn btn-ghost" id="pbReHero" type="button">לצייר שוב</button></div></section>`+foot;
   pbBindFoot(root,m);
-  const drawH=async()=>{const box=$("#pbHeroBox",root),msg=$("#pbMsg",root);msg.textContent="";box.innerHTML=`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים את ${esc(m.name)}. זה לוקח בערך חצי דקה.</span></div>`;$("#pbOkHero",root).disabled=true;$("#pbReHero",root).hidden=true;
-   try{const u=await pbRenderHero(m,n);await pbSetImg(id,"hero",u);m.heroN=n;await pbSaveMeta(m);if(!root.isConnected)return;box.innerHTML=`<img src="${u}" alt="הדמות של ${esc(m.name)}">`;$("#pbOkHero",root).disabled=false}catch(e){if(!root.isConnected)return;msg.textContent=pbErr(e);box.innerHTML=""}$("#pbReHero",root).hidden=false};
-  $("#pbReHero",root).onclick=()=>{n++;drawH()};
-  $("#pbOkHero",root).onclick=async()=>{m.heroOk=true;m.sheetOk=true;for(const s of pbSlots())await PBDB.del("i:"+id+":"+s);await pbSaveMeta(m);pbProjectView(root,id)};
+  const bindC=()=>$$(".pb-cand",root).forEach(bt=>bt.onclick=async()=>{if(bt.dataset.k==="0")return;const h=await pbImg(id,"hero"),a2=await pbImg(id,"heroAlt");await pbSetImg(id,"hero",a2);await pbSetImg(id,"heroAlt",h);$("#pbHeroBox",root).innerHTML=cands([a2,h]);bindC()});
+  const drawH=async fix=>{const box=$("#pbHeroBox",root),msg=$("#pbMsg",root);msg.textContent="";box.innerHTML=wait;$("#pbOkHero",root).disabled=true;$("#pbFixBox",root).hidden=true;
+   const r=await Promise.allSettled([pbRenderHero(m,n,fix),pbRenderHero(m,n+1,fix)]);n+=2;const ok=r.filter(x=>x.status==="fulfilled").map(x=>x.value);
+   if(!root.isConnected)return;
+   if(ok.length){await pbSetImg(id,"hero",ok[0]);if(ok[1])await pbSetImg(id,"heroAlt",ok[1]);else await PBDB.del("i:"+id+":heroAlt");m.heroN=n;if(fix)m.heroFix=fix;await pbSaveMeta(m);box.innerHTML=cands(ok);bindC();$("#pbOkHero",root).disabled=false}
+   else{msg.textContent=pbErr(r[0].reason);const h=await pbImg(id,"hero");box.innerHTML=h?cands([h,await pbImg(id,"heroAlt")]):"";if(h)bindC();$("#pbOkHero",root).disabled=!h}
+   $("#pbFixBox",root).hidden=false};
+  bindC();
+  $("#pbReHero",root).onclick=()=>{const fix=$("#pbFix",root).value.trim().replace(/[<>{}]/g,"").slice(0,200);drawH(fix)};
+  $("#pbOkHero",root).onclick=async()=>{m.heroOk=true;m.sheetOk=true;for(const s of pbSlots())await PBDB.del("i:"+id+":"+s);await PBDB.del("i:"+id+":heroAlt");await pbSaveMeta(m);pbProjectView(root,id)};
   if(!hero&&AI_ON())drawH();else if(!hero){$("#pbMsg",root).textContent="יצירת האיורים פועלת באתר המלא בלבד"}
   return}
  if(!m.sheetOk){
@@ -1975,7 +2035,7 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
  drawBook();prog();
  const missing=pages.map(p=>p.slot).filter(s=>!imgs[s]);
  if(missing.length){if(!AI_ON()){$("#pbProg",root).textContent="יצירת האיורים פועלת באתר המלא בלבד"}else if(!photo){$("#pbProg",root).className="note demo";$("#pbProg",root).textContent=PB_ERR.no_photo}else run(missing)}}
-function pbBindFoot(root,m){const d1=$("#pbDelPhoto",root);if(d1)d1.onclick=async()=>{if(!confirmInline(d1,"ללחוץ שוב כדי למחוק"))return;await PBDB.del("i:"+m.id+":photo");toast("התמונה נמחקה מהמכשיר. האיורים שכבר נוצרו נשארו.");pbProjectView(root,m.id)};
+function pbBindFoot(root,m){const d1=$("#pbDelPhoto",root);if(d1)d1.onclick=async()=>{if(!confirmInline(d1,"ללחוץ שוב כדי למחוק"))return;for(const k of ["photo","photo2","photo3"])await PBDB.del("i:"+m.id+":"+k);toast("התמונה נמחקה מהמכשיר. האיורים שכבר נוצרו נשארו.");pbProjectView(root,m.id)};
  const d2=$("#pbDelAll",root);if(d2)d2.onclick=async()=>{if(!confirmInline(d2,"ללחוץ שוב כדי למחוק הכול"))return;await pbDeleteProject(m.id);toast("התמונה, האיורים והספר נמחקו מהמכשיר");location.hash="#personal"}}
 
 if(S.cart.some(i=>!String(i.book).startsWith("pb:"))){S.cart=S.cart.filter(i=>String(i.book).startsWith("pb:"));save("cart");updateCartBadge()} // the old catalog was removed
@@ -1983,6 +2043,12 @@ routes.books={...routes.personal,title:()=>"כל הספרים",mount(el){return 
 {const go=(q,slug)=>{const id=slug&&pbBy(slug)?slug:null;setTimeout(()=>location.replace(id?"#personal?book="+id:"#personal"),0);return `<div class="wrap" style="padding:48px 0">מעבירים לספרים...</div>`};
  routes.book={title:()=>"הספרים",html:go,mount(){}};
  const oldCreate=routes.create;routes.create={...oldCreate,html(q){if(q&&q.resume)return oldCreate.html(q);return go(q,q&&q.book)},mount(m,q){if(q&&q.resume)return oldCreate.mount(m,q)}};}
+/* ---- contact: WhatsApp button + phone/hours, shown only once BRAND has real details ---- */
+(function contactInit(){const wa=String(BRAND.whatsapp||"").replace(/\D/g,"");const fc=document.getElementById("footContact");
+ const bits=[];if(BRAND.phone)bits.push(`טלפון: <a href="tel:${esc(BRAND.phone.replace(/[^\d+]/g,""))}" dir="ltr">${esc(BRAND.phone)}</a>`);if(wa)bits.push(`<a href="https://wa.me/${wa}" target="_blank" rel="noopener">וואטסאפ</a>`);if(BRAND.hours)bits.push(esc(BRAND.hours));
+ if(fc&&bits.length){fc.innerHTML=bits.join(" · ");fc.hidden=false}
+ if(wa){const a=document.createElement("a");a.className="wa-float";a.href="https://wa.me/"+wa+"?text="+encodeURIComponent("היי, יש לי שאלה על ספר אישי");a.target="_blank";a.rel="noopener";a.setAttribute("aria-label","שאלה בוואטסאפ");
+  a.innerHTML='<svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><path fill="#fff" d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3zm0 23.6c-2 0-4-.5-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.6 10.6 0 1 1 16 26.6zm5.8-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a8.7 8.7 0 0 1-4.3-3.8c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.1-1.2 2.8 1.2 3.2 1.4 3.4 2.4 3.7 5.8 5.2c2.2.9 3 1 4.1.8.7-.1 1.9-.8 2.2-1.5s.3-1.4.2-1.5-.3-.2-.6-.4z"/></svg>';document.body.appendChild(a)}})();
 route();
 </script>
 

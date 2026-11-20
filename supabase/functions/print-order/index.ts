@@ -1,4 +1,4 @@
-// Lumora: build print-ready PDFs for an order and send them to the printer (Bari print).
+// Agadibook: build print-ready PDFs for an order and send them to the printer (Bari print).
 // Secrets (Supabase dashboard > Edge Functions > Secrets):
 //   PRINT_EMAIL      the printer's order inbox (required to send)
 //   RESEND_API_KEY   email sending via resend.com (required to send; needs a verified sender domain)
@@ -89,7 +89,7 @@ async function sendToPrinter(orderId: string) {
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: Deno.env.get("PRINT_FROM") || "Lumora <onboarding@resend.dev>", to: [to], cc: Deno.env.get("PRINT_CC") ? [Deno.env.get("PRINT_CC")] : undefined, subject: `הזמנת הדפסה ${orderId}`, text }),
+    body: JSON.stringify({ from: Deno.env.get("PRINT_FROM") || "Agadibook <onboarding@resend.dev>", to: [to], cc: Deno.env.get("PRINT_CC") ? [Deno.env.get("PRINT_CC")] : undefined, subject: `הזמנת הדפסה ${orderId}`, text }),
   });
   if (!r.ok) {
     const e = (await r.text()).slice(0, 300);
