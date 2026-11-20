@@ -47,6 +47,8 @@ async function buildBook(orderId: string, pid: string) {
   const coverPdf = await PDFDocument.create();
   coverPdf.setTitle(`${orderId} ${pid} cover`);
   await fill(coverPdf, cover);
+  const back = await file(`${dir}/print/13.jpg`); // back cover: the child's photo next to the illustrated character
+  if (back) await fill(coverPdf, back);
   const inner = await PDFDocument.create();
   inner.setTitle(`${orderId} ${pid} interior`);
   for (let i = 1; i <= 12; i++) {

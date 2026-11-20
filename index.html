@@ -794,6 +794,8 @@ footer.site{background:var(--canvas)}
 .pb-text.big p{font-size:clamp(24px,2.9vw,34px);line-height:2}
 .pb-read{display:flex;gap:8px;justify-content:center;margin-top:8px}.pb-read .chip[aria-pressed=true]{background:var(--primary);color:#fff;border-color:var(--primary)}
 .sp-t p,.txtpage{line-height:1.9}
+.pb-th-back{display:grid;place-items:center;background:linear-gradient(#1A1748,#3A2F86);color:#FFC83D;font-weight:700}
+.pb-backopt{justify-content:center;margin-top:10px}.pb-backnote{text-align:center;margin:4px 0 0}
 </style>
 
 <div id="app">
@@ -2209,6 +2211,24 @@ async function pbUploadOrder(orderId,items,onProg){if(!INBOX.url)return {ok:fals
 const PRINT={trimW:210,trimH:250,bleed:3,dpi:300}; // change to the printer's spec
 const pxMM=mm=>Math.round(mm/25.4*PRINT.dpi);
 function pbWrap(x,text,maxW){const words=String(text).split(/\s+/);const lines=[];let cur="";for(const w of words){const t=cur?cur+" "+w:w;if(x.measureText(t).width>maxW&&cur){lines.push(cur);cur=w}else cur=t}if(cur)lines.push(cur);return lines}
+/* back cover: the child's real photo next to the illustrated character (photo only if the parent keeps it on) */
+function pbBackUsesPhoto(m){return m.src==="photo"&&m.backPhoto!==false}
+async function pbDrawBack(W,H,safe,b,m,photoUrl,heroUrl){const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.direction="rtl";
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#1A1748");g.addColorStop(1,"#3A2F86");x.fillStyle=g;x.fillRect(0,0,W,H);
+ let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;x.fillStyle="#fff";for(let i=0;i<110;i++){x.globalAlpha=.25+rnd()*.6;x.beginPath();x.arc(rnd()*W,rnd()*H*.9,(rnd()*2.2+.6)*W/1000,0,7);x.fill()}x.globalAlpha=1;
+ const u=W/1000;try{await document.fonts.load(`700 ${60*u}px "Rubik"`,"אבג");await document.fonts.load(`600 ${40*u}px "Assistant"`,"אבג")}catch(e){}
+ x.textAlign="center";x.fillStyle="#FFC83D";x.font=`700 ${64*u}px "Rubik","Assistant",sans-serif`;x.fillText("מהתמונה אל הסיפור",W/2,safe+70*u);
+ const ims=[];const usePhoto=photoUrl&&pbBackUsesPhoto(m);if(usePhoto)ims.push([photoUrl,m.name+" במציאות"]);if(heroUrl)ims.push([heroUrl,m.name+" בספר"]);
+ const loaded=[];for(const [u2,l] of ims){try{loaded.push([await loadImg(u2),l])}catch(e){}}
+ const n=loaded.length,fw=(n===2?380:520)*u,fh=fw*1.18,cy=H*.47;
+ loaded.forEach(([im,label],k)=>{const cx=n===2?(k===0?W*.7:W*.3):W/2,rot=n===2?(k===0?.06:-.05):-.03;
+  x.save();x.translate(cx,cy);x.rotate(rot);x.shadowColor="rgba(0,0,0,.45)";x.shadowBlur=40*u;x.shadowOffsetY=16*u;x.fillStyle="#fff";x.fillRect(-fw/2,-fh/2,fw,fh);x.shadowColor="transparent";
+  const pad=18*u,iw=fw-2*pad,ih=iw;const sc=Math.max(iw/im.width,ih/im.height);x.save();x.beginPath();x.rect(-fw/2+pad,-fh/2+pad,iw,ih);x.clip();x.drawImage(im,-im.width*sc/2,-fh/2+pad+ih/2-im.height*sc/2,im.width*sc,im.height*sc);x.restore();
+  x.fillStyle="#2A2540";x.font=`600 ${Math.round(38*u)}px "Assistant",sans-serif`;x.fillText(label,0,fh/2-26*u);x.restore()});
+ if(n===2){x.strokeStyle="#FFC83D";x.lineWidth=6*u;x.lineCap="round";x.setLineDash([1,22*u]);x.beginPath();x.moveTo(W*.56,cy-fh*.62);x.quadraticCurveTo(W/2,cy-fh*.85,W*.44,cy-fh*.62);x.stroke();x.setLineDash([])}
+ x.fillStyle="#fff";x.font=`500 ${36*u}px "Assistant",sans-serif`;x.fillText("הספר הזה נוצר במיוחד בשביל "+m.name,W/2,H*.82);
+ x.fillStyle="#FFC83D";x.font=`700 ${44*u}px "Rubik","Assistant",sans-serif`;x.fillText("אגדיבוק",W/2,H-safe-10*u);
+ return c}
 async function pbPrintPages(pid,m){const b=pbBy(m.book);const W=pxMM(PRINT.trimW+2*PRINT.bleed),H=pxMM(PRINT.trimH+2*PRINT.bleed),safe=pxMM(PRINT.bleed+14);
  try{await document.fonts.load('700 120px "Rubik"');await document.fonts.load('700 120px "Assistant"');await document.fonts.load('500 80px "Assistant"')}catch(e){}
  const out=[];const mk=()=>{const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.direction="rtl";return [c,x]};
@@ -2228,6 +2248,8 @@ async function pbPrintPages(pid,m){const b=pbBy(m.book);const W=pxMM(PRINT.trimW
  for(let i=0;i<12;i++){const [c,x]=mk();x.fillStyle="#FFFBF3";x.fillRect(0,0,W,H);x.fillStyle="#2A2540";x.textAlign="right";x.font='500 96px "Assistant", sans-serif';
   const lines=pbWrap(x,nk(pbFill(b.pages[i].textTemplate,m.name),m.nikud!==undefined?m.nikud:NIKUD),W-2*safe);const lh=160;let y=(H-lines.length*lh)/2+lh*.7;lines.forEach(l=>{x.fillText(l,W-safe,y);y+=lh});
   x.font='500 54px "Assistant", sans-serif';x.fillStyle="#8a8399";x.textAlign="center";x.fillText(String(b.pages[i].pageNumber||i+1),W/2,H-safe+20);out.push(c)}
+ // 13 back cover
+ try{out.push(await pbDrawBack(W,H,safe,b,m,await pbImg(pid,"photo"),await pbImg(pid,"hero")))}catch(e){console.warn("back cover",e)}
  return Promise.all(out.map(c=>new Promise(r=>c.toBlob(r,"image/jpeg",.9))))}
 async function pbUploadPrint(orderId,items,onProg){const base=INBOX.url.replace("/rest/v1/inbox","/storage/v1/object/orders/");
  for(const it of items){const m=await pbMeta(it.pb);if(!m)throw new Error("book missing");const blobs=await pbPrintPages(it.pb,m);
@@ -2366,16 +2388,24 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
  const failed={};
  const baseImg=s=>`<img src="${PB_BASE_URL(b.id,s)}" alt="" onerror="this.remove()">`;
  const tile=s=>imgs[s]?`<img src="${imgs[s]}" alt="">`:failed[s]?`${baseImg(s)}<div class="pb-badge bad"><span>${esc(failed[s])}</span><button class="btn btn-soft btn-sm" data-retry="${s}">לנסות שוב</button></div>`:`${baseImg(s)}<div class="pb-badge"><span class="spin" aria-hidden="true"></span><span>מכניסים את ${esc(m.name)} לעמוד...</span></div>`;
- const drawBook=()=>{const pg=pages[cur];const box=$("#pbBook",root);if(!box)return;
+ const drawBook=()=>{const box=$("#pbBook",root);if(!box)return;
+  if(cur>=pages.length){cur=pages.length;const photo=pbBackUsesPhoto(m)||m.src==="photo";box.innerHTML=`<div class="pb-spread is-cover"><div class="pb-art" id="pbBackArt"><div class="pb-badge"><span class="spin" aria-hidden="true"></span></div></div></div>
+   <div class="pb-nav"><button class="icon-btn" id="pbPrev" aria-label="העמוד הקודם">›</button><span class="small">הכריכה האחורית</span><button class="icon-btn" id="pbNext" aria-label="העמוד הבא" disabled>‹</button></div>
+   ${m.src==="photo"?`<label class="chk pb-backopt"><input type="checkbox" id="pbBackPhoto" ${m.backPhoto!==false?"checked":""}> להדפיס בכריכה האחורית את התמונה של ${esc(m.name)} ליד הדמות</label><p class="small muted pb-backnote">התמונה נשמרת רק בקובץ ההדפסה של ההזמנה הזו.</p>`:""}`;
+   $("#pbPrev",root).onclick=()=>go(-1);const cb=$("#pbBackPhoto",root);if(cb)cb.onchange=async()=>{m.backPhoto=cb.checked;await pbSaveMeta(m);drawBook()};
+   (async()=>{const cv=await pbDrawBack(800,950,40,b,m,await pbImg(id,"photo"),imgs.hero||await pbImg(id,"hero"));const a=$("#pbBackArt",root);if(a)a.innerHTML=`<img src="${cv.toDataURL("image/jpeg",.88)}" alt="הכריכה האחורית: ${esc(m.name)} בתמונה ובציור">`})();
+   thumbs();return}
+  const pg=pages[cur];
   box.innerHTML=`<div class="pb-spread ${pg.slot==="cover"?"is-cover":""}"><div class="pb-art">${tile(pg.slot)}${pg.slot==="cover"?(pbLetter(b,m.name)||`<div class="pb-title">${esc(pbTitle(b,m.name))}</div>`):""}</div>${pg.slot==="cover"?"":`<div class="pb-text${READ_BIG?" big":""}" dir="rtl"><p>${esc(nk(pg.text))}</p><span class="pb-num">${pg.n}</span></div>`}</div>
-   <div class="pb-nav"><button class="icon-btn" id="pbPrev" aria-label="העמוד הקודם" ${cur===0?"disabled":""}>›</button><span class="small">${cur===0?"כריכה":"עמוד "+pg.n+" מתוך 12"}</span><button class="icon-btn" id="pbNext" aria-label="העמוד הבא" ${cur===pages.length-1?"disabled":""}>‹</button></div>
+   <div class="pb-nav"><button class="icon-btn" id="pbPrev" aria-label="העמוד הקודם" ${cur===0?"disabled":""}>›</button><span class="small">${cur===0?"כריכה":"עמוד "+pg.n+" מתוך 12"}</span><button class="icon-btn" id="pbNext" aria-label="העמוד הבא" >‹</button></div>
    <div class="pb-read" role="group" aria-label="תצוגת הטקסט">${PB_HAS_NIKUD(b)?`<button type="button" class="chip" id="pbNik" aria-pressed="${NIKUD}">ניקוד</button>`:""}<button type="button" class="chip" id="pbBig" aria-pressed="${READ_BIG}">אותיות גדולות</button></div>`;
   const nb=$("#pbNik",root);if(nb)nb.onclick=async()=>{NIKUD=!NIKUD;try{localStorage.setItem("agadi-nikud",NIKUD?"on":"off")}catch(e){}m.nikud=NIKUD;await pbSaveMeta(m);drawBook()};
   $("#pbBig",root).onclick=()=>{READ_BIG=!READ_BIG;try{localStorage.setItem("agadi-fs",READ_BIG?"big":"")}catch(e){}drawBook()};
   $("#pbPrev",root).onclick=()=>go(-1);$("#pbNext",root).onclick=()=>go(1);bindRetry(box);
-  $("#pbThumbs",root).innerHTML=pages.map((p,i)=>`<button class="pb-th ${i===cur?"on":""}" data-go="${i}" aria-label="${i?"עמוד "+p.n:"כריכה"}">${imgs[p.slot]?`<img src="${imgs[p.slot]}" alt="">`:`<img src="${PB_BASE_URL(b.id,p.slot)}" alt="" style="opacity:.45" onerror="this.remove()"><span style="position:absolute">${i?p.n:"כ"}</span>`}</button>`).join("");
+  thumbs()};
+ const thumbs=()=>{$("#pbThumbs",root).innerHTML=pages.map((p,i)=>`<button class="pb-th ${i===cur?"on":""}" data-go="${i}" aria-label="${i?"עמוד "+p.n:"כריכה"}">${imgs[p.slot]?`<img src="${imgs[p.slot]}" alt="">`:`<img src="${PB_BASE_URL(b.id,p.slot)}" alt="" style="opacity:.45" onerror="this.remove()"><span style="position:absolute">${i?p.n:"כ"}</span>`}</button>`).join("")+`<button class="pb-th pb-th-back ${cur>=pages.length?"on":""}" data-go="${pages.length}" aria-label="הכריכה האחורית"><span>גב</span></button>`;
   $$("[data-go]",root).forEach(t=>t.onclick=()=>{cur=+t.dataset.go;drawBook()})};
- const go=d=>{cur=Math.max(0,Math.min(pages.length-1,cur+d));drawBook()};
+ const go=d=>{cur=Math.max(0,Math.min(pages.length,cur+d));drawBook()};
  const key=e=>{if(!root.isConnected){document.removeEventListener("keydown",key);return}if(e.target.closest&&e.target.closest("input,textarea,select"))return;if(e.key==="ArrowLeft")go(1);if(e.key==="ArrowRight")go(-1)};document.addEventListener("keydown",key);cleanup.push(()=>document.removeEventListener("keydown",key));
  let sx=null;const bk=$("#pbBook",root);bk.addEventListener("pointerdown",e=>{sx=e.clientX});bk.addEventListener("pointerup",e=>{if(sx==null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>50)go(dx>0?1:-1)});
  const bindRetry=scope=>$$("[data-retry]",scope).forEach(bt=>bt.onclick=()=>{delete failed[bt.dataset.retry];run([bt.dataset.retry])});
@@ -2392,12 +2422,12 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
   const ok=$("#pbOk",ap);if(ok)ok.onclick=()=>approve();
   const add=$("#pbAdd",ap);if(add)add.onclick=()=>toCart();
   const un=$("#pbUnapprove",ap);if(un)un.onclick=async()=>{m.approved=false;await pbSaveMeta(m);S.cart=S.cart.filter(i=>i.pb!==id);save("cart");updateCartBadge();drawApprove()};
-  const redo=$("#pbRedo",ap);if(redo)redo.onclick=()=>{const s=pages[cur].slot;if(PB_RUN[id]&&PB_RUN[id].has(s))return;imgs[s]=null;PBDB.del("i:"+id+":"+s);delete failed[s];drawBook();run([s])}};
+  const redo=$("#pbRedo",ap);if(redo)redo.onclick=()=>{if(cur>=pages.length)return;const s=pages[cur].slot;if(PB_RUN[id]&&PB_RUN[id].has(s))return;imgs[s]=null;PBDB.del("i:"+id+":"+s);delete failed[s];drawBook();run([s])}};
  const toCart=async()=>{const thumb=await pbThumb(imgs.cover);const item={id:uid(),pb:id,project:"pb-"+id,book:"pb:"+b.id,fmt:m.fmt||"hard",qty:1,child:{name:m.name,gender:pbG(b),age:"",dedication:""},char:{thumb},art:thumb};S.cart=S.cart.filter(i=>i.pb!==id);S.cart.push(item);if(!save("cart")){item.art=null;item.char={};save("cart")}updateCartBadge()};
  const approve=async()=>{m.approved=true;m.approvedAt=Date.now();await pbSaveMeta(m);await toCart();toast("הספר אושר ונוסף לעגלה");drawApprove()};
  const run=async list=>{const heroU=await pbImg(id,"hero"),sheetU=heroU?null:await pbImg(id,"sheet");if(!heroU&&!sheetU){m.heroOk=false;m.sheetOk=false;await pbSaveMeta(m);return pbProjectView(root,id)}
   const busy=PB_RUN[id]=PB_RUN[id]||new Set();const q=list.filter(s=>!busy.has(s));q.forEach(s=>busy.add(s));prog();drawBook();
-  const worker=async()=>{while(q.length){const s=q.shift();try{const u=heroU?await pbSwapPage(m,s,heroU):await pbRenderPage(m,s,sheetU);await pbSetImg(id,s,u);imgs[s]=u}catch(e){failed[s]=pbErr(e)}busy.delete(s);if(root.isConnected){prog();if(pages[cur].slot===s||!imgs[pages[cur].slot])drawBook();else $("#pbThumbs",root)&&drawBook()}}};
+  const worker=async()=>{while(q.length){const s=q.shift();try{const u=heroU?await pbSwapPage(m,s,heroU):await pbRenderPage(m,s,sheetU);await pbSetImg(id,s,u);imgs[s]=u}catch(e){failed[s]=pbErr(e)}busy.delete(s);if(root.isConnected){prog();if(cur>=pages.length||pages[cur].slot===s||!imgs[pages[cur].slot])drawBook();else $("#pbThumbs",root)&&drawBook()}}};
   await Promise.all(Array.from({length:heroU?7:3},worker))};
  drawBook();prog();
  const missing=pages.map(p=>p.slot).filter(s=>!imgs[s]);
