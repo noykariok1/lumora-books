@@ -790,6 +790,10 @@ footer.site{background:var(--canvas)}
 .hs-dot[aria-pressed=true]{width:26px;background:#FFC83D}
 .hs-dot:focus-visible{outline:2px solid #fff;outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.hs-slide,.hs-slide *{transition:none!important}}
+.pb-text p{font-size:clamp(20px,2.3vw,27px);line-height:1.9;font-weight:500;letter-spacing:.005em}
+.pb-text.big p{font-size:clamp(24px,2.9vw,34px);line-height:2}
+.pb-read{display:flex;gap:8px;justify-content:center;margin-top:8px}.pb-read .chip[aria-pressed=true]{background:var(--primary);color:#fff;border-color:var(--primary)}
+.sp-t p,.txtpage{line-height:1.9}
 </style>
 
 <div id="app">
@@ -1435,12 +1439,12 @@ routes.home={html(){
 function howSteps(){const dc=defaultChar("f");return `<div class="how">
   <div class="step"><div class="art art-img"><img src="${PB_COVER_URL(PB[0].id)}" alt="" loading="lazy"></div><div class="tx"><span class="num">1</span><h3>בוחרים סיפור</h3><p class="muted">ספרים לפני השינה, ליום הולדת, לגן החדש ועוד.</p></div></div>
   <div class="step"><div class="art art-img"><img src="${PB_BASE_URL(PB[0].id,"hero")}" alt="" loading="lazy" style="object-position:50% 20%"></div><div class="tx"><span class="num">2</span><h3>הופכים את זה לאישי</h3><p class="muted">שם, גיל ותמונה אחת. אנחנו בונים דמות ואתם מאשרים.</p></div></div>
-  <div class="step"><div class="art" style="padding:16px;display:grid;place-items:center"><div class="spread-mini" style="width:100%"><div class="txtpage">${esc(pbFill(PB[0].pages[3].textTemplate,"איתי"))}</div><div><img src="${PB_BASE_URL(PB[0].id,"p4")}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div></div></div><div class="tx"><span class="num">3</span><h3>רואים ונהנים</h3><p class="muted">מדפדפים בכל הספר המאויר, ומזמינים רק אם אוהבים.</p></div></div>
+  <div class="step"><div class="art" style="padding:16px;display:grid;place-items:center"><div class="spread-mini" style="width:100%"><div class="txtpage">${esc(nk(pbFill(PB[0].pages[3].textTemplate,"איתי")))}</div><div><img src="${PB_BASE_URL(PB[0].id,"p4")}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div></div></div><div class="tx"><span class="num">3</span><h3>רואים ונהנים</h3><p class="muted">מדפדפים בכל הספר המאויר, ומזמינים רק אם אוהבים.</p></div></div>
  </div>`}
 /* ================= PEEK INSIDE ================= */
 const PEEK_SLOTS=["p1","p2","p4","p9","p11","p12"];
 const pbDefName=b=>pbG(b)==="f"?"נועה":"איתי";
-function peekSpreads(b){const n=pbDefName(b);return PEEK_SLOTS.map(sl=>{const pg=b.pages[+sl.slice(1)-1];return `<figure class="spread"><div class="sp-t"><p>${esc(pbFill(pg.textTemplate,n))}</p><span>${pg.pageNumber}</span></div><div class="sp-a"><img src="${PB_BASE_URL(b.id,sl)}" alt="" loading="lazy" onerror="this.closest('figure').remove()"></div></figure>`}).join("")}
+function peekSpreads(b){const n=pbDefName(b);return PEEK_SLOTS.map(sl=>{const pg=b.pages[+sl.slice(1)-1];return `<figure class="spread"><div class="sp-t"><p>${esc(nk(pbFill(pg.textTemplate,n)))}</p><span>${pg.pageNumber}</span></div><div class="sp-a"><img src="${PB_BASE_URL(b.id,sl)}" alt="" loading="lazy" onerror="this.closest('figure').remove()"></div></figure>`}).join("")}
 function peekHTML(){return `<section class="section peek-sec"><div class="wrap">
   <div class="sec-head"><div class="stack"><span class="eyebrow">הצצה לתוך הספר</span><h2>ספר אמיתי, עם סיפור שלם ואיורים בכל עמוד</h2><p class="muted">כך נראים העמודים. בספר שלכם הגיבור מצויר לפי התמונה של הילד שלכם, והשם שלו מופיע בסיפור.</p></div></div>
   <div class="peek-tabs" role="tablist">${PB.map((b,i)=>`<button role="tab" class="chip" data-peek="${b.id}" aria-selected="${i===0}">${esc(pbTitle(b,pbDefName(b)))}</button>`).join("")}</div>
@@ -2108,7 +2112,13 @@ const pbG=b=>b.audience==="בנות"?"f":"m";
 const pbFill=(t,v)=>String(t||"").split("{{childName}}").join(v);
 const pbHero=b=>pbG(b)==="f"?"הגיבורה":"הגיבור";
 const pbImgText=(t,b)=>pbFill(t,pbHero(b)); // the child's name never goes into image prompts, so it cannot be drawn as text
-const pbTitle=(b,name)=>pbFill(b.titleTemplate,name||(pbG(b)==="f"?"נועה":"איתי"));
+const NIKUD_RE=/[\u0591-\u05BD\u05BF-\u05C7]/g; // vowel and cantillation marks (maqaf kept)
+const noNikud=t=>String(t||"").replace(NIKUD_RE,"");
+const hasNikud=t=>/[\u05B0-\u05BC\u05C1\u05C2\u05C7]/.test(String(t||""));
+let NIKUD=(()=>{try{return localStorage.getItem("agadi-nikud")!=="off"}catch(e){return true}})();
+let READ_BIG=(()=>{try{return localStorage.getItem("agadi-fs")==="big"}catch(e){return false}})();
+const nk=(t,on=NIKUD)=>on?String(t||""):noNikud(t);
+const pbTitle=(b,name)=>noNikud(pbFill(b.titleTemplate,name||(pbG(b)==="f"?"נועה":"איתי")));
 const PB_PAL={soccer_hero:["#2BB3A6","#FFD35A"],little_firefighter:["#D9473B","#F3B23C"],fairy_garden:["#B48CE0","#FFB8C9"],space_captain:["#2B2F7A","#2FC2D9"]};
 /* ---- device storage (IndexedDB, memory fallback) ---- */
 const PBDB={_db:null,_mem:new Map(),ok:typeof indexedDB!=="undefined",
@@ -2180,6 +2190,7 @@ async function pbSwapPage(m,slot,hero){const photo=await pbImg(m.id,"photo");if(
  return aiCall({mode:"swap",photo:b64(photo),hero:b64(hero),heroMime:pbMime(hero),base:b64(base),baseMime:pbMime(base),aspect:"4:5",size:"2K",gender:pbG(pbBy(m.book)),...pbArt(pbBy(m.book),slot==="cover"?"cover":"page")})}
 async function pbRenderPage(m,slot,sheet){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  return aiCall({mode:"render",photo:b64(photo),sheet:b64(sheet),sheetMime:pbMime(sheet),prompt:pbSlotPrompt(b,slot),aspect:"4:5",size:"2K",gender:pbG(b),...pbArt(b,slot==="cover"?"cover":"page")})}
+const PB_HAS_NIKUD=b=>b.pages.some(p=>hasNikud(p.textTemplate));
 const PB_ERR={blocked:"מסנן הבטיחות של שירות האיור חסם את הבקשה. אפשר לנסות שוב או להחליף תמונה.",rate_limited:"יותר מדי בקשות בזמן קצר. נסו שוב בעוד כמה דקות.",no_photo:"התמונה נמחקה. כדי לצייר שוב צריך להעלות אותה מחדש.",not_configured:"שירות האיור עוד לא מוגדר.",error:"תקלה זמנית בשירות האיור. אפשר לנסות שוב."};
 const pbErr=e=>PB_ERR[e&&e.code]||PB_ERR.error;
 /* ---- order: send the approved illustrations (never the photo) to the private print bucket ---- */
@@ -2215,7 +2226,7 @@ async function pbPrintPages(pid,m){const b=pbBy(m.book);const W=pxMM(PRINT.trimW
   const lines=pbWrap(x,pbTitle(b,m.name),W-2*safe);let y=H-safe-(lines.length-1)*220;lines.forEach(l=>{x.fillText(l,W/2,y);y+=220})}out.push(c)}
  // 01..12 text pages
  for(let i=0;i<12;i++){const [c,x]=mk();x.fillStyle="#FFFBF3";x.fillRect(0,0,W,H);x.fillStyle="#2A2540";x.textAlign="right";x.font='500 96px "Assistant", sans-serif';
-  const lines=pbWrap(x,pbFill(b.pages[i].textTemplate,m.name),W-2*safe);const lh=160;let y=(H-lines.length*lh)/2+lh*.7;lines.forEach(l=>{x.fillText(l,W-safe,y);y+=lh});
+  const lines=pbWrap(x,nk(pbFill(b.pages[i].textTemplate,m.name),m.nikud!==undefined?m.nikud:NIKUD),W-2*safe);const lh=160;let y=(H-lines.length*lh)/2+lh*.7;lines.forEach(l=>{x.fillText(l,W-safe,y);y+=lh});
   x.font='500 54px "Assistant", sans-serif';x.fillStyle="#8a8399";x.textAlign="center";x.fillText(String(b.pages[i].pageNumber||i+1),W/2,H-safe+20);out.push(c)}
  return Promise.all(out.map(c=>new Promise(r=>c.toBlob(r,"image/jpeg",.9))))}
 async function pbUploadPrint(orderId,items,onProg){const base=INBOX.url.replace("/rest/v1/inbox","/storage/v1/object/orders/");
@@ -2356,8 +2367,11 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
  const baseImg=s=>`<img src="${PB_BASE_URL(b.id,s)}" alt="" onerror="this.remove()">`;
  const tile=s=>imgs[s]?`<img src="${imgs[s]}" alt="">`:failed[s]?`${baseImg(s)}<div class="pb-badge bad"><span>${esc(failed[s])}</span><button class="btn btn-soft btn-sm" data-retry="${s}">לנסות שוב</button></div>`:`${baseImg(s)}<div class="pb-badge"><span class="spin" aria-hidden="true"></span><span>מכניסים את ${esc(m.name)} לעמוד...</span></div>`;
  const drawBook=()=>{const pg=pages[cur];const box=$("#pbBook",root);if(!box)return;
-  box.innerHTML=`<div class="pb-spread ${pg.slot==="cover"?"is-cover":""}"><div class="pb-art">${tile(pg.slot)}${pg.slot==="cover"?(pbLetter(b,m.name)||`<div class="pb-title">${esc(pbTitle(b,m.name))}</div>`):""}</div>${pg.slot==="cover"?"":`<div class="pb-text" dir="rtl"><p>${esc(pg.text)}</p><span class="pb-num">${pg.n}</span></div>`}</div>
-   <div class="pb-nav"><button class="icon-btn" id="pbPrev" aria-label="העמוד הקודם" ${cur===0?"disabled":""}>›</button><span class="small">${cur===0?"כריכה":"עמוד "+pg.n+" מתוך 12"}</span><button class="icon-btn" id="pbNext" aria-label="העמוד הבא" ${cur===pages.length-1?"disabled":""}>‹</button></div>`;
+  box.innerHTML=`<div class="pb-spread ${pg.slot==="cover"?"is-cover":""}"><div class="pb-art">${tile(pg.slot)}${pg.slot==="cover"?(pbLetter(b,m.name)||`<div class="pb-title">${esc(pbTitle(b,m.name))}</div>`):""}</div>${pg.slot==="cover"?"":`<div class="pb-text${READ_BIG?" big":""}" dir="rtl"><p>${esc(nk(pg.text))}</p><span class="pb-num">${pg.n}</span></div>`}</div>
+   <div class="pb-nav"><button class="icon-btn" id="pbPrev" aria-label="העמוד הקודם" ${cur===0?"disabled":""}>›</button><span class="small">${cur===0?"כריכה":"עמוד "+pg.n+" מתוך 12"}</span><button class="icon-btn" id="pbNext" aria-label="העמוד הבא" ${cur===pages.length-1?"disabled":""}>‹</button></div>
+   <div class="pb-read" role="group" aria-label="תצוגת הטקסט">${PB_HAS_NIKUD(b)?`<button type="button" class="chip" id="pbNik" aria-pressed="${NIKUD}">ניקוד</button>`:""}<button type="button" class="chip" id="pbBig" aria-pressed="${READ_BIG}">אותיות גדולות</button></div>`;
+  const nb=$("#pbNik",root);if(nb)nb.onclick=async()=>{NIKUD=!NIKUD;try{localStorage.setItem("agadi-nikud",NIKUD?"on":"off")}catch(e){}m.nikud=NIKUD;await pbSaveMeta(m);drawBook()};
+  $("#pbBig",root).onclick=()=>{READ_BIG=!READ_BIG;try{localStorage.setItem("agadi-fs",READ_BIG?"big":"")}catch(e){}drawBook()};
   $("#pbPrev",root).onclick=()=>go(-1);$("#pbNext",root).onclick=()=>go(1);bindRetry(box);
   $("#pbThumbs",root).innerHTML=pages.map((p,i)=>`<button class="pb-th ${i===cur?"on":""}" data-go="${i}" aria-label="${i?"עמוד "+p.n:"כריכה"}">${imgs[p.slot]?`<img src="${imgs[p.slot]}" alt="">`:`<img src="${PB_BASE_URL(b.id,p.slot)}" alt="" style="opacity:.45" onerror="this.remove()"><span style="position:absolute">${i?p.n:"כ"}</span>`}</button>`).join("");
   $$("[data-go]",root).forEach(t=>t.onclick=()=>{cur=+t.dataset.go;drawBook()})};
