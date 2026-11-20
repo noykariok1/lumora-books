@@ -490,7 +490,7 @@ nav.main a.on{background:var(--primary-soft);color:var(--primary)}
 .hs-char{animation:popc .7s 1.05s cubic-bezier(.2,.7,.3,1.2) both}
 @media (max-width:880px){
  .hero-night .hero{grid-template-columns:1fr;gap:20px;padding-bottom:72px}
- .hero-stage{max-width:300px;order:-1;margin-top:-8px}
+ .hero-stage{max-width:300px;order:-1;margin-top:-8px}.hero-side{order:-1}.hs-nav{margin-top:-4px}
 }
 @media (max-width:480px){.hero-ctas .btn{width:100%}.hero-night h1{font-size:clamp(34px,10vw,44px)}}
 /* trust strip */
@@ -779,6 +779,17 @@ footer.site{background:var(--canvas)}
 .pb-letter{position:absolute;inset:0;pointer-events:none;z-index:2;container-type:inline-size}.pb-letter svg{width:100%;height:100%}
 .pb-cov:has(.pb-letter)::after,.pb-cover-art:has(.pb-letter){box-shadow:none}
 @media (prefers-reduced-motion:no-preference){.pb-card:hover .pb-letter{transform:scale(1.02);transition:transform .2s}}
+.hero-side{display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0;width:100%}.hero-side .hero-stage{align-self:stretch;margin-inline:auto}
+.hs-slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .7s ease,visibility 0s linear .7s}
+.hs-slide.on{opacity:1;visibility:visible;transition:opacity .7s ease}
+.hs-slide .hs-book,.hs-slide .hs-photo,.hs-slide .hs-char{transition:transform .7s ease}
+.hs-slide:not(.on) .hs-photo{transform:rotate(10deg) translateY(10px)}.hs-slide:not(.on) .hs-char{transform:translateY(12px)}
+.hs-nav{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;position:relative;z-index:3}
+.hs-title{color:#fff;font-family:var(--f-display);font-weight:600;font-size:15px;text-decoration:none;opacity:.92}.hs-title:hover{text-decoration:underline}
+.hs-dots{display:flex;gap:8px}.hs-dot{width:10px;height:10px;border-radius:99px;border:0;padding:0;background:rgba(255,255,255,.35);cursor:pointer;transition:width .3s,background .3s}
+.hs-dot[aria-pressed=true]{width:26px;background:#FFC83D}
+.hs-dot:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.hs-slide,.hs-slide *{transition:none!important}}
 </style>
 
 <div id="app">
@@ -1328,11 +1339,16 @@ routes.home={html(){
     <ul class="hero-checks"><li>${ICON.check}משלמים רק אחרי שרואים את כל הספר</li><li>${ICON.check}בלי כרטיס אשראי</li><li>${ICON.check}ספר מ־${fmtPrice(FORMATS.digital.price)}</li></ul>
     ${PROOF.demo?"":`<div class="hero-proof">${avatarStack()}<div class="stack" style="gap:0"><span class="row" style="gap:6px">${starsRow()}<b>${PROOF.rating} מתוך 5</b></span><span>${PROOF.families.toLocaleString("he-IL")} משפחות כבר יצרו ספר</span></div></div>`}
    </div>
+   <div class="hero-side">
    <div class="hero-stage" aria-hidden="true">
     <div class="lamp"></div>
-    <div class="hs-book"><div class="book3d">${pbCover(PB[2],"נועה")}</div></div>
-    <figure class="hs-photo"><div class="photoish"><img src="${PB_BASE_URL(PB[2].id,"p2")}" alt="" onerror="this.closest('figure').remove()"></div><figcaption>עמוד מתוך הספר</figcaption></figure>
-    <figure class="hs-char"><div class="ring"><img src="${PB_BASE_URL(PB[2].id,"hero")}" alt="" onerror="this.closest('figure').remove()"></div><figcaption>אותה דמות בכל עמוד</figcaption></figure>
+    ${PB.map((b,i)=>`<div class="hs-slide${i===0?" on":""}" data-hs="${i}">
+    <div class="hs-book"><div class="book3d">${pbCover(b,pbDefName(b))}</div></div>
+    <figure class="hs-photo"><div class="photoish"><img src="${PB_BASE_URL(b.id,"p2")}" alt="" onerror="this.closest('figure').remove()"></div><figcaption>עמוד מתוך הספר</figcaption></figure>
+    <figure class="hs-char"><div class="ring"><img src="${PB_BASE_URL(b.id,"hero")}" alt="" onerror="this.closest('figure').remove()"></div><figcaption>אותה דמות בכל עמוד</figcaption></figure>
+    </div>`).join("")}
+   </div>
+   <div class="hs-nav"><a class="hs-title" id="hsTitle" href="#personal?book=${PB[0].id}">${esc(pbTitle(PB[0],pbDefName(PB[0])))}</a><div class="hs-dots" role="group" aria-label="הספרים שלנו">${PB.map((b,i)=>`<button type="button" class="hs-dot" data-hsd="${i}" aria-label="${esc(pbTitle(b,pbDefName(b)))}" aria-pressed="${i===0}"></button>`).join("")}</div></div>
    </div>
   </div>
   <svg class="hero-wave" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0 70V38C220 6 470 0 720 26S1220 66 1440 30V70z"/></svg>
@@ -1408,7 +1424,7 @@ routes.home={html(){
  <section class="section"><div class="wrap"><div class="final"><svg class="sky" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${stars(60,1200,400,5)}</svg><h2>מוכנים לראות את הילד שלכם בתוך סיפור?</h2><p>זה לוקח כמה דקות, והתצוגה המקדימה חינם.</p><a class="btn btn-lg" href="#personal">צרו תצוגה מקדימה חינם</a></div></div></section>
  <div class="sticky-cta" id="homeSticky"><a class="btn btn-primary btn-block" href="#personal">צרו תצוגה מקדימה חינם</a></div>`},
  mount(m){
-  homeSticky(m);
+  homeSticky(m);heroRotate(m);
   peekMount(m);
   const r=$("#baRange",m),ba=$("#ba",m);if(r)r.addEventListener("input",()=>ba.style.setProperty("--cut",(100-r.value)+"%"));
   $("#baFile",m)&&$("#baFile",m).addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;if(!/image\/(jpeg|png|webp)/.test(f.type)){toast("אפשר להעלות JPG, PNG או WEBP");return}
@@ -2220,6 +2236,13 @@ routes.personal={title:()=>"ספרים מאוירים מהתמונה",
 const PB_COVER_URL=id=>PB_BASE_URL(id,"cover"); // the same pre-made cover the child is placed into
 let PB_LT_N=0;
 function pbLetter(b,name,o){if(!window.AgadiCover)return "";const k="a"+(++PB_LT_N);try{return `<div class="pb-letter">${AgadiCover.svg({template:b.titleTemplate,name:name||pbDefName(b),theme:b.id,...(o||{})}).replace(/ag-(hero|gloss|scrim-t|scrim-b|soft|ph)\b/g,k+"-$1")}</div>`}catch(e){return ""}}
+function heroRotate(m){const sl=$$(".hs-slide",m),dots=$$(".hs-dot",m),t=$("#hsTitle",m);if(sl.length<2)return;let i=0,timer=null,paused=false;
+ const go=n=>{i=(n+sl.length)%sl.length;sl.forEach((x,k)=>x.classList.toggle("on",k===i));dots.forEach((d,k)=>d.setAttribute("aria-pressed",k===i));const b=PB[i];if(t){t.textContent=pbTitle(b,pbDefName(b));t.href="#personal?book="+b.id}};
+ const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+ const start=()=>{clearInterval(timer);if(!reduce)timer=setInterval(()=>{if(!paused&&!document.hidden)go(i+1)},4000)};
+ dots.forEach(d=>d.onclick=()=>{go(+d.dataset.hsd);start()});
+ const side=$(".hero-side",m);if(side){side.addEventListener("mouseenter",()=>paused=true);side.addEventListener("mouseleave",()=>paused=false)}
+ start();cleanup.push(()=>clearInterval(timer))}
 function pbCover(b,name,style){return `<div class="cover pb-cov" ${style?`style="${style}"`:""}><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="spine"></span>${pbLetter(b,name)||`<div class="ttl">${esc(pbTitle(b,name))}</div>`}</div>`}
 function pbCardHTML(b){return `<a class="pb-card" href="#personal?book=${b.id}">${pbCoverArt(b)}<div class="stack" style="gap:4px"><b>${esc(pbTitle(b,"השם שלכם"))}</b><span class="small muted">${esc(b.genre)} · גילאי ${esc(b.ageRange)} · ${b.pageCount} עמודים</span><span class="small pb-price">ספר מ־${fmtPrice(FORMATS.digital.price)} · מודפס מ־${fmtPrice(FORMATS.hard.price)}</span></div><span class="btn btn-primary btn-sm">תצוגה מקדימה חינם</span></a>`}
 function pbCoverArt(b,name){const [a,c]=PB_PAL[b.id]||["#4B3FD1","#FFCC75"];return `<div class="pb-cover-art" style="--a:${a};--c:${c}"><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()">${pbLetter(b,name,{brand:false})}<span class="pb-cover-t">${esc(pbTitle(b,name))}</span></div>`}
