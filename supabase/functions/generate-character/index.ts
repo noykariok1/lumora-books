@@ -7,7 +7,9 @@
 //   extra?: ["<base64>", ...] up to 2 more photos of the child (render mode)
 //   size?: "1K"|"2K" on any mode with an aspect (2K is used for printed pages)
 //   style?: "cinema3d"|"gouache", book?: <book id>, slot?: "cover"|"page"|"hero"|"sheet"  (render/swap: house art direction, v7)
-//   { mode: "swap", photo, hero: "<base64 approved hero>", base: "<base64 finished page>", heroMime?, baseMime?, aspect?, prompt? }
+//   { mode: "swap", photo, extra?: [..], hero: "<base64 approved hero>", face?: "<base64 4-angle head sheet>", base: "<base64 finished page>", heroMime?, faceMime?, baseMime?, aspect?, prompt? }
+//   { mode: "check", hero, face?, page, *Mime? } -> { score: 0..10, found, issues }  (v11 likeness check, text model, no photo needed)
+//   slot "face" on render: 4-angle head identity sheet of the hero (v11)
 //   { mode: "character", photo: "<base64 jpeg>", gender: "m"|"f", traits?: {...}, notes?: string, variant?: 0..3 }
 //   { mode: "page", photo: "<base64>", sheet: "<base64 approved character>", scene: "text", gender, variant?: number }
 // Response: { image: "<base64 png/jpeg>", mime: "image/png" } or { error, code }
@@ -108,6 +110,7 @@ Keep the bottom 6% free of important detail. Depth in three layers: a foreground
 The hero's face is always visible, lit and in focus, never hidden, cropped or turned away. Clear staging: the action of the scene reads in one second.
 Keep one calm, uncluttered area of the image. Keep every page of the book in the same style, outfit, palette and character design.`,
   hero: `COMPOSITION: character model of the hero alone, full body, front three-quarter view, relaxed happy pose, on a plain soft light-cream seamless studio background with only a soft floor shadow: no scenery, no flowers, no props, nothing else in the image.`,
+  face: `COMPOSITION (identity sheet of the hero's HEAD ONLY, 16:9): the same child's head and shoulders drawn 4 times side by side at large size, evenly lit, on a plain soft light-cream background: 1) straight front view, neutral friendly face, 2) three-quarter view turned left, 3) three-quarter view turned right, 4) front view with a big open-mouth laugh. Identical face, hair, skin tone and age in all 4. No body below the shoulders, no props, no text, no other characters.`,
   sheet: `COMPOSITION (character reference sheet, 16:9): every character of the book side by side on a plain soft light-cream background, full body, evenly lit, same scale, plus the key props, so later pages can match them exactly.`,
 };
 
@@ -116,8 +119,43 @@ function artDirection(body: Record<string, unknown>) {
   if (!style) return "";
   const slot = String(body.slot || "page");
   // character models stay on a plain background: the book's world is only for covers and pages
-  const world = slot === "hero" || slot === "sheet" ? "" : WORLD[String(body.book || "")] || "";
+  const world = slot === "hero" || slot === "sheet" || slot === "face" ? "" : WORLD[String(body.book || "")] || "";
   return [style, world, COMPOSE[slot] || COMPOSE.page].filter(Boolean).join("\n");
+}
+
+// The book data still carries old 2D style words ("gouache", "watercolour"): for character models the house style must win,
+// otherwise the hero comes out 2D while the pages are 3D, and every page re-interprets the face differently.
+function finalLock(body: Record<string, unknown>) {
+  const slot = String(body.slot || "");
+  if (!ART[String(body.style || "")] || !["hero", "face", "sheet"].includes(slot)) return "";
+  return `\nFINAL RULES (these win over anything above): render ONLY in the HOUSE STYLE above${body.style === "cinema3d" ? " (a 3D animated feature-film character render, never a flat 2D drawing, gouache or watercolour)" : ""}.
+The output is a clean new image on a plain light-cream background: never paste, trace, blend or overlay the reference photo or any part of it, no photo background, no ghosted faces.
+The face must still be unmistakably this real child: same face shape, eyes, nose, mouth, teeth, skin tone, freckles, hair colour, length and texture, glasses.`;
+}
+
+// ---- likeness check (v11): a cheap vision model compares the hero on a finished page with the approved character ----
+const CHECK_MODEL = Deno.env.get("GEMINI_CHECK_MODEL") || "gemini-3.8-flash";
+async function checkLikeness(refs: { mime: string; data: string }[], page: { mime: string; data: string }) {
+  const parts = [
+    ...refs.map((r) => ({ inline_data: { mime_type: r.mime, data: r.data } })),
+    { inline_data: { mime_type: page.mime, data: page.data } },
+    { text: `The first ${refs.length} image(s) show the approved illustrated hero of a children's book (the reference). The LAST image is a finished book page.
+Find the main hero child on the last image and judge whether it is clearly the SAME character as the reference: face shape, eyes, eyebrows, nose, mouth, skin tone, hair colour, hair length, hair style/texture, glasses or marks, apparent age and body size (a young child, not adult-sized).
+Ignore pose, camera, expression, lighting and outfit differences that the scene requires.
+Return JSON only: {"score": <0-10, 10 = unmistakably the same child>, "found": <true if the hero child is visible>, "issues": "<short English list of concrete differences, empty if none>"}` },
+  ];
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CHECK_MODEL}:generateContent`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-goog-api-key": KEY },
+    body: JSON.stringify({ contents: [{ role: "user", parts }], generationConfig: { responseMimeType: "application/json", temperature: 0 } }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) return { error: data?.error?.message || `Gemini HTTP ${res.status}`, code: res.status === 429 ? "rate_limited" : "provider_error" };
+  const txt = (data?.candidates?.[0]?.content?.parts || []).map((p: { text?: string }) => p.text || "").join("");
+  try {
+    const j = JSON.parse(txt.replace(/^```json|```$/g, "").trim());
+    return { score: Math.max(0, Math.min(10, Number(j.score) || 0)), found: j.found !== false, issues: String(j.issues || "").slice(0, 400) };
+  } catch { return { error: "Bad check reply", code: "empty" }; }
 }
 
 async function callGemini(parts: unknown[], aspect?: string, size?: string) {
@@ -156,6 +194,15 @@ Deno.serve(async (req) => {
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return json({ error: "Bad JSON" }, 400, h); }
+  const mt = (m: unknown) => /^image\/(png|jpeg|webp)$/.test(String(m)) ? String(m) : "image/jpeg";
+  if (body.mode === "check") {
+    // { mode:"check", hero, heroMime?, face?, faceMime?, page, pageMime? } -> { score, found, issues }
+    const hero = String(body.hero || ""), page = String(body.page || ""), face = String(body.face || "");
+    if (!hero || !page || [hero, page, face].some((x) => x.length > MAX_B64)) return json({ error: "Missing hero or page" }, 400, h);
+    const refs = [{ mime: mt(body.heroMime), data: hero }, ...(face ? [{ mime: mt(body.faceMime), data: face }] : [])];
+    const r = await checkLikeness(refs, { mime: mt(body.pageMime), data: page });
+    return json(r, "error" in r ? 502 : 200, h);
+  }
   const photo = String(body.photo || "");
   if (!photo || photo.length > MAX_B64) return json({ error: "Missing or too large photo" }, 400, h);
   const gender = body.gender === "m" ? "m" : "f";
@@ -182,24 +229,27 @@ Deno.serve(async (req) => {
       { inline_data: { mime_type: "image/jpeg", data: photo } },
       ...extra.map((d) => ({ inline_data: { mime_type: "image/jpeg", data: d } })),
       ...(sheet ? [{ inline_data: { mime_type: /^image\/(png|jpeg|webp)$/.test(String(body.sheetMime)) ? String(body.sheetMime) : "image/png", data: sheet } }] : []),
-      { text: `${intro}\n${artDirection(body)}\n${RENDER_RULES}\n${prompt}` },
+      { text: `${intro}\n${artDirection(body)}\n${RENDER_RULES}\n${prompt}${finalLock(body)}` },
     ];
   } else if (body.mode === "swap") {
-    // pre-illustrated book page: image 1 = child photo/avatar, image 2 = approved hero character, image 3 = finished page with a placeholder hero
-    const hero = String(body.hero || ""), base = String(body.base || "");
-    if (!hero || !base || hero.length > MAX_B64 || base.length > MAX_B64) return json({ error: "Missing hero or base page" }, 400, h);
+    // pre-illustrated book page: photo(s) of the child, approved hero character, optional face identity sheet, finished page with a placeholder hero
+    const hero = String(body.hero || ""), base = String(body.base || ""), face = String(body.face || "");
+    if (!hero || !base || hero.length > MAX_B64 || base.length > MAX_B64 || face.length > MAX_B64) return json({ error: "Missing hero or base page" }, 400, h);
     const extra = String(body.prompt || "").slice(0, 800);
+    const photos = [photo, ...(Array.isArray(body.extra) ? body.extra : []).map(String).filter((x) => x && x.length <= MAX_B64).slice(0, 2)];
     aspect = ["4:5", "16:9", "3:2", "1:1"].includes(String(body.aspect)) ? String(body.aspect) : "4:5";
-    const mt = (m: unknown) => /^image\/(png|jpeg|webp)$/.test(String(m)) ? String(m) : "image/jpeg";
+    const nP = photos.length, iHero = nP + 1, iFace = face ? nP + 2 : 0, iBase = nP + (face ? 3 : 2);
+    const who = nP === 1 ? "Image 1 is a photo (or avatar) of the real child." : `Images 1 to ${nP} are photos of the same real child.`;
     parts = [
-      { inline_data: { mime_type: "image/jpeg", data: photo } },
+      ...photos.map((d) => ({ inline_data: { mime_type: "image/jpeg", data: d } })),
       { inline_data: { mime_type: mt(body.heroMime), data: hero } },
+      ...(face ? [{ inline_data: { mime_type: mt(body.faceMime), data: face } }] : []),
       { inline_data: { mime_type: mt(body.baseMime), data: base } },
-      { text: `Image 1 is a photo (or avatar) of the real child. Image 2 is this child's approved illustrated character. Image 3 is a finished children's-book illustration whose main hero is a PLACEHOLDER child.
-Redraw image 3 EXACTLY: same composition, camera, background, lighting, colours, rendering style, other characters, props, and the hero's pose, position and outfit.
-Replace the placeholder hero's identity with the child of image 2 (face from image 1): face, eyes, skin tone and hair. The placeholder's face must not remain anywhere; a parent must recognise their child at once.
-SIZE IS FIXED: the hero keeps EXACTLY the placeholder's height, head size, body size and body proportions in the frame, with the top of the head in the same place. The hero is a young child: never taller or bigger than in image 3, never adult-sized, the same height as the other children in the picture.
-STYLE IS FIXED: render the hero in exactly the same style, lighting, materials and detail as image 3. Use images 1 and 2 only for who the child is (identity), never for drawing style, outfit, size or proportions.
+      { text: `${who} Image ${iHero} is this child's approved illustrated character${face ? `, and image ${iFace} is the same character's head from 4 angles (identity sheet)` : ""}. Image ${iBase} is a finished children's-book illustration whose main hero is a PLACEHOLDER child.
+Redraw image ${iBase} EXACTLY: same composition, camera, background, lighting, colours, rendering style, other characters, props, and the hero's pose, position and outfit.
+Replace the placeholder hero's identity with the approved character of image ${iHero}${face ? ` and ${iFace}` : ""}: face shape, eyes, eyebrows, nose, mouth, skin tone, hair colour, hair length, hair style and texture, glasses and marks must be IDENTICAL to the approved character, so the child looks exactly the same on every page of the book. Pick the angle from the identity sheet that matches the hero's head turn. The placeholder's face and hair must not remain anywhere; a parent must recognise their child at once.
+SIZE IS FIXED: the hero keeps EXACTLY the placeholder's height, head size, body size and body proportions in the frame, with the top of the head in the same place. The hero is a young child: never taller or bigger than in image ${iBase}, never adult-sized, the same height as the other children in the picture.
+STYLE IS FIXED: render the hero in exactly the same style, lighting, materials and detail as image ${iBase}. Use the other images only for who the child is (identity), never for drawing style, outfit, size or proportions.
 ${RENDER_RULES}
 ${extra}` },
     ];
