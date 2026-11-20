@@ -11,6 +11,7 @@
 //   { mode: "check", hero, face?, page, *Mime? } -> { score: 0..10, found, issues }  (v11 likeness check, text model, no photo needed)
 //   slot "face" on render: 4-angle head identity sheet of the hero (v11)
 //   render slot "hero"/"face" with a style: a vision model first writes a likeness checklist from the photos (v14; describe:false skips it)
+//   v15: render hero/face accepts prev (+prevMime) = earlier drawing to correct with the parent's fix; render/swap accept refIsArt:true when image 1 is a saved illustrated character, not a photo
 //   { mode: "character", photo: "<base64 jpeg>", gender: "m"|"f", traits?: {...}, notes?: string, variant?: 0..3 }
 //   { mode: "page", photo: "<base64>", sheet: "<base64 approved character>", scene: "text", gender, variant?: number }
 // Response: { image: "<base64 png/jpeg>", mime: "image/png" } or { error, code }
@@ -242,17 +243,26 @@ Deno.serve(async (req) => {
     // optional extra photos of the same child (other angles / smile) for a stronger identity lock
     const extra = (Array.isArray(body.extra) ? body.extra : []).map(String).filter((x) => x && x.length <= MAX_B64).slice(0, 2);
     const nP = 1 + extra.length;
-    const who = nP === 1 ? "Image 1 is the photo (or chosen avatar) of the real child, the hero."
+    // v15: refIsArt = image 1 is the child's saved illustrated character (reused in a new book), not a photo
+    const refIsArt = body.refIsArt === true;
+    const who = refIsArt ? "Image 1 is the approved illustrated character of the real child, the hero (no photo available): keep this exact face, hair, skin tone and proportions."
+      : nP === 1 ? "Image 1 is the photo (or chosen avatar) of the real child, the hero."
       : `Images 1 to ${nP} are photos of the same real child, the hero, from different moments and angles; use all of them together to get the face exactly right (image 1 is the main one).`;
+    // v15: prev = the earlier hero drawing the parent asked to correct; keep it and change only what was asked
+    const prev = ["hero", "face"].includes(String(body.slot)) && !sheet ? String(body.prev || "") : "";
+    const iPrev = nP + 1;
     const intro = sheet
-      ? `${who} Image ${nP + 1} is the approved character reference sheet for this book: keep every character, outfit, prop, colour and proportion exactly as in image ${nP + 1}, and the hero's face exactly as in the photo(s).`
+      ? `${who} Image ${nP + 1} is the approved character reference sheet for this book: keep every character, outfit, prop, colour and proportion exactly as in image ${nP + 1}, and the hero's face exactly as in the ${refIsArt ? "character" : "photo(s)"}.`
+      : prev && prev.length <= MAX_B64
+      ? `${who} Image ${iPrev} is our earlier drawing of this child. The parent asked for a correction (below): keep image ${iPrev}'s character design, rendering, outfit and everything that is already right, change ONLY what the correction asks, and use the photo(s) to get those features right.`
       : who;
     // hero/face character models: describe the child first (skipped when the client says photo is not a real child)
-    const notes = ART[String(body.style || "")] && ["hero", "face"].includes(String(body.slot)) && body.describe !== false ? await describeChild([photo, ...extra]) : "";
+    const notes = ART[String(body.style || "")] && ["hero", "face"].includes(String(body.slot)) && body.describe !== false && !refIsArt ? await describeChild([photo, ...extra]) : "";
     parts = [
       { inline_data: { mime_type: "image/jpeg", data: photo } },
       ...extra.map((d) => ({ inline_data: { mime_type: "image/jpeg", data: d } })),
       ...(sheet ? [{ inline_data: { mime_type: /^image\/(png|jpeg|webp)$/.test(String(body.sheetMime)) ? String(body.sheetMime) : "image/png", data: sheet } }] : []),
+      ...(prev && prev.length <= MAX_B64 ? [{ inline_data: { mime_type: mt(body.prevMime), data: prev } }] : []),
       { text: `${intro}\n${artDirection(body)}\n${RENDER_RULES}\n${prompt}${notes ? `\nLIKENESS CHECKLIST for this specific child (read from the photos; follow it exactly, and keep a real child's face proportions: no oversized round cartoon head, no huge baby eyes):\n${notes}` : ""}${finalLock(body)}` },
     ];
   } else if (body.mode === "swap") {
@@ -263,7 +273,7 @@ Deno.serve(async (req) => {
     const photos = [photo, ...(Array.isArray(body.extra) ? body.extra : []).map(String).filter((x) => x && x.length <= MAX_B64).slice(0, 2)];
     aspect = ["4:5", "16:9", "3:2", "1:1"].includes(String(body.aspect)) ? String(body.aspect) : "4:5";
     const nP = photos.length, iHero = nP + 1, iFace = face ? nP + 2 : 0, iBase = nP + (face ? 3 : 2);
-    const who = nP === 1 ? "Image 1 is a photo (or avatar) of the real child." : `Images 1 to ${nP} are photos of the same real child.`;
+    const who = body.refIsArt === true ? "Image 1 is the child's saved illustrated character (no photo available)." : nP === 1 ? "Image 1 is a photo (or avatar) of the real child." : `Images 1 to ${nP} are photos of the same real child.`;
     parts = [
       ...photos.map((d) => ({ inline_data: { mime_type: "image/jpeg", data: d } })),
       { inline_data: { mime_type: mt(body.heroMime), data: hero } },
