@@ -1887,7 +1887,7 @@ async function charGet(id){const sb=await sbClient();const {data,error}=await sb
 async function charSaveFromProject(pid){const sb=await sbClient();const u=await meUser();if(!sb||!u)return null;const m=await pbMeta(pid);if(!m||m.charId)return m&&m.charId;
  const hero=await pbImg(pid,"hero");if(!hero)return null;const b=pbBy(m.book);const id=crypto.randomUUID?crypto.randomUUID():([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
  const path=u.id+"/"+id+".jpg";const up=await sb.storage.from("characters").upload(path,dataURLtoBlob(await toJpeg(hero)),{contentType:"image/jpeg",upsert:true});if(up.error)throw up.error;
- const {error}=await sb.from("characters").insert({id,name:m.name,gender:b?pbG(b):"f",traits:m.traits||{},hero_path:path,source_book:m.book});if(error){await sb.storage.from("characters").remove([path]);throw error}
+ const {error}=await sb.from("characters").insert({id,name:m.name,gender:b?pbG(b):"f",traits:{...(m.traits||{}),art:m.art||""},hero_path:path,source_book:m.book});if(error){await sb.storage.from("characters").remove([path]);throw error}
  m.charId=id;await pbSaveMeta(m);return id}
 async function charDelete(c){const sb=await sbClient();await sb.storage.from("characters").remove([c.hero_path]);const {error}=await sb.from("characters").delete().eq("id",c.id);if(error)throw error}
 /* start a new book from a saved character: no photo, no hero step */
@@ -1895,7 +1895,7 @@ async function pbFromChar(root,b,cid){root.innerHTML=`<div class="pb-wait"><span
  try{if(!await meUser()){location.hash="#me";return}const c=await charGet(cid);if(!c||!c.img)throw new Error("not found");
   const r=await fetch(c.img);const blob=await r.blob();const url=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(blob)});const hero=await toJpeg(url,1536);
   const id=uid();await pbSetImg(id,"photo",hero);await pbSetImg(id,"hero",hero);
-  await pbSaveMeta({id,book:b.id,name:c.name,src:"char",charId:c.id,traits:c.traits||{},avatar:null,consentAt:null,createdAt:Date.now(),heroOk:true,sheetOk:true,approved:false,fmt:"hard"});
+  await pbSaveMeta({id,book:b.id,name:c.name,src:"char",charId:c.id,traits:c.traits||{},avatar:null,consentAt:null,createdAt:Date.now(),heroOk:!PB_V2.has(b.id)||(c.traits&&c.traits.art)==="v2",sheetOk:!PB_V2.has(b.id)||(c.traits&&c.traits.art)==="v2",art:(c.traits&&c.traits.art)||"",approved:false,fmt:"hard"});
   location.hash="#personal?p="+id}
  catch(e){console.error(e);root.innerHTML=`<div class="empty" style="padding-block:64px"><h1 style="font-size:26px">לא הצלחנו לטעון את הדמות</h1><p class="muted">נסו שוב בעוד רגע, או התחברו שוב לאזור האישי.</p><a class="btn btn-primary" href="#me">לאזור האישי</a></div>`}}
 const ME_ICON='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
@@ -2154,8 +2154,8 @@ async function pbRenderHero(m,n,fix){const b=pbBy(m.book);const photo=await pbIm
 async function pbRender(m){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  const hero=await pbImg(m.id,"hero");
  return aiCall({mode:"render",photo:b64(photo),...(hero?{sheet:b64(hero),sheetMime:pbMime(hero)}:{}),prompt:(hero?"תמונה 2 היא הדמות המאוירת של "+pbHero(b)+" שההורה אישר. לצייר את "+pbHero(b)+" בדף בדיוק כמו בתמונה 2, ולהוסיף לידו/ה את שאר הדמויות. | ":"")+pbSheetPrompt(b),aspect:"16:9",gender:pbG(b),...pbArt(b,"sheet")})}
-const PB_V2=new Set(["fairy_garden","soccer_hero"]); // cinematic 3D art (approved 2026-11-20)
-const PB_BASE_URL=(book,slot)=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+(PB_V2.has(book)?"v2/":"")+book+"/"+slot+".jpg";
+const PB_V2=new Set(["fairy_garden","soccer_hero","little_firefighter"]);const PB_V2Q="?v=20261120b"; // cinematic 3D art (approved 2026-11-20)
+const PB_BASE_URL=(book,slot)=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+(PB_V2.has(book)?"v2/":"")+book+"/"+slot+".jpg"+(PB_V2.has(book)?PB_V2Q:"");
 const pbArt=(b,slot)=>b&&PB_V2.has(b.id)?{style:"cinema3d",book:b.id,slot}:{};
 const PB_BASE_CACHE={};
 function pbBaseData(book,slot){const k=book+"/"+slot;return PB_BASE_CACHE[k]=PB_BASE_CACHE[k]||fetch(PB_BASE_URL(book,slot)).then(r=>{if(!r.ok)throw new Error("no base");return r.blob()}).then(bl=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(bl)})).catch(e=>{delete PB_BASE_CACHE[k];throw e})}
@@ -2217,7 +2217,7 @@ routes.personal={title:()=>"ספרים מאוירים מהתמונה",
   if(q.book&&q.char&&pbBy(q.book))return pbFromChar(root,pbBy(q.book),q.char);
   if(q.book&&pbBy(q.book))return pbFormView(root,pbBy(q.book));
   return pbHomeView(root)}};
-const PB_COVER_URL=id=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+(typeof PB_V2!=="undefined"&&PB_V2.has(id)?"v2/":"")+id+"/cover.jpg"; // the same pre-made cover the child is placed into
+const PB_COVER_URL=id=>"https://lxcpmmiahrllakahhrch.supabase.co/storage/v1/object/public/covers/base/"+(typeof PB_V2!=="undefined"&&PB_V2.has(id)?"v2/":"")+id+"/cover.jpg"+(typeof PB_V2!=="undefined"&&PB_V2.has(id)?"?v=20261120b":""); // the same pre-made cover the child is placed into
 let PB_LT_N=0;
 function pbLetter(b,name,o){if(!window.AgadiCover)return "";const k="a"+(++PB_LT_N);try{return `<div class="pb-letter">${AgadiCover.svg({template:b.titleTemplate,name:name||pbDefName(b),theme:b.id,...(o||{})}).replace(/ag-(hero|gloss|scrim-t|scrim-b|soft|ph)\b/g,k+"-$1")}</div>`}catch(e){return ""}}
 function pbCover(b,name,style){return `<div class="cover pb-cov" ${style?`style="${style}"`:""}><img src="${PB_COVER_URL(b.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="spine"></span>${pbLetter(b,name)||`<div class="ttl">${esc(pbTitle(b,name))}</div>`}</div>`}
@@ -2283,6 +2283,7 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
  if(!m){root.innerHTML=`<div class="empty" style="padding-block:64px"><h1 style="font-size:28px">הספר לא נמצא במכשיר הזה</h1><p class="muted">ייתכן שנמחק, או שעברו ${PB_KEEP_DAYS} ימים מאז שנוצר.</p><a class="btn btn-primary" href="#personal">ליצור ספר חדש</a></div>`;return}
  const b=pbBy(m.book);if(!b){root.innerHTML="";return}
  const photo=await pbImg(id,"photo"),sheet=await pbImg(id,"sheet");if(!m.heroOk&&sheet)m.heroOk=true; // books started before the hero step
+ if(m.heroOk&&PB_V2.has(m.book)&&m.art!=="v2"&&!m.approved&&photo){m.heroOk=false;m.sheetOk=false;m.restyled=true;for(const k of ["hero","heroAlt","sheet",...pbSlots()])await PBDB.del("i:"+id+":"+k);await pbSaveMeta(m)} // the book got new 3D art: the hero is redrawn in the new style
  const head=`<div class="pb-head"><a class="small" href="#personal">→ כל הספרים</a><h1>${esc(pbTitle(b,m.name))}</h1>
   <ol class="pb-steps"><li class="${m.heroOk?"done":"cur"}">הדמות של ${esc(m.name)}</li><li class="${m.sheetOk?(m.approved?"done":"cur"):""}">כריכה ו-12 עמודים</li><li class="${m.approved?"done":""}">אישור הספר</li></ol></div>${await pbInvHTML(m)}`;
  const foot=`<div class="pb-privacy small muted">${photo?`התמונה שמורה רק במכשיר הזה ותימחק אוטומטית ב-${new Date(m.createdAt+PB_KEEP_DAYS*864e5).toLocaleDateString("he-IL")}.`:"התמונה כבר נמחקה מהמכשיר."} <button class="linkbtn" id="pbDelPhoto" ${photo?"":"hidden"}>למחוק את התמונה עכשיו</button> · <button class="linkbtn" id="pbDelAll">למחוק את כל הספר והאיורים</button></div>`;
@@ -2290,7 +2291,7 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
   const wait=`<div class="pb-wait"><span class="spin" aria-hidden="true"></span><span>מציירים שתי גרסאות של ${esc(m.name)}. זה לוקח פחות מדקה.</span></div>`;
   const cands=u=>u.filter(Boolean).map((x,k)=>`<button type="button" class="pb-cand" data-k="${k}" aria-pressed="${k===0}"><img src="${x}" alt="גרסה ${k+1} של ${esc(m.name)}"><span>${k===0?"נבחרה":"לבחור בגרסה הזו"}</span></button>`).join("");
   root.innerHTML=head+`<section class="box stack pb-sheet"><h2>הדמות של ${esc(m.name)}</h2><p class="muted">קודם מציירים רק את ${esc(m.name)}. בחרו את הגרסה הכי דומה. אם משהו לא דומה, כתבו מה לתקן ונצייר שוב. אחרי האישור נפתח הספר המלא, ו${esc(m.name)} מוכנס לכל העמודים.</p>
-   <div class="pb-cands" id="pbHeroBox">${hero?cands([hero,alt]):wait}</div>
+   ${m.restyled?`<div class="note info small">לספר הזה יש עכשיו איורים חדשים בתלת־ממד, ולכן מציירים את ${esc(m.name)} מחדש באותו סגנון.</div>`:""}<div class="pb-cands" id="pbHeroBox">${hero?cands([hero,alt]):wait}</div>
    <span class="small bad" id="pbMsg" aria-live="polite"></span>
    <div class="row"><button class="btn btn-primary" id="pbOkHero" ${hero?"":"disabled"}>זה ${G?"היא":"הוא"}, אפשר להמשיך</button><a class="btn btn-ghost" href="#personal?book=${b.id}">להתחיל מחדש עם תמונה אחרת</a></div>
    <div class="pb-fix stack" id="pbFixBox" ${hero?"":"hidden"}><label class="f" for="pbFix">לא מספיק ${G?"דומה":"דומה"}? כתבו מה שונה, ונצייר שוב<textarea class="inp" id="pbFix" rows="2" maxlength="200" placeholder="למשל: השיער יותר מתולתל וכהה, העיניים יותר מלוכסנות, יש ${G?"לה":"לו"} גומות"></textarea></label><button class="btn btn-ghost" id="pbReHero" type="button">לצייר שוב</button></div></section>`+foot;
@@ -2304,7 +2305,7 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
    $("#pbFixBox",root).hidden=false};
   bindC();
   $("#pbReHero",root).onclick=()=>{const fix=$("#pbFix",root).value.trim().replace(/[<>{}]/g,"").slice(0,200);drawH(fix)};
-  $("#pbOkHero",root).onclick=async()=>{m.heroOk=true;m.sheetOk=true;for(const s of pbSlots())await PBDB.del("i:"+id+":"+s);await PBDB.del("i:"+id+":heroAlt");await pbSaveMeta(m);if(m.src!=="char")meUser().then(u=>u&&charSaveFromProject(id).then(()=>toast("הדמות של "+m.name+" נשמרה באזור האישי"))).catch(e=>console.warn("char save",e));pbProjectView(root,id)};
+  $("#pbOkHero",root).onclick=async()=>{m.heroOk=true;m.sheetOk=true;if(PB_V2.has(m.book))m.art="v2";for(const s of pbSlots())await PBDB.del("i:"+id+":"+s);await PBDB.del("i:"+id+":heroAlt");await pbSaveMeta(m);if(m.src!=="char")meUser().then(u=>u&&charSaveFromProject(id).then(()=>toast("הדמות של "+m.name+" נשמרה באזור האישי"))).catch(e=>console.warn("char save",e));pbProjectView(root,id)};
   if(!hero&&AI_ON())drawH();else if(!hero){$("#pbMsg",root).textContent="יצירת האיורים פועלת באתר המלא בלבד"}
   return}
  if(!m.sheetOk){
