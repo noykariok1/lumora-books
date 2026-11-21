@@ -2230,7 +2230,7 @@ function pbHeroPrompt(b,n,m,fix){const tr=pbTraitsText(m&&m.traits),v2=PB_V2.has
  v2?"Art style: the HOUSE STYLE (premium 3D animated feature film character), matching the rest of the book.":""].filter(Boolean).join("\n")}
 async function pbRenderHero(m,n,fix,prev){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  const extra=[];for(const k of ["photo2","photo3"]){const u=await pbImg(m.id,k);if(u)extra.push(b64(u))}
- return aiCall({mode:"render",photo:b64(photo),extra,prompt:pbHeroPrompt(b,n,m,fix),aspect:"4:5",gender:pbG(b),engine:PB_ENGINE,...(fix&&prev&&PB_V2.has(b.id)?{prev:b64(prev),prevMime:pbMime(prev)}:{}),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,"hero")})}
+ return aiCall({mode:"render",photo:b64(photo),extra,prompt:pbHeroPrompt(b,n,m,fix),aspect:"4:5",gender:pbG(b),engine:PB_ENGINE,stylize:PB_STYLIZE,...(fix&&prev&&PB_V2.has(b.id)?{prev:b64(prev),prevMime:pbMime(prev)}:{}),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,"hero")})}
 async function pbRender(m){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  const hero=await pbImg(m.id,"hero");
  return aiCall({mode:"render",photo:b64(photo),...(hero?{sheet:b64(hero),sheetMime:pbMime(hero)}:{}),prompt:(hero?"תמונה 2 היא הדמות המאוירת של "+pbHero(b)+" שההורה אישר. לצייר את "+pbHero(b)+" בדף בדיוק כמו בתמונה 2, ולהוסיף לידו/ה את שאר הדמויות. | ":"")+pbSheetPrompt(b),aspect:"16:9",gender:pbG(b),...pbArt(b,"sheet")})}
@@ -2240,6 +2240,7 @@ const pbArt=(b,slot)=>b&&PB_V2.has(b.id)?{style:"cinema3d",book:b.id,slot}:{};
 const PB_BASE_CACHE={};
 function pbBaseData(book,slot){const k=book+"/"+slot;return PB_BASE_CACHE[k]=PB_BASE_CACHE[k]||fetch(PB_BASE_URL(book,slot)).then(r=>{if(!r.ok)throw new Error("no base");return r.blob()}).then(bl=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(bl)})).catch(e=>{delete PB_BASE_CACHE[k];throw e})}
 const PB_ENGINE="gpt"; // GPT Image 2 (the server falls back to Gemini by itself); set "gemini" to switch back (noy, 2026-11-21)
+const PB_STYLIZE=2; // hero + face sheet a bit more illustrated (noy, 2026-11-21); pages copy the style from the base art
 const PB_PAGE_Q="medium"; // pages at medium in preview and full book; the hero stays high (fast-cheap plan v17)
 const PB_PREVIEW=["p1","p2"]; // only pages 1-2 are drawn before payment; the rest (cover too) only after the order (noy, 2026-11-21)
 const pbHqDone=m=>pbSlots().slice(1).every(s=>m&&m.hq&&m.hq[s]);
@@ -2247,7 +2248,7 @@ const PB_QA=true; // per-page likeness check (cheap text model). A weak page is 
 async function pbExtra(m){const extra=[];for(const k of ["photo2","photo3"]){const u=await pbImg(m.id,k);if(u)extra.push(b64(u))}return extra}
 async function pbFaceSheet(m,hero){const b=pbBy(m.book);if(!PB_V2.has(b.id))return null;const have=await pbImg(m.id,"face");if(have)return have;
  try{const photo=await pbImg(m.id,"photo");if(!photo)return null;
-  const u=await aiCall({mode:"render",photo:b64(photo),extra:await pbExtra(m),sheet:b64(hero),sheetMime:pbMime(hero),aspect:"16:9",gender:pbG(b),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,"face"),
+  const u=await aiCall({mode:"render",photo:b64(photo),extra:await pbExtra(m),sheet:b64(hero),stylize:PB_STYLIZE,sheetMime:pbMime(hero),aspect:"16:9",gender:pbG(b),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,"face"),
    prompt:"TASK: create a completely NEW image from scratch; do NOT edit image 1 or image 2 and nothing of their backgrounds may appear. Draw the identity sheet of the hero exactly as approved in image 2 (same 3D character, face, glasses, hair, skin)"+(m.src==="char"?".":", with the face matching the real child in image 1.")});
   await pbSetImg(m.id,"face",u);if(m.charId)charSaveFace(m.charId,u).catch(e=>console.warn("face save",e));return u}catch(e){console.warn("face sheet",e);return null}}
 async function pbCheck(hero,face,page){try{const r=await fetch(AI.endpoint,{method:"POST",signal:AbortSignal.timeout(60000),headers:{"Content-Type":"application/json",apikey:AI.anonKey,Authorization:"Bearer "+AI.anonKey},
