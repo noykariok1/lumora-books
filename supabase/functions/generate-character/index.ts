@@ -12,6 +12,9 @@
 //   slot "face" on render: 4-angle head identity sheet of the hero (v11)
 //   render slot "hero"/"face" with a style: a vision model first writes a likeness checklist from the photos (v14; describe:false skips it)
 //   v15: render hero/face accepts prev (+prevMime) = earlier drawing to correct with the parent's fix; render/swap accept refIsArt:true when image 1 is a saved illustrated character, not a photo
+//   v16: engine?: "gemini"|"gpt" (default: secret IMAGE_ENGINE, else "gemini"); quality?: "low"|"medium"|"high" (gpt only, default high).
+//        "gpt" = OpenAI gpt-image-2 via /v1/images/edits (needs secret OPENAI_API_KEY; OPENAI_IMAGE_MODEL optional). If gpt fails, falls back to Gemini.
+//        Response also carries engine: "gpt"|"gemini".
 //   { mode: "character", photo: "<base64 jpeg>", gender: "m"|"f", traits?: {...}, notes?: string, variant?: 0..3 }
 //   { mode: "page", photo: "<base64>", sheet: "<base64 approved character>", scene: "text", gender, variant?: number }
 // Response: { image: "<base64 png/jpeg>", mime: "image/png" } or { error, code }
@@ -21,6 +24,9 @@ const MODEL = Deno.env.get("GEMINI_IMAGE_MODEL") || "gemini-3-pro-image";
 const KEY = Deno.env.get("GEMINI_API_KEY") || "";
 const ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") || "*").split(",").map((s) => s.trim()).filter(Boolean);
 const MAX_B64 = 6_000_000; // ~4.5 MB per image
+const OPENAI_KEY = Deno.env.get("OPENAI_API_KEY") || "";
+const OPENAI_MODEL = Deno.env.get("OPENAI_IMAGE_MODEL") || "gpt-image-2";
+const DEFAULT_ENGINE = Deno.env.get("IMAGE_ENGINE") || "gemini";
 
 // very small per-isolate rate limit (use Upstash/DB for real limits)
 const hits = new Map<string, number[]>();
@@ -207,11 +213,57 @@ async function callGemini(parts: unknown[], aspect?: string, size?: string) {
   return { error: "The model did not return an image", code: cand.finishReason === "SAFETY" ? "blocked" : "empty" };
 }
 
+// v16: OpenAI image edits. parts = Gemini-style [{inline_data:{mime_type,data}}..., {text}] so both engines share one prompt builder.
+const GPT_SIZES: Record<string, string[]> = {
+  "4:5": ["1024x1280", "1024x1536"], "16:9": ["1536x864", "1536x1024"], "3:2": ["1536x1024"], "1:1": ["1024x1024"],
+};
+const GPT_SIZES_2K: Record<string, string[]> = {
+  "4:5": ["1600x2000", "1024x1280", "1024x1536"], "16:9": ["2048x1152", "1536x864", "1536x1024"], "3:2": ["1536x1024"], "1:1": ["2048x2048", "1024x1024"],
+};
+function b64ToBlob(data: string, mime: string) {
+  const bin = atob(data); const u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new Blob([u], { type: mime });
+}
+async function callOpenAI(parts: unknown[], aspect?: string, size?: string, quality = "high") {
+  if (!OPENAI_KEY) return { error: "OPENAI_API_KEY is not set", code: "not_configured" };
+  const imgs: { mime: string; data: string }[] = [];
+  let text = "";
+  for (const p of parts as Record<string, any>[]) {
+    const d = p.inline_data || p.inlineData;
+    if (d?.data) imgs.push({ mime: d.mime_type || d.mimeType || "image/jpeg", data: d.data });
+    else if (p.text) text += (text ? "\n" : "") + p.text;
+  }
+  if (!imgs.length) return { error: "No reference image", code: "provider_error" };
+  const sizes = [...((size === "2K" ? GPT_SIZES_2K : GPT_SIZES)[aspect || "1:1"] || ["auto"]), "auto"];
+  let last: { error: string; code: string } = { error: "OpenAI failed", code: "provider_error" };
+  let fidelity = true;
+  for (let i = 0; i < sizes.length; i++) {
+    const fd = new FormData();
+    fd.append("model", OPENAI_MODEL);
+    fd.append("prompt", text.slice(0, 32000));
+    fd.append("size", sizes[i]);
+    fd.append("quality", ["low", "medium", "high"].includes(quality) ? quality : "high");
+    fd.append("output_format", "jpeg");
+    fd.append("n", "1");
+    if (fidelity) fd.append("input_fidelity", "high");
+    imgs.slice(0, 16).forEach((im, k) => fd.append("image[]", b64ToBlob(im.data, im.mime), `ref${k + 1}.${im.mime.includes("png") ? "png" : im.mime.includes("webp") ? "webp" : "jpg"}`));
+    const res = await fetch("https://api.openai.com/v1/images/edits", { method: "POST", headers: { Authorization: `Bearer ${OPENAI_KEY}` }, body: fd });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data?.data?.[0]?.b64_json) return { image: data.data[0].b64_json, mime: "image/jpeg" };
+    const msg = String(data?.error?.message || `OpenAI HTTP ${res.status}`);
+    last = { error: msg, code: res.status === 429 ? "rate_limited" : /safety|moderation/i.test(msg) ? "blocked" : "provider_error" };
+    if (res.status === 400 && /input_fidelity/i.test(msg) && fidelity) { fidelity = false; i--; continue; }
+    if (!(res.status === 400 && /size/i.test(msg))) break; // only retry on an unsupported size
+  }
+  return last;
+}
+
 Deno.serve(async (req) => {
   const h = cors(req.headers.get("origin"));
   if (req.method === "OPTIONS") return new Response("ok", { headers: h });
   if (req.method !== "POST") return json({ error: "POST only" }, 405, h);
-  if (!KEY) return json({ error: "GEMINI_API_KEY is not set", code: "not_configured" }, 500, h);
+  if (!KEY && !OPENAI_KEY) return json({ error: "No image API key is set", code: "not_configured" }, 500, h);
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (limited(ip)) return json({ error: "Too many requests, try again in a few minutes", code: "rate_limited" }, 429, h);
 
@@ -280,7 +332,7 @@ Deno.serve(async (req) => {
       ...(face ? [{ inline_data: { mime_type: mt(body.faceMime), data: face } }] : []),
       { inline_data: { mime_type: mt(body.baseMime), data: base } },
       { text: `${who} Image ${iHero} is this child's approved illustrated character${face ? `, and image ${iFace} is the same character's head from 4 angles (identity sheet)` : ""}. Image ${iBase} is a finished children's-book illustration whose main hero is a PLACEHOLDER child.
-Redraw image ${iBase} EXACTLY: same composition, camera, background, lighting, colours, rendering style, other characters, props, and the hero's pose, position and outfit.
+Redraw image ${iBase} EXACTLY: same composition, camera, background, lighting, colours, rendering style, other characters, props, and the hero's pose, position and outfit. Keep the hero's facial expression, emotion, gaze direction and head turn exactly as in image ${iBase}: do not make the hero look at the camera or smile unless the placeholder does.
 Replace the placeholder hero's identity with the approved character of image ${iHero}${face ? ` and ${iFace}` : ""}: face shape, eyes, eyebrows, nose, mouth, skin tone, hair colour, hair length, hair style and texture, glasses and marks must be IDENTICAL to the approved character, so the child looks exactly the same on every page of the book. Pick the angle from the identity sheet that matches the hero's head turn. The placeholder's face and hair must not remain anywhere; a parent must recognise their child at once.
 SIZE IS FIXED: the hero keeps EXACTLY the placeholder's height, head size, body size and body proportions in the frame, with the top of the head in the same place. The hero is a young child: never taller or bigger than in image ${iBase}, never adult-sized, the same height as the other children in the picture.
 STYLE IS FIXED: render the hero in exactly the same style, lighting, materials and detail as image ${iBase}. Use the other images only for who the child is (identity), never for drawing style, outfit, size or proportions.
@@ -304,10 +356,18 @@ ${extra}` },
   }
   // Photos are not stored by this function. Turn off request logging in the Google project for children's data.
   const size = ["1K", "2K"].includes(String(body.size)) ? String(body.size) : undefined; // 2K for print pages
+  const engine = (body.engine === "gpt" || body.engine === "gemini") ? String(body.engine) : DEFAULT_ENGINE;
+  if (engine === "gpt" && OPENAI_KEY) {
+    const g = await callOpenAI(parts, aspect, size, String(body.quality || "high"));
+    if (!("error" in g)) return json({ ...g, engine: "gpt" }, 200, h);
+    if (!KEY || body.fallback === false) return json({ ...g, engine: "gpt" }, 502, h);
+    console.log("gpt failed, falling back to gemini:", g.code, String(g.error).slice(0, 200));
+  }
+  if (!KEY) return json({ error: "GEMINI_API_KEY is not set", code: "not_configured" }, 500, h);
   let out = await callGemini(parts, aspect, size);
   if ("error" in out && size && out.code === "provider_error" && /imageSize|size/i.test(String(out.error))) out = await callGemini(parts, aspect);
   if ("error" in out && aspect && out.code === "provider_error" && /aspect|imageConfig|Unknown name/i.test(String(out.error))) {
     out = await callGemini(parts); // model without imageConfig support: aspect is also stated in the prompt
   }
-  return json(out, "error" in out ? 502 : 200, h);
+  return json({ ...out, engine: "gemini" }, "error" in out ? 502 : 200, h);
 });
