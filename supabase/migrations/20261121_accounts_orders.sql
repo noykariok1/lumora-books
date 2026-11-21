@@ -1,0 +1,7 @@
+-- Applied to project lxcpmmiahrllakahhrch on 2026-11-21 (migrations accounts_orders,
+-- place_order_claim_only_own_email, place_order_null_safe_claim). Kept here for reference.
+-- * public.orders: one row per order, written only by place_order(); RLS read by account or verified email
+-- * public.my_email(), owns_order(), link_my_orders()
+-- * storage policy orders_files_owner_read: parents can read their own order images in bucket "orders"
+-- * characters.user_id FK now ON DELETE CASCADE
+-- See the live definitions with: select pg_get_functiondef('public.place_order(jsonb)'::regprocedure);
