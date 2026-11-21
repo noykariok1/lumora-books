@@ -15,6 +15,8 @@
 //   v16: engine?: "gemini"|"gpt" (default: secret IMAGE_ENGINE, else "gemini"); quality?: "low"|"medium"|"high" (gpt only, default high).
 //        "gpt" = OpenAI gpt-image-2 via /v1/images/edits (needs secret OPENAI_API_KEY; OPENAI_IMAGE_MODEL optional). If gpt fails, falls back to Gemini.
 //        Response also carries engine: "gpt"|"gemini".
+//   v23: likeness checklist also for family members (person); stylize 3 = clearly animated (noy: hero looked like a photo).
+//   v22: swap with cast keeps all outfits from the base page and must replace every family placeholder.
 //   v21 (family series): render accepts person?: "father"|"mother"|"brother"|"sister"|"grandfather"|"grandmother" when image 1 is a photo of a family member
 //        (draws that person's character instead of the child's), and render/swap accept cast?: [{ role, hero, heroMime? }] (up to 3) =
 //        approved characters of the other family members who appear on the page.
@@ -103,11 +105,17 @@ function castOf(body: Record<string, unknown>) {
     .filter((c) => ROLE_EN[String(c.role)] && typeof c.hero === "string" && c.hero.length > 0 && String(c.hero).length <= MAX_B64)
     .map((c) => ({ role: ROLE_EN[String(c.role)], hero: String(c.hero), mime: /^image\/(png|jpeg|webp)$/.test(String(c.heroMime)) ? String(c.heroMime) : "image/jpeg" }));
 }
+const PLACEHOLDER: Record<string, string> = {
+  grandfather: "the grandfather placeholder is an older man with short grey hair and round glasses",
+  grandmother: "the grandmother placeholder is an older woman with chin-length silver hair",
+  father: "the father placeholder is the adult man", mother: "the mother placeholder is the adult woman",
+  brother: "the brother placeholder is the other boy", sister: "the sister placeholder is the other girl",
+};
 function castText(cast: { role: string }[], first: number, swap: boolean) {
   if (!cast.length) return "";
   const list = cast.map((c, k) => `image ${first + k} is the approved illustrated character of the hero's ${c.role} (${ROLE_NOTE[c.role]})`).join("; ");
   return `\nFAMILY CAST: ${list}. ${swap
-    ? `Wherever the ${cast.map((c) => c.role).join(" or ")} appears in the page as a PLACEHOLDER, replace that placeholder's identity (face, skin tone, hair, glasses, facial hair, build) with the matching approved character, keeping the placeholder's pose, position, size, outfit and expression. Each family member must look exactly like their approved character, the same on every page.`
+    ? `The page contains PLACEHOLDER family members (${cast.map((c) => PLACEHOLDER[c.role] || c.role).join("; ")}). EVERY one of them that appears MUST be replaced: none of the placeholders' faces, hair, glasses or facial hair may remain anywhere in the result, even if the person is small, in the background or turned away. Replace each placeholder's identity (face, skin tone, hair colour and style, baldness, glasses or no glasses, facial hair or none, build) with the matching approved character, keeping the placeholder's pose, position, size and expression. Each family member must look exactly like their approved character, the same on every page.`
     : `Whenever the scene has the ${cast.map((c) => c.role).join(" or ")}, draw them exactly like their approved character (face, skin tone, hair, glasses, facial hair, build), the same on every page.`} Keep the cast images only for identity, never for style. Do not add a family member who is not in the scene.`;
 }
 
@@ -170,7 +178,7 @@ The face must still be unmistakably this real ${personOf(body) || "child"}: same
 function stylizeNote(body: Record<string, unknown>) {
   const lv = Number(body.stylize || 0);
   if (!(lv > 0)) return "";
-  const amt = lv >= 2 ? "noticeably (about 30%)" : "slightly (about 15%)";
+  const amt = lv >= 3 ? "clearly (about 50%): it must read at first glance as an animated-film character, never as a photo or a realistic render of a real child" : lv >= 2 ? "noticeably (about 30%)" : "slightly (about 15%)";
   return `\nSTYLIZATION: make the hero ${amt} more stylized than a photo, like a lead character of a premium 3D animated feature film: a touch larger, brighter eyes, softer rounder cheeks and chin, smoother simplified skin without pores or photographic detail, hair as soft sculpted strand groups, gentle appealing proportions. It must NOT look like a photograph or a photoreal render. Likeness still comes first: keep this ${personOf(body) || "child"}'s own face shape, eye shape and colour, nose, mouth, teeth, skin tone, hair colour, length and texture, so a parent instantly recognises the child.`;
 }
 
@@ -200,12 +208,12 @@ Return JSON only: {"score": <0-10, 10 = unmistakably the same child>, "found": <
 }
 
 // ---- likeness notes (v14): a cheap vision model writes a precise feature list from the photos, so the hero is drawn from facts, not a vague impression ----
-async function describeChild(photos: string[]) {
+async function describeChild(photos: string[], person = "") {
   const parts = [
     ...photos.map((d) => ({ inline_data: { mime_type: "image/jpeg", data: d } })),
-    { text: `These photos all show the same real child. Write a precise LIKENESS CHECKLIST an illustrator can follow, in English, one short line each:
+    { text: `These photos all show the same real ${person || "child"}. Write a precise LIKENESS CHECKLIST an illustrator can follow, in English, one short line each:
 face shape and chin; cheeks; eye shape, size relative to the face, spacing and colour; eyebrows (shape, thickness, colour); nose; mouth, lips and teeth; ears; skin tone (describe it exactly, e.g. "light olive", "medium brown"); hair colour, length, texture and exactly how it is worn (fringe or not, parting, ponytail, braid, curls); glasses, freckles, moles or marks; apparent age and build; typical expression.
-Only facts visible in the photos. No names, no guesses about ethnicity. Plain text, max 14 lines.` },
+Only facts visible in the photos. No names, no guesses about ethnicity.${person ? " Also: apparent age, face width and fullness, wrinkles and skin texture, hair colour, length and parting exactly (e.g. shoulder-length white-grey hair swept to one side), jewellery." : ""} Plain text, max 14 lines.` },
   ];
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CHECK_MODEL}:generateContent`, {
@@ -343,7 +351,7 @@ Deno.serve(async (req) => {
       ? `${who} Image ${iPrev} is our earlier drawing of this child. The parent asked for a correction (below): keep image ${iPrev}'s character design, rendering, outfit and everything that is already right, change ONLY what the correction asks, and use the photo(s) to get those features right.`
       : who;
     // hero/face character models: describe the child first (skipped when the client says photo is not a real child)
-    const notes = ART[String(body.style || "")] && ["hero", "face"].includes(String(body.slot)) && body.describe !== false && !refIsArt && !person ? await describeChild([photo, ...extra]) : "";
+    const notes = ART[String(body.style || "")] && ["hero", "face"].includes(String(body.slot)) && (body.describe !== false || person) && !refIsArt ? await describeChild([photo, ...extra], person) : "";
     const rCast = person ? [] : castOf(body);
     const iCast = nP + 1 + (sheet ? 1 : 0) + (prev && prev.length <= MAX_B64 ? 1 : 0);
     parts = [
@@ -352,7 +360,7 @@ Deno.serve(async (req) => {
       ...(sheet ? [{ inline_data: { mime_type: /^image\/(png|jpeg|webp)$/.test(String(body.sheetMime)) ? String(body.sheetMime) : "image/png", data: sheet } }] : []),
       ...(prev && prev.length <= MAX_B64 ? [{ inline_data: { mime_type: mt(body.prevMime), data: prev } }] : []),
       ...rCast.map((c) => ({ inline_data: { mime_type: c.mime, data: c.hero } })),
-      { text: `${intro}${castText(rCast, iCast, false)}\n${artDirection(body)}\n${person ? RENDER_RULES.replace(/\bchild\b/g, "person") : RENDER_RULES}\n${prompt}${notes ? `\nLIKENESS CHECKLIST for this specific child (read from the photos; follow it exactly, and keep a real child's face proportions: no oversized round cartoon head, no huge baby eyes):\n${notes}` : ""}${finalLock(body)}${stylizeNote(body)}` },
+      { text: `${intro}${castText(rCast, iCast, false)}\n${artDirection(body)}\n${person ? RENDER_RULES.replace(/\bchild\b/g, "person") : RENDER_RULES}\n${prompt}${notes ? (person ? `\nLIKENESS CHECKLIST for this specific person (read from the photos; follow it exactly: face shape and fullness, hair length, colour and parting, skin tone and real age must match, never a generic grandparent):\n${notes}` : `\nLIKENESS CHECKLIST for this specific child (read from the photos; follow it exactly, and keep a real child's face proportions: no oversized round cartoon head, no huge baby eyes):\n${notes}`) : ""}${finalLock(body)}${stylizeNote(body)}` },
     ];
   } else if (body.mode === "swap") {
     // pre-illustrated book page: photo(s) of the child, approved hero character, optional face identity sheet, finished page with a placeholder hero
@@ -374,7 +382,7 @@ Deno.serve(async (req) => {
 Redraw image ${iBase} EXACTLY: same composition, camera, background, lighting, colours, rendering style, other characters, props, and the hero's pose, position and outfit. Keep the hero's facial expression, emotion, gaze direction and head turn exactly as in image ${iBase}: do not make the hero look at the camera or smile unless the placeholder does.
 Replace the placeholder hero's identity with the approved character of image ${iHero}${face ? ` and ${iFace}` : ""}: face shape, eyes, eyebrows, nose, mouth, skin tone, hair colour, hair length, hair style and texture, glasses and marks must be IDENTICAL to the approved character, so the child looks exactly the same on every page of the book. Pick the angle from the identity sheet that matches the hero's head turn. The placeholder's face and hair must not remain anywhere; a parent must recognise their child at once.
 SIZE IS FIXED: the hero keeps EXACTLY the placeholder's height, head size, body size and body proportions in the frame, with the top of the head in the same place. The hero is a young child: never taller or bigger than in image ${iBase}, never adult-sized, the same height as the other children in the picture.
-STYLE IS FIXED: render the hero in exactly the same style, lighting, materials and detail as image ${iBase}. Use the other images only for who the child is (identity), never for drawing style, outfit, size or proportions.${castText(sCast, iBase + 1, true)}
+STYLE IS FIXED: render the hero in exactly the same style, lighting, materials and detail as image ${iBase}. Use the other images only for who the child is (identity), never for drawing style, outfit, size or proportions.${castText(sCast, iBase + 1, true)}${sCast.length ? `\nOUTFITS ARE FIXED: every person, the hero included, keeps EXACTLY the clothes, shoes and colours they wear in image ${iBase}. The reference characters may wear different clothes: ignore their clothes completely and take only identity (face, skin, hair, glasses, facial hair, body build) from them.` : ""}
 ${RENDER_RULES}
 ${extra}` },
     ];
