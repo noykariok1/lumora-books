@@ -4,6 +4,11 @@
 //   RESEND_API_KEY   email sending via resend.com (required to send; needs a verified sender domain)
 //   PRINT_FROM       optional sender, e.g. "Lumora <orders@your-domain.co.il>"
 //   PRINT_CC         optional copy to the owner
+//   CUSTOMER_FROM    sender of the customer emails, e.g. "אגדיבוק <orders@your-domain.co.il>" (falls back to PRINT_FROM)
+//   OWNER_EMAIL      optional: gets a copy (bcc) of every customer email
+// Customer email: right after "build", every customer gets an order confirmation with the order number and a
+// download link to the full book as a PDF (hardcover and digital alike). Rows in table order_emails; while the
+// sender domain is not verified the row stays "pending"/"failed" and { action: "mail", orderId } sends it again.
 // Book spec (change with the printer's real spec): trim 210x250 mm, 3 mm bleed, 300 dpi images.
 // Requests (POST JSON):
 //   { action: "build", orderId }  called by the site right after the order files are uploaded
@@ -40,6 +45,75 @@ async function fill(pdf: PDFDocument, bytes: Uint8Array) { // cover-fit an image
   page(pdf).drawImage(img, { x: (PW - w) / 2, y: (PH - h) / 2, width: w, height: h });
 }
 
+// the full book as one PDF for the family: front cover, 12 picture + text spreads, back cover
+async function buildReader(orderId: string, pid: string) {
+  const dir = `${orderId}/${pid}`;
+  const doc = await PDFDocument.create();
+  doc.setTitle("אגדיבוק");
+  const cover = await file(`${dir}/print/00.jpg`);
+  if (!cover) throw new Error(`missing cover for ${pid}`);
+  await fill(doc, cover);
+  for (let i = 1; i <= 12; i++) {
+    const art = await file(`${dir}/p${i}.jpg`), text = await file(`${dir}/print/${String(i).padStart(2, "0")}.jpg`);
+    if (!art || !text) throw new Error(`missing page ${i} for ${pid}`);
+    await fill(doc, art);
+    await fill(doc, text);
+  }
+  const back = await file(`${dir}/print/13.jpg`);
+  if (back) await fill(doc, back);
+  const path = `${dir}/book.pdf`;
+  const { error } = await db.storage.from("orders").upload(path, new Blob([await doc.save()], { type: "application/pdf" }), { upsert: true, contentType: "application/pdf" });
+  if (error) throw new Error(`upload book: ${error.message}`);
+  return path;
+}
+
+const FMT: Record<string, string> = { hard: "כריכה קשה + PDF", gift: "כריכה קשה + PDF", digital: "ספר דיגיטלי (PDF)" };
+const esc = (t: unknown) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
+const ils = (n: unknown) => `${Number(n || 0)} ₪`;
+
+async function mailCustomer(orderId: string) {
+  const { data: row } = await db.from("order_emails").select("*").eq("order_id", orderId).maybeSingle();
+  if (!row) return { error: "no mail row" };
+  if (row.status === "sent") return { ok: true, already: true };
+  const key = Deno.env.get("RESEND_API_KEY"), from = Deno.env.get("CUSTOMER_FROM") || Deno.env.get("PRINT_FROM");
+  if (!key || !from) {
+    await db.from("order_emails").update({ status: "pending", error: "RESEND_API_KEY / CUSTOMER_FROM not set yet (needs a verified domain)" }).eq("order_id", orderId);
+    return { error: "email not configured" };
+  }
+  const { data: rows } = await db.from("inbox").select("payload").eq("kind", "order").filter("payload->order->>id", "eq", orderId).limit(1);
+  const o = rows?.[0]?.payload?.order || {};
+  const first = String(o.customer?.name || "").split(" ")[0];
+  const books: string[] = [];
+  for (const b of row.books || []) {
+    let link = "";
+    if (b.pdf) { const { data } = await db.storage.from("orders").createSignedUrl(b.pdf, 60 * 60 * 24 * 30, { download: `${b.title}.pdf` }); link = data?.signedUrl || ""; }
+    books.push(`<tr><td style="padding:10px 0;border-bottom:1px solid #eee"><b>${esc(b.title)}</b><br><span style="color:#777">${esc(FMT[b.fmt] || b.fmt)} · כמות ${esc(b.qty || 1)}</span>${link ? `<br><a href="${link}" style="display:inline-block;margin-top:8px;background:#4B3FD8;color:#fff;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:bold">להורדת הספר המלא (PDF)</a>` : `<br><span style="color:#a15c00">קובץ ה־PDF יישלח אליכם בנפרד בקרוב.</span>`}</td></tr>`);
+  }
+  const s = o.shipping || {};
+  const ship = s.method && s.method !== "digital" ? `<p><b>משלוח אל:</b> ${esc(o.customer?.name)}, ${esc(s.street)}${s.apt ? ", " + esc(s.apt) : ""}, ${esc(s.city)}</p><p style="color:#777">הספר המודפס יוצא להדפסה ונעדכן אתכם כשהוא נשלח.</p>` : "";
+  const html = `<div dir="rtl" style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#2A2540;line-height:1.6">
+<h1 style="color:#1A1748;font-size:24px">ההזמנה התקבלה${first ? ", " + esc(first) : ""}!</h1>
+<p>מספר הזמנה: <b dir="ltr">${esc(orderId)}</b></p>
+<table style="width:100%;border-collapse:collapse">${books.join("")}</table>
+<p style="margin-top:16px"><b>סה״כ:</b> ${ils(o.total)}${o.payment === "unpaid" ? " (נחזור אליכם להשלמת התשלום)" : ""}</p>
+${ship}
+<p style="color:#777;font-size:13px">הקישורים להורדה בתוקף 30 יום. שמרו את הקובץ במכשיר. יש שאלה? פשוט השיבו למייל הזה עם מספר ההזמנה.</p>
+<p style="color:#1A1748;font-weight:bold">אגדיבוק</p></div>`;
+  const owner = Deno.env.get("OWNER_EMAIL");
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from, to: [row.email], bcc: owner ? [owner] : undefined, subject: `אישור הזמנה ${orderId} · אגדיבוק`, html }),
+  });
+  if (!r.ok) {
+    const e = (await r.text()).slice(0, 300);
+    await db.from("order_emails").update({ status: "failed", error: e }).eq("order_id", orderId);
+    return { error: e };
+  }
+  await db.from("order_emails").update({ status: "sent", sent_at: new Date().toISOString(), error: null }).eq("order_id", orderId);
+  return { ok: true };
+}
+
 async function buildBook(orderId: string, pid: string) {
   const dir = `${orderId}/${pid}`;
   const cover = await file(`${dir}/print/00.jpg`);
@@ -58,6 +132,7 @@ async function buildBook(orderId: string, pid: string) {
     await fill(inner, text);
   }
   const out: Record<string, string> = {};
+  out.book = await buildReader(orderId, pid);
   for (const [name, doc] of [["cover", coverPdf], ["interior", inner]] as const) {
     const bytes = await doc.save();
     const path = `${dir}/${name}.pdf`;
@@ -111,22 +186,36 @@ Deno.serve(async (req) => {
   if (!/^LM-[A-Z0-9]{4,10}$/.test(orderId)) return json({ error: "Bad order id" }, 400);
   try {
     if (body.action === "send") return json(await sendToPrinter(orderId));
+    if (body.action === "mail") return json(await mailCustomer(orderId));
     // build: the order row (sent by the site) is the source of truth for titles, formats and address
     const { data: existing } = await db.from("print_jobs").select("order_id,status").eq("order_id", orderId).maybeSingle();
-    if (existing && existing.status !== "ready") return json({ ok: true, status: existing.status });
+    if (existing && existing.status !== "ready") return json({ ok: true, status: existing.status, mail: await mailCustomer(orderId) });
     const { data: rows } = await db.from("inbox").select("payload").eq("kind", "order").filter("payload->order->>id", "eq", orderId).limit(1);
     const order = rows?.[0]?.payload?.order;
     if (!order) return json({ error: "order not found" }, 404);
-    const books = [];
+    const books: any[] = [], mailBooks: any[] = [];
     for (const it of order.items || []) {
       const pid = (it.files || [])[0]?.split("/")[2];
-      if (!pid || it.fmt === "digital") continue; // digital books are not printed
-      books.push({ project: pid, title: it.title, format: it.fmt, qty: it.qty, pdf: await buildBook(orderId, pid) });
+      if (!pid) continue;
+      if (it.fmt === "digital") { // not printed: only the family PDF
+        let pdf: string | null = null; try { pdf = await buildReader(orderId, pid); } catch (e) { console.warn(e); }
+        mailBooks.push({ title: it.title, fmt: it.fmt, qty: it.qty, pdf });
+        continue;
+      }
+      const pdf = await buildBook(orderId, pid);
+      books.push({ project: pid, title: it.title, format: it.fmt, qty: it.qty, pdf });
+      mailBooks.push({ title: it.title, fmt: it.fmt, qty: it.qty, pdf: pdf.book });
     }
-    if (!books.length) return json({ error: "no personal books in order" }, 400);
+    let mail: unknown = null;
+    if (order.customer?.email && mailBooks.length) {
+      const { data: had } = await db.from("order_emails").select("status").eq("order_id", orderId).maybeSingle();
+      if (!had) await db.from("order_emails").insert({ order_id: orderId, email: order.customer.email, books: mailBooks });
+      mail = await mailCustomer(orderId);
+    }
+    if (!books.length) return json({ ok: true, books: 0, mail });
     const s = order.shipping || {};
     await db.from("print_jobs").upsert({ order_id: orderId, status: "ready", books, customer: { name: order.customer?.name, phone: order.customer?.phone, email: order.customer?.email, city: s.city, street: s.street, apt: s.apt, zip: s.zip, note: s.note, method: s.method } });
-    return json({ ok: true, books: books.length });
+    return json({ ok: true, books: books.length, mail });
   } catch (e) {
     return json({ error: String((e as Error).message || e) }, 500);
   }
