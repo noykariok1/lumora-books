@@ -33,6 +33,17 @@
 
   // Split the template into lines: words before the name, the name alone, the words after (balanced into 1-2 lines).
   function lines(template, name) {
+    // a title without the child's name (e.g. "התזמורת שבארון"): the title itself is the hero, balanced into 1-2 lines
+    if (!String(template).includes("{{childName}}")) {
+      const w = String(template).trim().split(/\s+/).filter(Boolean);
+      if (w.length < 2) return [{ t: w.join(" "), hero: true }];
+      let best = 1, diff = 1e9;
+      for (let i = 1; i < w.length; i++) {
+        const d = Math.abs(w.slice(0, i).join(" ").length - w.slice(i).join(" ").length);
+        if (d < diff) { diff = d; best = i; }
+      }
+      return [{ t: w.slice(0, best).join(" "), hero: true }, { t: w.slice(best).join(" "), hero: true }];
+    }
     const [pre, post = ""] = String(template).split("{{childName}}");
     const out = [];
     if (pre.trim()) out.push({ t: pre.trim(), hero: false });
