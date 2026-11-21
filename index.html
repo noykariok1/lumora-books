@@ -805,6 +805,8 @@ footer.site{background:var(--canvas)}
 .pb-locked{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:linear-gradient(160deg,#EEE9FB,#F8F3EA);color:#4a3f78;font-weight:600;font-size:15px}
 .pb-locked.is-cv{background:linear-gradient(170deg,#1A1748,#3A2F86);color:#fff;justify-content:flex-end;padding-bottom:40px}
 .pb-th-lock{font-size:14px;opacity:.7;position:absolute;top:6px}
+.spread.sp-cv{width:min(380px,70vw);grid-template-columns:1fr;background:none}.spread.sp-cv::after,.spread.sp-more::after{display:none}.spread.sp-cv .pb-cover-art{border-radius:0;height:100%}
+.spread.sp-more{width:min(300px,64vw);grid-template-columns:1fr;background:linear-gradient(160deg,#EEE9FB,#F8F3EA);color:#4a3f78}.sp-more>div{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:28px 22px}.sp-more span{font-size:14px;color:#6a6190}
 </style>
 
 <div id="app">
@@ -1452,12 +1454,12 @@ routes.home={html(){
 function howSteps(){const dc=defaultChar("f");return `<div class="how">
   <div class="step"><div class="art art-img"><img src="${PB_COVER_URL(PB[0].id)}" alt="" loading="lazy"></div><div class="tx"><span class="num">1</span><h3>בוחרים סיפור</h3><p class="muted">ספרים לפני השינה, ליום הולדת, לגן החדש ועוד.</p></div></div>
   <div class="step"><div class="art art-img"><img src="${PB_BASE_URL(PB[0].id,"hero")}" alt="" loading="lazy" style="object-position:50% 20%"></div><div class="tx"><span class="num">2</span><h3>הופכים את זה לאישי</h3><p class="muted">שם, גיל ותמונה אחת. אנחנו בונים דמות ואתם מאשרים.</p></div></div>
-  <div class="step"><div class="art" style="padding:16px;display:grid;place-items:center"><div class="spread-mini" style="width:100%"><div class="txtpage">${esc(pbPageText(PB[0].pages[3],"איתי"))}</div><div><img src="${PB_BASE_URL(PB[0].id,"p4")}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div></div></div><div class="tx"><span class="num">3</span><h3>רואים ונהנים</h3><p class="muted">מדפדפים בכל הספר המאויר, ומזמינים רק אם אוהבים.</p></div></div>
+  <div class="step"><div class="art" style="padding:16px;display:grid;place-items:center"><div class="spread-mini" style="width:100%"><div class="txtpage">${esc(pbPageText(PB[0].pages[3],"איתי"))}</div><div><img src="${PB_BASE_URL(PB[0].id,"p4")}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div></div></div><div class="tx"><span class="num">3</span><h3>רואים ונהנים</h3><p class="muted">רואים את הדמות ואת העמודים הראשונים עם הילד, ומזמינים רק אם אוהבים.</p></div></div>
  </div>`}
 /* ================= PEEK INSIDE ================= */
-const PEEK_SLOTS=["p1","p2","p4","p9","p11","p12"];
+const PEEK_SLOTS=["p1","p2"]; // the sample shows only the cover and the first 2 pages of each book (noy, 2026-11-21)
 const pbDefName=b=>pbG(b)==="f"?"נועה":b.id==="judo_champion"?"יואב":"איתי";
-function peekSpreads(b){const n=pbDefName(b);return PEEK_SLOTS.map(sl=>{const pg=b.pages[+sl.slice(1)-1];return `<figure class="spread"><div class="sp-t"><p>${esc(pbPageText(pg,n))}</p><span>${pg.pageNumber}</span></div><div class="sp-a"><img src="${PB_BASE_URL(b.id,sl)}" alt="" loading="lazy" onerror="this.closest('figure').remove()"></div></figure>`}).join("")}
+function peekSpreads(b){const n=pbDefName(b);return `<figure class="spread sp-cv">${pbCoverArt(b,n)}</figure>`+PEEK_SLOTS.map(sl=>{const pg=b.pages[+sl.slice(1)-1];return `<figure class="spread"><div class="sp-t"><p>${esc(pbPageText(pg,n))}</p><span>${pg.pageNumber}</span></div><div class="sp-a"><img src="${PB_BASE_URL(b.id,sl)}" alt="" loading="lazy" onerror="this.closest('figure').remove()"></div></figure>`}).join("")+`<figure class="spread sp-more"><div><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><b>ועוד ${Math.max(0,(b.pageCount||12)-PEEK_SLOTS.length)} עמודים של הסיפור</b><span>נפתחים בספר שלכם, עם הילד שלכם בכל עמוד</span><a class="btn btn-primary btn-sm" href="#personal?book=${b.id}">ליצור את הספר</a></div></figure>`}
 function peekHTML(){return `<section class="section peek-sec"><div class="wrap">
   <div class="sec-head"><div class="stack"><span class="eyebrow">הצצה לתוך הספר</span><h2>ספר אמיתי, עם סיפור שלם ואיורים בכל עמוד</h2><p class="muted">כך נראים העמודים. בספר שלכם הגיבור מצויר לפי התמונה של הילד שלכם, והשם שלו מופיע בסיפור.</p></div></div>
   <div class="peek-tabs" role="tablist">${PB.map((b,i)=>`<button role="tab" class="chip" data-peek="${b.id}" aria-selected="${i===0}">${esc(pbTitle(b,pbDefName(b)))}</button>`).join("")}</div>
