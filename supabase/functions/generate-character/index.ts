@@ -24,7 +24,7 @@ const MODEL = Deno.env.get("GEMINI_IMAGE_MODEL") || "gemini-3-pro-image";
 const KEY = Deno.env.get("GEMINI_API_KEY") || "";
 const ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") || "*").split(",").map((s) => s.trim()).filter(Boolean);
 const MAX_B64 = 6_000_000; // ~4.5 MB per image
-const OPENAI_KEY = Deno.env.get("OPENAI_API_KEY") || "";
+const OPENAI_KEY = Deno.env.get("OPENAI_API_KEY") || Deno.env.get("OPEN_API_KEY") || ""; // the key was saved as OPEN_API_KEY on 2026-11-21
 const OPENAI_MODEL = Deno.env.get("OPENAI_IMAGE_MODEL") || "gpt-image-2";
 const DEFAULT_ENGINE = Deno.env.get("IMAGE_ENGINE") || "gemini";
 
