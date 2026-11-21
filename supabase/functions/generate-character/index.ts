@@ -142,6 +142,14 @@ The output is a clean new image on a plain light-cream background: never paste, 
 The face must still be unmistakably this real child: same face shape, eyes, nose, mouth, teeth, skin tone, freckles, hair colour, length and texture, glasses.`;
 }
 
+// v20: optional `stylize` (1 or 2) nudges the hero a little further from a photo toward an animated-film character (noy, 2026-11-21)
+function stylizeNote(body: Record<string, unknown>) {
+  const lv = Number(body.stylize || 0);
+  if (!(lv > 0)) return "";
+  const amt = lv >= 2 ? "noticeably (about 30%)" : "slightly (about 15%)";
+  return `\nSTYLIZATION: make the hero ${amt} more stylized than a photo, like a lead character of a premium 3D animated feature film: a touch larger, brighter eyes, softer rounder cheeks and chin, smoother simplified skin without pores or photographic detail, hair as soft sculpted strand groups, gentle appealing proportions. It must NOT look like a photograph or a photoreal render. Likeness still comes first: keep this child's own face shape, eye shape and colour, nose, mouth, teeth, skin tone, hair colour, length and texture, so a parent instantly recognises the child.`;
+}
+
 // ---- likeness check (v11): a cheap vision model compares the hero on a finished page with the approved character ----
 const CHECK_MODEL = Deno.env.get("GEMINI_CHECK_MODEL") || "gemini-3.8-flash";
 async function checkLikeness(refs: { mime: string; data: string }[], page: { mime: string; data: string }) {
@@ -315,7 +323,7 @@ Deno.serve(async (req) => {
       ...extra.map((d) => ({ inline_data: { mime_type: "image/jpeg", data: d } })),
       ...(sheet ? [{ inline_data: { mime_type: /^image\/(png|jpeg|webp)$/.test(String(body.sheetMime)) ? String(body.sheetMime) : "image/png", data: sheet } }] : []),
       ...(prev && prev.length <= MAX_B64 ? [{ inline_data: { mime_type: mt(body.prevMime), data: prev } }] : []),
-      { text: `${intro}\n${artDirection(body)}\n${RENDER_RULES}\n${prompt}${notes ? `\nLIKENESS CHECKLIST for this specific child (read from the photos; follow it exactly, and keep a real child's face proportions: no oversized round cartoon head, no huge baby eyes):\n${notes}` : ""}${finalLock(body)}` },
+      { text: `${intro}\n${artDirection(body)}\n${RENDER_RULES}\n${prompt}${notes ? `\nLIKENESS CHECKLIST for this specific child (read from the photos; follow it exactly, and keep a real child's face proportions: no oversized round cartoon head, no huge baby eyes):\n${notes}` : ""}${finalLock(body)}${stylizeNote(body)}` },
     ];
   } else if (body.mode === "swap") {
     // pre-illustrated book page: photo(s) of the child, approved hero character, optional face identity sheet, finished page with a placeholder hero
