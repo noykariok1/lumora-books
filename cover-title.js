@@ -1,4 +1,4 @@
-/* Agadibook cover lettering.
+/* Sefer VaChetzi cover lettering.
    Draws the book title as crisp vector "sticker" lettering over the cover art, with the child's name as the hero word.
    The image model never draws text (Hebrew from image models is unreliable); the title is always sharp, spelled right and
    personal. The same SVG is used on the site and rasterised for print.
@@ -100,7 +100,7 @@
       y += size * 0.26;
     });
 
-    // twinkles around the title block (echo the star in the Agadibook logo)
+    // twinkles around the title block (sparkles around the title)
     const top = bottom ? H - 70 - heights() : 46;
     const tw = [
       sparkle(W * 0.1, top + 40, 26, th.star), sparkle(W * 0.9, top + heights() * 0.55, 20, th.star),
@@ -125,7 +125,7 @@
     const brand = opts.brand === false ? "" : `<g opacity=".95">
         <rect x="${W / 2 - 92}" y="${H - 64}" width="184" height="40" rx="20" fill="rgba(14,16,48,.55)"/>
         ${sparkle(W / 2 + 64, H - 44, 11, th.star)}
-        <text x="${W / 2 - 8}" y="${H - 35}" text-anchor="middle" font-family="${FONT}, Assistant, sans-serif" font-weight="700" font-size="25" fill="#fff">אגדיבוק</text>
+        <text x="${W / 2 - 8}" y="${H - 35}" text-anchor="middle" font-family="${FONT}, Assistant, sans-serif" font-weight="700" font-size="25" fill="#fff">ספר וחצי</text>
       </g>`;
 
     // soft scrim behind the title so lettering reads on any artwork

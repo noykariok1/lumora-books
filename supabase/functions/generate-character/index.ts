@@ -1,4 +1,4 @@
-// Lumora: likeness-preserving character + page illustration via Google Gemini image model.
+// Sefer VaChetzi (ספר וחצי): likeness-preserving character + page illustration via Google Gemini image model.
 // Secrets (Supabase dashboard > Edge Functions > Secrets):
 //   GEMINI_API_KEY      required
 //   GEMINI_IMAGE_MODEL  optional, default "gemini-3-pro-image" (Nano Banana Pro, best identity consistency; cheaper: gemini-nano-banana-2.1)

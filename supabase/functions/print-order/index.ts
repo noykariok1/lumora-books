@@ -1,10 +1,10 @@
-// Agadibook: build print-ready PDFs for an order and send them to the printer (Bari print).
+// Sefer VaChetzi (ספר וחצי): build print-ready PDFs for an order and send them to the printer (Bari print).
 // Secrets (Supabase dashboard > Edge Functions > Secrets):
 //   PRINT_EMAIL      the printer's order inbox (required to send)
 //   RESEND_API_KEY   email sending via resend.com (required to send; needs a verified sender domain)
-//   PRINT_FROM       optional sender, e.g. "Lumora <orders@your-domain.co.il>"
+//   PRINT_FROM       optional sender, e.g. "ספר וחצי <orders@your-domain.co.il>"
 //   PRINT_CC         optional copy to the owner
-//   CUSTOMER_FROM    sender of the customer emails, e.g. "אגדיבוק <orders@your-domain.co.il>" (falls back to PRINT_FROM)
+//   CUSTOMER_FROM    sender of the customer emails, e.g. "ספר וחצי <orders@your-domain.co.il>" (falls back to PRINT_FROM)
 //   OWNER_EMAIL      optional: gets a copy (bcc) of every customer email
 // Customer email: right after "build", every customer gets an order confirmation with the order number and a
 // download link to the full book as a PDF (hardcover and digital alike). Rows in table order_emails; while the
@@ -49,7 +49,7 @@ async function fill(pdf: PDFDocument, bytes: Uint8Array) { // cover-fit an image
 async function buildReader(orderId: string, pid: string) {
   const dir = `${orderId}/${pid}`;
   const doc = await PDFDocument.create();
-  doc.setTitle("אגדיבוק");
+  doc.setTitle("ספר וחצי");
   const cover = await file(`${dir}/print/00.jpg`);
   if (!cover) throw new Error(`missing cover for ${pid}`);
   await fill(doc, cover);
@@ -101,12 +101,12 @@ async function mailCustomer(orderId: string) {
 <p style="margin-top:16px"><b>סה״כ:</b> ${ils(o.total)}${o.payment === "unpaid" ? " (נחזור אליכם להשלמת התשלום)" : ""}</p>
 ${ship}
 <p style="color:#777;font-size:13px">הקישורים להורדה בתוקף 30 יום. שמרו את הקובץ במכשיר. יש שאלה? פשוט השיבו למייל הזה עם מספר ההזמנה.</p>
-<p style="color:#1A1748;font-weight:bold">אגדיבוק</p></div>`;
+<p style="color:#1A1748;font-weight:bold">ספר וחצי</p></div>`;
   const owner = Deno.env.get("OWNER_EMAIL");
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from, to: [row.email], bcc: owner ? [owner] : undefined, subject: `אישור הזמנה ${ref} · אגדיבוק`, html }),
+    body: JSON.stringify({ from, to: [row.email], bcc: owner ? [owner] : undefined, subject: `אישור הזמנה ${ref} · ספר וחצי`, html }),
   });
   if (!r.ok) {
     const e = (await r.text()).slice(0, 300);
@@ -169,7 +169,7 @@ async function sendToPrinter(orderId: string) {
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: Deno.env.get("PRINT_FROM") || "Agadibook <onboarding@resend.dev>", to: [to], cc: Deno.env.get("PRINT_CC") ? [Deno.env.get("PRINT_CC")] : undefined, subject: `הזמנת הדפסה ${orderId}`, text }),
+    body: JSON.stringify({ from: Deno.env.get("PRINT_FROM") || "ספר וחצי <onboarding@resend.dev>", to: [to], cc: Deno.env.get("PRINT_CC") ? [Deno.env.get("PRINT_CC")] : undefined, subject: `הזמנת הדפסה ${orderId}`, text }),
   });
   if (!r.ok) {
     const e = (await r.text()).slice(0, 300);
