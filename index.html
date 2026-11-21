@@ -2206,7 +2206,7 @@ function pbHeroPrompt(b,n,m,fix){const tr=pbTraitsText(m&&m.traits),v2=PB_V2.has
  v2?"Art style: the HOUSE STYLE (premium 3D animated feature film character), matching the rest of the book.":""].filter(Boolean).join("\n")}
 async function pbRenderHero(m,n,fix,prev){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  const extra=[];for(const k of ["photo2","photo3"]){const u=await pbImg(m.id,k);if(u)extra.push(b64(u))}
- return aiCall({mode:"render",photo:b64(photo),extra,prompt:pbHeroPrompt(b,n,m,fix),aspect:"4:5",gender:pbG(b),...(PB_V2.has(b.id)?{size:"2K"}:{}),engine:PB_ENGINE,...(fix&&prev&&PB_V2.has(b.id)?{prev:b64(prev),prevMime:pbMime(prev)}:{}),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,"hero")})}
+ return aiCall({mode:"render",photo:b64(photo),extra,prompt:pbHeroPrompt(b,n,m,fix),aspect:"4:5",gender:pbG(b),engine:PB_ENGINE,...(fix&&prev&&PB_V2.has(b.id)?{prev:b64(prev),prevMime:pbMime(prev)}:{}),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,"hero")})}
 async function pbRender(m){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  const hero=await pbImg(m.id,"hero");
  return aiCall({mode:"render",photo:b64(photo),...(hero?{sheet:b64(hero),sheetMime:pbMime(hero)}:{}),prompt:(hero?"תמונה 2 היא הדמות המאוירת של "+pbHero(b)+" שההורה אישר. לצייר את "+pbHero(b)+" בדף בדיוק כמו בתמונה 2, ולהוסיף לידו/ה את שאר הדמויות. | ":"")+pbSheetPrompt(b),aspect:"16:9",gender:pbG(b),...pbArt(b,"sheet")})}
@@ -2216,13 +2216,14 @@ const pbArt=(b,slot)=>b&&PB_V2.has(b.id)?{style:"cinema3d",book:b.id,slot}:{};
 const PB_BASE_CACHE={};
 function pbBaseData(book,slot){const k=book+"/"+slot;return PB_BASE_CACHE[k]=PB_BASE_CACHE[k]||fetch(PB_BASE_URL(book,slot)).then(r=>{if(!r.ok)throw new Error("no base");return r.blob()}).then(bl=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(bl)})).catch(e=>{delete PB_BASE_CACHE[k];throw e})}
 const PB_ENGINE="gpt"; // GPT Image 2 (the server falls back to Gemini by itself); set "gemini" to switch back (noy, 2026-11-21)
+const PB_PAGE_Q="medium"; // pages at medium in preview and full book; the hero stays high (fast-cheap plan v17)
 const PB_PREVIEW=["p1","p2"]; // only pages 1-2 are drawn before payment; the rest (cover too) only after the order (noy, 2026-11-21)
 const pbHqDone=m=>pbSlots().slice(1).every(s=>m&&m.hq&&m.hq[s]);
 const PB_QA=true; // per-page likeness check (cheap text model). A weak page is only flagged; the parent decides whether to redraw it (noy, 2026-11-20)
 async function pbExtra(m){const extra=[];for(const k of ["photo2","photo3"]){const u=await pbImg(m.id,k);if(u)extra.push(b64(u))}return extra}
 async function pbFaceSheet(m,hero){const b=pbBy(m.book);if(!PB_V2.has(b.id))return null;const have=await pbImg(m.id,"face");if(have)return have;
  try{const photo=await pbImg(m.id,"photo");if(!photo)return null;
-  const u=await aiCall({mode:"render",photo:b64(photo),extra:await pbExtra(m),sheet:b64(hero),sheetMime:pbMime(hero),aspect:"16:9",size:"2K",gender:pbG(b),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,"face"),
+  const u=await aiCall({mode:"render",photo:b64(photo),extra:await pbExtra(m),sheet:b64(hero),sheetMime:pbMime(hero),aspect:"16:9",gender:pbG(b),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,"face"),
    prompt:"TASK: create a completely NEW image from scratch; do NOT edit image 1 or image 2 and nothing of their backgrounds may appear. Draw the identity sheet of the hero exactly as approved in image 2 (same 3D character, face, glasses, hair, skin)"+(m.src==="char"?".":", with the face matching the real child in image 1.")});
   await pbSetImg(m.id,"face",u);if(m.charId)charSaveFace(m.charId,u).catch(e=>console.warn("face save",e));return u}catch(e){console.warn("face sheet",e);return null}}
 async function pbCheck(hero,face,page){try{const r=await fetch(AI.endpoint,{method:"POST",signal:AbortSignal.timeout(60000),headers:{"Content-Type":"application/json",apikey:AI.anonKey,Authorization:"Bearer "+AI.anonKey},
@@ -2230,24 +2231,26 @@ async function pbCheck(hero,face,page){try{const r=await fetch(AI.endpoint,{meth
 async function pbSwapPage(m,slot,hero,quality){const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
  let base;try{base=await pbBaseData(m.book,slot)}catch(e){return pbRenderPage(m,slot,hero,quality)} // no pre-made page: draw it fully
  const bk=pbBy(m.book),v2=PB_V2.has(bk.id),face=v2?await pbImg(m.id,"face"):null;
- const body={mode:"swap",engine:PB_ENGINE,...(quality?{quality}:{}),photo:b64(photo),hero:b64(hero),heroMime:pbMime(hero),base:b64(base),baseMime:pbMime(base),aspect:"4:5",size:"2K",gender:pbG(bk),...(v2?{extra:await pbExtra(m)}:{}),...(face?{face:b64(face),faceMime:pbMime(face)}:{}),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(bk,slot==="cover"?"cover":"page")};
+ const body={mode:"swap",engine:PB_ENGINE,...(quality?{quality}:{}),photo:b64(photo),hero:b64(hero),heroMime:pbMime(hero),base:b64(base),baseMime:pbMime(base),aspect:"4:5",gender:pbG(bk),...(v2?{extra:await pbExtra(m)}:{}),...(face?{face:b64(face),faceMime:pbMime(face)}:{}),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(bk,slot==="cover"?"cover":"page")};
  const u=await aiCall(body);await PBDB.del("i:"+m.id+":qa_"+slot);if(!(v2&&PB_QA))return u;
  const c=await pbCheck(hero,face,u); // a failed check never blocks the book
  if(c&&(c.found===false||c.score<=5))await pbSetImg(m.id,"qa_"+slot,String(c.issues||"").slice(0,300)||"1");
  return u}
 async function pbRenderPage(m,slot,sheet,quality){const b=pbBy(m.book);const photo=await pbImg(m.id,"photo");if(!photo)throw Object.assign(new Error("photo deleted"),{code:"no_photo"});
- return aiCall({mode:"render",engine:PB_ENGINE,...(quality?{quality}:{}),photo:b64(photo),sheet:b64(sheet),sheetMime:pbMime(sheet),prompt:pbSlotPrompt(b,slot),aspect:"4:5",size:"2K",gender:pbG(b),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,slot==="cover"?"cover":"page")})}
+ return aiCall({mode:"render",engine:PB_ENGINE,...(quality?{quality}:{}),photo:b64(photo),sheet:b64(sheet),sheetMime:pbMime(sheet),prompt:pbSlotPrompt(b,slot),aspect:"4:5",gender:pbG(b),...(m.src==="char"?{refIsArt:true}:{}),...pbArt(b,slot==="cover"?"cover":"page")})}
 const PB_HAS_NIKUD=b=>b.pages.some(p=>p.textTemplateNikud||hasNikud(p.textTemplate));
 const pbPageText=(p,name,on=NIKUD)=>on&&p.textTemplateNikud?pbFill(p.textTemplateNikud,name):noNikud(pbFill(p.textTemplate,name));
 const PB_ERR={blocked:"מסנן הבטיחות של שירות האיור חסם את הבקשה. אפשר לנסות שוב או להחליף תמונה.",rate_limited:"יותר מדי בקשות בזמן קצר. נסו שוב בעוד כמה דקות.",no_photo:"התמונה נמחקה. כדי לצייר שוב צריך להעלות אותה מחדש.",not_configured:"שירות האיור עוד לא מוגדר.",error:"תקלה זמנית בשירות האיור. אפשר לנסות שוב."};
 const pbErr=e=>PB_ERR[e&&e.code]||PB_ERR.error;
+async function pbRetry(fn){let rl=0,er=0;for(;;){try{return await fn()}catch(e){const c=e&&e.code;if(c==="rate_limited"&&rl<3){rl++;await new Promise(r=>setTimeout(r,20000));continue}if(c!=="rate_limited"&&c!=="blocked"&&c!=="no_photo"&&c!=="not_configured"&&er<1){er++;await new Promise(r=>setTimeout(r,5000));continue}throw e}}}
 /* ---- order: send the approved illustrations (never the photo) to the private print bucket ---- */
 async function pbUploadOrder(orderId,items,onProg){if(!INBOX.url)return {ok:false,msg:"שמירת הספר להדפסה פועלת באתר המלא בלבד."};
  const base=INBOX.url.replace("/rest/v1/inbox","/storage/v1/object/orders/");const files={};const jobs=[];
  for(const it of items){const slots=["hero",...pbSlots().slice(1)];files[it.pb]=[];for(const s of slots)jobs.push([it.pb,s])}
  let done=0;const fail=[];
  const w=async()=>{while(jobs.length){const [pid,s]=jobs.shift();try{const u=await pbImg(pid,s);if(!u){if(s!=="hero")fail.push(s);continue}
-   const im=await loadImg(u);const c=document.createElement("canvas");c.width=im.width;c.height=im.height;c.getContext("2d").drawImage(im,0,0);const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.92));
+   const im=await loadImg(u);const k=s!=="hero"&&im.width<1600?2:1;const c=document.createElement("canvas");c.width=im.width*k;c.height=im.height*k;{const x=c.getContext("2d");x.imageSmoothingEnabled=true;x.imageSmoothingQuality="high";x.drawImage(im,0,0,c.width,c.height)} // 1024x1280 -> 2048x2560 for print
+   const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",.92));
    const path=`${orderId}/${pid}/${s}.jpg`;const r=await fetch(base+path,{method:"POST",signal:AbortSignal.timeout(60000),headers:{apikey:INBOX.key,Authorization:"Bearer "+INBOX.key,"Content-Type":"image/jpeg","x-upsert":"false"},body:blob});
    if(!r.ok&&r.status!==409)throw new Error("http "+r.status);files[pid].push("orders/"+path)}catch(e){console.warn("upload",s,e);fail.push(s)}done++;onProg&&onProg(done,done+jobs.length)}};
  await Promise.all([w(),w(),w(),w()]);
@@ -2436,7 +2439,7 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
  // pages
  const imgs={};for(const s of pbSlots().slice(1))imgs[s]=await pbImg(id,s);
  if(!m.v16){m.v16=true;m.hq=pbSlots().slice(1).every(s=>imgs[s])?Object.fromEntries(pbSlots().slice(1).map(s=>[s,true])):{};await pbSaveMeta(m)} // books drawn before the preview step count as finished
- m.hq=m.hq||{};const mode=m.needsFull?"full":pbHqDone(m)?"done":"preview";const QUAL=mode==="preview"?"medium":"high";
+ m.hq=m.hq||{};const mode=m.needsFull?"full":pbHqDone(m)?"done":"preview";const QUAL=PB_PAGE_Q;if(mode==="full"){let ch=false;for(const s of pbSlots().slice(1))if(imgs[s]&&!m.hq[s]){m.hq[s]=true;ch=true}if(ch)await pbSaveMeta(m)} // pages drawn in the preview are final
  const inPrev=s=>mode!=="preview"||PB_PREVIEW.includes(s);
  root.innerHTML=head+`<section class="stack"><div class="note info" id="pbProg" aria-live="polite"></div>
   <div class="pb-book" id="pbBook"></div>
@@ -2501,8 +2504,8 @@ async function pbProjectView(root,id){const m=await pbMeta(id);
  const run=async list=>{const heroU=await pbImg(id,"hero"),sheetU=heroU?null:await pbImg(id,"sheet");if(!heroU&&!sheetU){m.heroOk=false;m.sheetOk=false;await pbSaveMeta(m);return pbProjectView(root,id)}
   const busy=PB_RUN[id]=PB_RUN[id]||new Set();const q=list.filter(s=>!busy.has(s));q.forEach(s=>busy.add(s));prog();drawBook();
   if(heroU&&q.length&&PB_ENGINE!=="gpt")await pbFaceSheet(m,heroU); // GPT keeps the face from the hero alone
-  const worker=async()=>{while(q.length){const s=q.shift();try{const u=heroU?await pbSwapPage(m,s,heroU,QUAL):await pbRenderPage(m,s,sheetU,QUAL);await pbSetImg(id,s,u);imgs[s]=u;if(QUAL==="high"){m.hq[s]=true;await pbSaveMeta(m)}const f=await pbImg(id,"qa_"+s);if(f)flags[s]=f;else delete flags[s]}catch(e){failed[s]=pbErr(e)}busy.delete(s);if(root.isConnected){prog();if(cur>=pages.length||pages[cur].slot===s||!imgs[pages[cur].slot])drawBook();else $("#pbThumbs",root)&&drawBook()}}};
-  await Promise.all(Array.from({length:heroU?7:3},worker))};
+  const worker=async()=>{while(q.length){const s=q.shift();try{const u=await pbRetry(()=>heroU?pbSwapPage(m,s,heroU,QUAL):pbRenderPage(m,s,sheetU,QUAL));await pbSetImg(id,s,u);imgs[s]=u;m.hq[s]=true;await pbSaveMeta(m);const f=await pbImg(id,"qa_"+s);if(f)flags[s]=f;else delete flags[s]}catch(e){failed[s]=pbErr(e)}busy.delete(s);if(root.isConnected){prog();if(cur>=pages.length||pages[cur].slot===s||!imgs[pages[cur].slot])drawBook();else $("#pbThumbs",root)&&drawBook()}}};
+  await Promise.all(Array.from({length:heroU?13:3},worker))};
  drawBook();prog();
  const missing=pages.map(p=>p.slot).filter(s=>mode==="full"?!m.hq[s]:mode==="preview"?PB_PREVIEW.includes(s)&&!imgs[s]:!imgs[s]);
  if(missing.length){if(!AI_ON()){$("#pbProg",root).textContent="יצירת האיורים פועלת באתר המלא בלבד"}else if(!photo){$("#pbProg",root).className="note demo";$("#pbProg",root).textContent=PB_ERR.no_photo}else run(missing)}}
