@@ -82,6 +82,9 @@ async function mailCustomer(orderId: string) {
   }
   const { data: rows } = await db.from("inbox").select("payload").eq("kind", "order").filter("payload->order->>id", "eq", orderId).limit(1);
   const o = rows?.[0]?.payload?.order || {};
+  // internal sequential number from public.orders (accounts thread); read at mail time, it may lag the inbox insert
+  let no = ""; try { const { data: ord } = await db.from("orders").select("order_no").eq("id", orderId).maybeSingle(); if (ord?.order_no) no = String(ord.order_no); } catch (_) { /* table optional */ }
+  const ref = no || orderId;
   const first = String(o.customer?.name || "").split(" ")[0];
   const books: string[] = [];
   for (const b of row.books || []) {
@@ -93,7 +96,7 @@ async function mailCustomer(orderId: string) {
   const ship = s.method && s.method !== "digital" ? `<p><b>משלוח אל:</b> ${esc(o.customer?.name)}, ${esc(s.street)}${s.apt ? ", " + esc(s.apt) : ""}, ${esc(s.city)}</p><p style="color:#777">הספר המודפס יוצא להדפסה ונעדכן אתכם כשהוא נשלח.</p>` : "";
   const html = `<div dir="rtl" style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#2A2540;line-height:1.6">
 <h1 style="color:#1A1748;font-size:24px">ההזמנה התקבלה${first ? ", " + esc(first) : ""}!</h1>
-<p>מספר הזמנה: <b dir="ltr">${esc(orderId)}</b></p>
+<p>מספר הזמנה: <b dir="ltr">${esc(ref)}</b>${no ? ` <span style="color:#999;font-size:12px" dir="ltr">(${esc(orderId)})</span>` : ""}</p>
 <table style="width:100%;border-collapse:collapse">${books.join("")}</table>
 <p style="margin-top:16px"><b>סה״כ:</b> ${ils(o.total)}${o.payment === "unpaid" ? " (נחזור אליכם להשלמת התשלום)" : ""}</p>
 ${ship}
@@ -103,7 +106,7 @@ ${ship}
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from, to: [row.email], bcc: owner ? [owner] : undefined, subject: `אישור הזמנה ${orderId} · אגדיבוק`, html }),
+    body: JSON.stringify({ from, to: [row.email], bcc: owner ? [owner] : undefined, subject: `אישור הזמנה ${ref} · אגדיבוק`, html }),
   });
   if (!r.ok) {
     const e = (await r.text()).slice(0, 300);
