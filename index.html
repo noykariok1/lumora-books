@@ -1076,7 +1076,7 @@ const b64=u=>String(u||"").split(",")[1]||"";
 const SCENE_EN={night:"a starry night sky over soft hills with a crescent moon",birthday:"a cosy birthday party with a cake, candles, balloons and bunting",space:"outer space next to a ringed planet and a little rocket on the moon",sea:"a sunny beach with gentle waves, a sailboat and a friendly fish",forest:"a friendly green forest path with mushrooms and fireflies",castle:"a lavender fairy-tale castle with flags on a grassy hill",garden:"a blooming garden with flowers, a big sprout and the sun",home:"a warm living room with a sofa and a big window",school:"a cheerful kindergarten room with a chalkboard and drawings",mountain:"snowy mountains with a little red flag on the peak",rainbow:"a big rainbow over green hills and clouds",monster:"a dim cosy bedroom at night with a friendly purple fluffy monster and a night light"};
 const BRAND={name:"ספר וחצי",whatsapp:"",phone:"",hours:"", // whatsapp: digits with country code, e.g. "972501234567"; empty hides the button
  demoPricing:false,currency:"ILS",secondBook:99,freeShipOver:250,vat:0.18,shipping:{home:{label:"משלוח עד הבית",price:29,days:"7–10 ימי עסקים"},pickup:{label:"איסוף מנקודת חלוקה",price:15,days:"7–12 ימי עסקים"},digital:{label:"ספר דיגיטלי, ללא משלוח",price:0,days:"מיד לאחר אישור"}}};
-const FORMATS={hard:{label:"כריכה קשה",desc:"21×25 ס״מ, נייר מט עבה · כולל גם את הספר המלא כקובץ PDF במייל",price:129},digital:{label:"ספר דיגיטלי (PDF)",desc:"לקריאה בטלפון, טאבלט ומחשב",price:69}};
+const FORMATS={hard:{label:"כריכה קשה",desc:"20×20 ס״מ, נייר מט עבה · כולל ספרון צביעה מתנה וגם את הספר המלא כקובץ PDF במייל",price:129},digital:{label:"ספר דיגיטלי (PDF)",desc:"לקריאה בטלפון, טאבלט ומחשב",price:69}};
 Object.defineProperty(FORMATS,"gift",{value:FORMATS.hard,enumerable:false}); // the gift-box option was removed (noy, 2026-11-21); old carts and orders still read it
 /* ================= SOCIAL PROOF, POLICY & SEASONAL SHIPPING (owner: replace before launch) =================
    PLACEHOLDERS: rating, reviewCount, families and every entry in REVIEWS are SAMPLE values for the layout only.
@@ -1448,7 +1448,7 @@ routes.home={html(){
    <h2>ספר שמרגישים ביד</h2>
    <p class="lead">כריכה קשה, נייר מט עבה שלא מקמט, וצבעים חיים. כל ספר מודפס בנפרד עבור הילד שלו.</p>
    <div class="spec-list">
-    <div><b>21×25 ס״מ</b><span class="small muted">גודל נוח לידיים קטנות</span></div>
+    <div><b>20×20 ס״מ</b><span class="small muted">גודל נוח לידיים קטנות</span></div>
     <div><b>כריכה ו-12 עמודים</b><span class="small muted">מאוירים עם הילד שלכם</span></div>
     <div><b>נייר מט 200 גר׳</b><span class="small muted">עמיד לדפדוף</span></div>
     <div><b>כריכה קשה</b><span class="small muted">+ הספר המלא כקובץ PDF</span></div>
@@ -1500,7 +1500,7 @@ const FAQ=[
  ["איזו תמונה הכי מתאימה?","תמונה ברורה של הפנים מלפנים, באור טבעי, בלי משקפי שמש או כובע. ילד אחד בתמונה."],
  ["מה קורה עם התמונה שהעליתי?",AI_ON()?"התמונה משמשת רק ליצירת הדמות. היא נשלחת בחיבור מוצפן לשירות האיור (OpenAI, ובגיבוי Google Gemini) לצורך הציור, לא משמשת לאימון ולא נשמרת בשרת שלנו. עותק נשמר רק בדפדפן שלכם ונמחק אוטומטית אחרי 7 ימים. אם תזמינו ספר מודפס ותשאירו את האפשרות להדפיס את התמונה בכריכה האחורית, היא תישמר רק בקובצי ההדפסה של ההזמנה. כל הפרטים במדיניות הפרטיות.":"התמונה משמשת רק ליצירת הדמות. בגרסה הזו היא נשמרת רק בדפדפן שלכם. אפשר למחוק אותה ואת כל הפרטים מעמוד החשבון."],
  ["אפשר לראות את הספר לפני שמשלמים?","כן. התצוגה המקדימה עם השם והדמות היא בחינם, ומזמינים רק אם אוהבים."],
- ["מה ההבדל בין הפורמטים?","כריכה קשה היא ספר מודפס 21×25 ס״מ, ואיתו מקבלים גם את הספר המלא כקובץ PDF במייל. הספר הדיגיטלי הוא קובץ PDF לקריאה במסך."],
+ ["מה ההבדל בין הפורמטים?","כריכה קשה היא ספר מודפס 20×20 ס״מ, ואיתו מקבלים מתנה: ספרון צביעה מודפס עם הדמות של הילד, וגם את הספר המלא כקובץ PDF במייל. הספר הדיגיטלי הוא קובץ PDF לקריאה במסך, ואיתו ספר צביעה כ־PDF להדפסה בבית."],
  ["כמה זמן לוקח משלוח?","הערכה של 7 עד 10 ימי עסקים להדפסה ומשלוח. הזמנים הסופיים יעודכנו מול בית הדפוס."],
  ["אפשר להזמין ספר כמתנה?","בטח. בקופה ממלאים את הכתובת של מי שמקבל את הספר, והוא יגיע ישר אליו."],
  ["הספרים בעברית בלבד?","כרגע כן. כל סיפור כתוב לילד או לילדה, ויש ספרים לשניהם. אנגלית ושפות נוספות מתוכננות."],
@@ -1572,7 +1572,7 @@ routes.book={title:(q,slug)=>{const b=bookBy(slug);return b?bookTitle(b):"ספר
   </div>
  </div></div>
  <section class="section" style="padding-bottom:0"><div class="wrap"><div class="sec-head"><div class="stack"><span class="eyebrow">הצצה לספר</span><h2>לדפדף בעמודי הדוגמה</h2></div></div><div id="reader"></div></div></section>
- <section class="section"><div class="wrap quality"><div>${book3D(b,p,c)}</div><div class="stack"><span class="eyebrow">איכות</span><h2>מודפס במיוחד עבור הילד שלכם</h2><div class="spec-list"><div><b>כריכה קשה</b><span class="small muted">עם למינציה מט</span></div><div><b>נייר 200 גר׳</b><span class="small muted">לא נקרע בקלות</span></div><div><b>${b.pages} עמודים</b><span class="small muted">כולל עמוד הקדשה</span></div><div><b>21×25 ס״מ</b><span class="small muted">פורמט לרוחב</span></div></div><span class="pill demo" style="align-self:flex-start">מפרט לדוגמה</span></div></div></section>
+ <section class="section"><div class="wrap quality"><div>${book3D(b,p,c)}</div><div class="stack"><span class="eyebrow">איכות</span><h2>מודפס במיוחד עבור הילד שלכם</h2><div class="spec-list"><div><b>כריכה קשה</b><span class="small muted">עם למינציה מט</span></div><div><b>נייר 200 גר׳</b><span class="small muted">לא נקרע בקלות</span></div><div><b>${b.pages} עמודים</b><span class="small muted">כולל עמוד הקדשה</span></div><div><b>20×20 ס״מ</b><span class="small muted">פורמט ריבועי</span></div></div><span class="pill demo" style="align-self:flex-start">מפרט לדוגמה</span></div></div></section>
  <section class="section tint"><div class="wrap">${PROOF.demo?"":`<div class="sec-head"><div class="stack"><span class="eyebrow">ביקורות</span><h2>מה משפחות אומרות</h2></div></div>${reviewsHTML(3)}`}
   <div class="pdp-faq"><div class="stack" style="gap:10px"><h3>שאלות לפני שמתחילים</h3><p class="muted">התצוגה המקדימה חינם, ואפשר לעצור בכל שלב.</p><a class="btn btn-primary" href="#create?book=${b.slug}">צרו תצוגה מקדימה חינם</a></div>${faqHTML(FAQ.slice(1,5))}</div></div></section>
  <section class="section"><div class="wrap"><div class="sec-head"><div class="stack"><span class="eyebrow">אולי תאהבו גם</span><h2>ספרים דומים</h2></div></div><div class="grid-books">${similar.map(bookCard).join("")}</div></div></section>
@@ -2663,7 +2663,7 @@ async function pbUploadOrder(orderId,items,onProg){if(!INBOX.url)return {ok:fals
  if(fail.length)return {ok:false,msg:fail.some(s=>!s.startsWith("p")&&s!=="cover")?"לא הצלחנו לשמור את הספר להדפסה. נסו שוב בעוד רגע.":"חלק מאיורי הספר חסרים או לא נשמרו. פתחו את הספר מהעגלה, ודאו שכל העמודים מוכנים, ונסו שוב."};
  return {ok:true,files}}
 /* ---- print files: cover with title + 12 text pages, drawn here because the browser lays out Hebrew perfectly ---- */
-const PRINT={trimW:210,trimH:250,bleed:3,dpi:300}; // change to the printer's spec
+const PRINT={trimW:200,trimH:200,bleed:3,dpi:300,spineMM:6}; // 20x20 cm (noy 2026-11-22). spineMM and bleed: confirm with Be'eri
 const pxMM=mm=>Math.round(mm/25.4*PRINT.dpi);
 /* side-by-side spread: shrink the page text until it fits next to the picture (no scrolling inside a kids' book) */
 function pbFitText(box){const t=box&&box.querySelector(".pb-text"),a=box&&box.querySelector(".pb-art"),pp=t&&t.querySelector("p");if(!pp||!a)return;
@@ -2692,6 +2692,51 @@ async function pbDrawBack(W,H,safe,b,m,photoUrl,heroUrl){const c=document.create
  x.fillStyle="#fff";x.font=`500 ${36*u}px "Assistant",sans-serif`;x.fillText("הספר הזה נוצר במיוחד בשביל "+m.name,W/2,H*.82);
  x.fillStyle="#FFC83D";x.font=`700 ${44*u}px "Rubik","Assistant",sans-serif`;x.fillText("ספר וחצי",W/2,H-safe-10*u);
  return c}
+/* spine strip for the hardcover wrap: top-to-bottom title, brand at the bottom */
+async function pbDrawSpine(H,b,m){const w=Math.max(8,pxMM(PRINT.spineMM));const c=document.createElement("canvas");c.width=w;c.height=H;const x=c.getContext("2d");
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#1A1748");g.addColorStop(1,"#3A2F86");x.fillStyle=g;x.fillRect(0,0,w,H);
+ if(PRINT.spineMM>=4){try{await document.fonts.load('700 40px "Rubik"')}catch(e){}
+  const fs=Math.round(w*.5);x.save();x.translate(w/2,0);x.rotate(Math.PI/2);x.direction="rtl";x.textBaseline="middle";
+  x.font=`700 ${fs}px "Rubik","Assistant",sans-serif`;x.fillStyle="#FFFFFF";x.textAlign="left";x.fillText(pbTitle(b,pbN(m)),pxMM(PRINT.bleed+12),0);
+  x.fillStyle="#FFC83D";x.textAlign="right";x.fillText("ספר וחצי",H-pxMM(PRINT.bleed+12),0);x.restore()}
+ return c}
+/* coloring booklet (free printed gift, noy 2026-11-22): front cover, back cover, inside title page. The 5 line-art pages come from the server. */
+async function pbDrawColoring(W,H,safe,b,m,heroUrl){const u=W/1000;const mk=()=>{const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.direction="rtl";x.textAlign="center";return [c,x]};
+ try{await document.fonts.load(`700 ${90*u}px "Rubik"`,"אבג");await document.fonts.load(`600 ${40*u}px "Assistant"`,"אבג")}catch(e){}
+ const PLUM="#4A1942",CORAL="#C2553F",CREAM="#FBF3EA",COLS=["#FF6B6B","#FFC83D","#4ECDC4","#5B8DEF","#B07CE8","#7BD389"];
+ const crayons=(x,y0)=>{const n=COLS.length,cw=46*u,gap=22*u,tw=n*cw+(n-1)*gap;COLS.forEach((col,k)=>{const cx=W/2-tw/2+k*(cw+gap);x.fillStyle=col;x.beginPath();x.moveTo(cx,y0);x.lineTo(cx+cw/2,y0-34*u);x.lineTo(cx+cw,y0);x.closePath();x.fill();x.fillRect(cx,y0,cw,120*u);x.fillStyle="rgba(0,0,0,.12)";x.fillRect(cx,y0+30*u,cw,14*u)})};
+ const name=m.name||"";const out=[];
+ // front
+ {const [c,x]=mk();x.fillStyle=CREAM;x.fillRect(0,0,W,H);
+  let seed=11;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;for(let i=0;i<40;i++){x.fillStyle=COLS[i%COLS.length];x.globalAlpha=.35;x.beginPath();x.arc(rnd()*W,rnd()*H,(rnd()*10+6)*u,0,7);x.fill()}x.globalAlpha=1;
+  x.fillStyle=CORAL;x.font=`700 ${52*u}px "Rubik","Assistant",sans-serif`;x.fillText("ספר הצביעה של",W/2,safe+60*u);
+  let fs=130;x.font=`700 ${fs*u}px "Rubik","Assistant",sans-serif`;while(x.measureText(name).width>W-2*safe&&fs>60){fs-=6;x.font=`700 ${fs*u}px "Rubik","Assistant",sans-serif`}
+  x.fillStyle=PLUM;x.fillText(name,W/2,safe+60*u+fs*u*1.05);
+  if(heroUrl){try{const im=await loadImg(heroUrl);const fw=500*u,fh=500*u,cx=W/2,cy=H*.575;x.save();x.translate(cx,cy);x.rotate(-.03);x.shadowColor="rgba(74,25,66,.35)";x.shadowBlur=30*u;x.shadowOffsetY=12*u;x.fillStyle="#fff";x.fillRect(-fw/2-16*u,-fh/2-16*u,fw+32*u,fh+32*u);x.shadowColor="transparent";
+   const sc=Math.max(fw/im.width,fh/im.height);x.beginPath();x.rect(-fw/2,-fh/2,fw,fh);x.clip();x.drawImage(im,-im.width*sc/2,-fh/2-(im.height*sc-fh)*.2,im.width*sc,im.height*sc);x.restore()}catch(e){console.warn("coloring hero",e)}}
+  x.fillStyle=PLUM;x.font=`600 ${34*u}px "Assistant",sans-serif`;x.fillText("ספר וחצי",W/2,H-safe-6*u);out.push(c)}
+ // back
+ {const [c,x]=mk();x.fillStyle=PLUM;x.fillRect(0,0,W,H);crayons(x,H*.3);
+  x.fillStyle=CREAM;x.font=`700 ${60*u}px "Rubik","Assistant",sans-serif`;x.fillText("צובעים את ההרפתקה",W/2,H*.56);
+  x.font=`500 ${36*u}px "Assistant",sans-serif`;x.fillText("חמישה רגעים מתוך "+pbTitle(b,pbN(m)),W/2,H*.56+70*u);x.fillText("מתנה קטנה מאיתנו, "+name,W/2,H*.56+122*u);
+  x.fillStyle="#F5A08C";x.font=`700 ${44*u}px "Rubik","Assistant",sans-serif`;x.fillText("ספר וחצי",W/2,H-safe-10*u);out.push(c)}
+ // inside title page, black and white so it can be colored too
+ {const [c,x]=mk();x.fillStyle="#fff";x.fillRect(0,0,W,H);x.strokeStyle="#111";x.lineWidth=5*u;const p=safe+20*u;x.setLineDash([18*u,14*u]);x.strokeRect(p,p,W-2*p,H-2*p);x.setLineDash([]);
+  x.fillStyle="#111";x.font=`700 ${64*u}px "Rubik","Assistant",sans-serif`;x.fillText("הספר הזה שייך ל",W/2,H*.4);
+  x.font=`700 ${110*u}px "Rubik","Assistant",sans-serif`;x.lineWidth=4*u;x.strokeText(name,W/2,H*.4+140*u);
+  x.font=`500 ${34*u}px "Assistant",sans-serif`;x.fillText("בחרו צבעים, ותנו לדמות שלכם לקום לחיים",W/2,H*.72);out.push(c)}
+ return out}
+/* interior page 1 (on its own, facing the inside of the cover) and the last page, so every picture faces its text on one spread */
+async function pbDrawOpenEnd(W,H,safe,b,m,heroUrl){const u=W/1000;const mk=()=>{const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.direction="rtl";x.textAlign="center";x.fillStyle="#FFFBF3";x.fillRect(0,0,W,H);return [c,x]};
+ try{await document.fonts.load(`700 ${80*u}px "Rubik"`,"אבג");await document.fonts.load(`500 ${36*u}px "Assistant"`,"אבג")}catch(e){}
+ const out=[];
+ {const [c,x]=mk();x.fillStyle="#4A1942";const fs=84;const t=pbTitle(b,pbN(m));x.font=`700 ${fs*u}px "Rubik","Assistant",sans-serif`;const lines=pbWrap(x,t,W-2*safe-60*u);let y=H*.42-(lines.length-1)*fs*u*.6;lines.forEach(l=>{x.fillText(l,W/2,y);y+=fs*u*1.2});
+  x.fillStyle="#C2553F";x.font=`500 ${38*u}px "Assistant",sans-serif`;x.fillText("נכתב וצויר במיוחד בשביל "+(m.name||""),W/2,y+40*u);
+  x.fillStyle="#8a8399";x.font=`600 ${30*u}px "Assistant",sans-serif`;x.fillText("ספר וחצי",W/2,H-safe-6*u);out.push(c)}
+ {const [c,x]=mk();if(heroUrl){try{const im=await loadImg(heroUrl);const r=170*u,cy=H*.4;x.save();x.beginPath();x.arc(W/2,cy,r,0,7);x.clip();const sc=Math.max(2*r/im.width,2*r/im.height);x.drawImage(im,W/2-im.width*sc/2,cy-r-(im.height*sc-2*r)*.2,im.width*sc,im.height*sc);x.restore();x.strokeStyle="#C2553F";x.lineWidth=8*u;x.beginPath();x.arc(W/2,cy,r,0,7);x.stroke()}catch(e){}}
+  x.fillStyle="#4A1942";x.font=`700 ${96*u}px "Rubik","Assistant",sans-serif`;x.fillText("הסוף",W/2,H*.72);
+  x.fillStyle="#8a8399";x.font=`600 ${30*u}px "Assistant",sans-serif`;x.fillText("ספר וחצי",W/2,H-safe-6*u);out.push(c)}
+ return out}
 async function pbPrintPages(pid,m){const b=pbBy(m.book);const W=pxMM(PRINT.trimW+2*PRINT.bleed),H=pxMM(PRINT.trimH+2*PRINT.bleed),safe=pxMM(PRINT.bleed+14);
  try{await document.fonts.load('700 120px "Rubik"');await document.fonts.load('700 120px "Assistant"');await document.fonts.load('500 80px "Assistant"')}catch(e){}
  const out=[];const mk=()=>{const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.direction="rtl";return [c,x]};
@@ -2713,10 +2758,16 @@ async function pbPrintPages(pid,m){const b=pbBy(m.book);const W=pxMM(PRINT.trimW
   x.font='500 54px "Assistant", sans-serif';x.fillStyle="#8a8399";x.textAlign="center";x.fillText(String(b.pages[i].pageNumber||i+1),W/2,H-safe+20);out.push(c)}
  // 13 back cover
  try{out.push(await pbDrawBack(W,H,safe,b,m,await pbImg(pid,"photo"),await pbImg(pid,"hero")))}catch(e){console.warn("back cover",e)}
- return Promise.all(out.map(c=>new Promise(r=>c.toBlob(r,"image/jpeg",.9))))}
+ const list=out.map((c,i)=>[i,c]);
+ // 14 spine, 15-17 coloring booklet front / back / title page
+ try{list.push([14,await pbDrawSpine(H,b,m)])}catch(e){console.warn("spine",e)}
+ try{(await pbDrawColoring(W,H,safe,b,m,await pbImg(pid,"hero"))).forEach((c,k)=>list.push([15+k,c]))}catch(e){console.warn("coloring",e)}
+ // 18 first interior page, 19 last interior page
+ try{(await pbDrawOpenEnd(W,H,safe,b,m,await pbImg(pid,"hero"))).forEach((c,k)=>list.push([18+k,c]))}catch(e){console.warn("open/end",e)}
+ return Promise.all(list.map(([i,c])=>new Promise(r=>c.toBlob(bl=>r([i,bl]),"image/jpeg",.92))))}
 async function pbUploadPrint(orderId,items,onProg){const base=INBOX.url.replace("/rest/v1/inbox","/storage/v1/object/orders/");
- for(const it of items){const m=await pbMeta(it.pb);if(!m)throw new Error("book missing");const blobs=await pbPrintPages(it.pb,m);
-  for(let i=0;i<blobs.length;i++){const path=`${orderId}/${it.pb}/print/${String(i).padStart(2,"0")}.jpg`;const r=await fetch(base+path,{method:"POST",signal:AbortSignal.timeout(90000),headers:{apikey:INBOX.key,Authorization:"Bearer "+INBOX.key,"Content-Type":"image/jpeg"},body:blobs[i]});if(!r.ok&&r.status!==409)throw new Error("http "+r.status);onProg&&onProg(i+1,blobs.length)}}}
+ for(const it of items){const m=await pbMeta(it.pb);if(!m)throw new Error("book missing");const blobs=await pbPrintPages(it.pb,m);let n=0;
+  for(const [i,blob] of blobs){const path=`${orderId}/${it.pb}/print/${String(i).padStart(2,"0")}.jpg`;const r=await fetch(base+path,{method:"POST",signal:AbortSignal.timeout(90000),headers:{apikey:INBOX.key,Authorization:"Bearer "+INBOX.key,"Content-Type":"image/jpeg"},body:blob});if(!r.ok&&r.status!==409)throw new Error("http "+r.status);onProg&&onProg(++n,blobs.length)}}}
 function pbBuildPrint(orderId){if(!AI.endpoint)return Promise.resolve();return fetch(AI.endpoint.replace("generate-character","print-order"),{method:"POST",signal:AbortSignal.timeout(120000),headers:{"Content-Type":"application/json",apikey:AI.anonKey,Authorization:"Bearer "+AI.anonKey},body:JSON.stringify({action:"build",orderId})}).then(r=>r.json()).catch(e=>({error:String(e)}))}
 /* ---- cart integration ---- */
 function pbShim(slug){if(!String(slug).startsWith("pb:"))return null;const b=pbBy(slug.slice(3));if(!b)return null;return {slug,personal:true,title:b.titleTemplate.split("{{childName}}").join("{name}"),pages:b.pageCount||12,cover:"garden",story:[],extras:[]}}
